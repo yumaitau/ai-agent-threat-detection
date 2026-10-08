@@ -1,0 +1,58 @@
+{
+ "A03-agent-or-tool-change.eventbridge.json": {
+  "match": [
+   "ct-create-gateway.json",
+   "ct-create-agent.json"
+  ],
+  "nomatch": [
+   "ct-create-agent-failed.json",
+   "ct-invoke-model.json",
+   "ct-attach-role-policy.json"
+  ]
+ },
+ "A04-agent-role-privilege-change.eventbridge.json": {
+  "match": [
+   "ct-attach-role-policy.json"
+  ],
+  "nomatch": [
+   "ct-create-user.json",
+   "ct-create-agent.json"
+  ]
+ },
+ "A05-identity-center-ai-app.eventbridge.json": {
+  "match": [
+   "ct-sso-create-app-assignment.json"
+  ],
+  "nomatch": [
+   "ct-create-agent.json"
+  ]
+ },
+ "A10-prompt-attack-signal.eventbridge.json": {
+  "match": [
+   "ct-applyguardrail-prompt-attack.json"
+  ],
+  "nomatch": [
+   "ct-applyguardrail-violence.json",
+   "ct-invoke-model.json"
+  ]
+ },
+ "A10-guardduty-ai-findings.eventbridge.json": {
+  "match": [
+   "gd-prompt-injection.json"
+  ],
+  "nomatch": [
+   "gd-other-finding.json",
+   "ct-invoke-model.json"
+  ]
+ },
+ "A12-guardrail-or-logging-tamper.eventbridge.json": {
+  "match": [
+   "ct-delete-guardrail.json",
+   "ct-stop-logging.json"
+  ],
+  "nomatch": [
+   "ct-create-agent.json",
+   "ct-invoke-model.json"
+  ]
+ }
+}

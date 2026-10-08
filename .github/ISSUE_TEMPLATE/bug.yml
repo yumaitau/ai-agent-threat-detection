@@ -1,0 +1,26 @@
+name: Bug
+description: Report a query, deployment, playbook or validation bug.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: Report vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version, platform and affected file
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Remove credentials, tenant identifiers, private URLs and personal information.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true

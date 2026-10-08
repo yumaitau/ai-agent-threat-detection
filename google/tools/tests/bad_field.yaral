@@ -1,0 +1,16 @@
+rule bad_field {
+  meta:
+    author = "t"
+    description = "t"
+    severity = "LOW"
+    yuma_id = "T1"
+    ism = "x"
+  events:
+    $e.metadata.vendor_name = "Google Workspace"
+    $e.principal.user.made_up_field = "x"
+    $e.principal.ai.type = "ROBOT"
+  match:
+    $nope over 1h
+  condition:
+    $e
+}

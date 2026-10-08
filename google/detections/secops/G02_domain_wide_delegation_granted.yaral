@@ -1,0 +1,35 @@
+// YUMA-GAI-G02  Domain-wide delegation granted to an API client (lets a service account, often an agent, act as any user)
+// Status: DRAFT HUNT/RULE (event names verified; parameter-to-UDM mapping for API_CLIENT_NAME / API_SCOPES not confirmed)
+// Event: admin application, AUTHORIZE_API_CLIENT_ACCESS (params API_CLIENT_NAME, API_SCOPES, DOMAIN_NAME)
+//   https://developers.google.com/workspace/admin/reports/v1/appendix/activity/admin-domain-settings
+// Why: an agent on domain-wide delegation impersonates people, so it has no identity of its own (ISM-2133) and its
+//   effective permissions are not limited by the invoking user (ISM-2157).
+// Maps: ISM-2137, ISM-2133, ISM-2156, ISM-2157 | E8 restrict administrative privileges
+//   ATT&CK T1098.001, T1550.001 | ATLAS AML.T0012 | OWASP ASI03, LLM06
+rule yuma_gai_g02_domain_wide_delegation_granted {
+  meta:
+    author = "Yuma IT"
+    description = "An administrator authorised domain-wide delegation for an API client"
+    severity = "HIGH"
+    yuma_id = "G02"
+    ism = "ISM-2137, ISM-2133, ISM-2156, ISM-2157"
+
+  events:
+    $e.metadata.vendor_name = "Google Workspace"
+    $e.metadata.product_name = "admin"
+    $e.metadata.product_event_type = "AUTHORIZE_API_CLIENT_ACCESS"
+    $e.principal.user.email_addresses = $admin
+
+  match:
+    $admin over 1h
+
+  outcome:
+    $risk_score = max(80)
+    $target_resource = array_distinct($e.target.resource.name)
+    $target_application = array_distinct($e.target.application)
+    $description = array_distinct($e.metadata.description)
+    $principal_ip = array_distinct($e.principal.ip)
+
+  condition:
+    $e
+}

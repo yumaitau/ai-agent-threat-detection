@@ -1,0 +1,24 @@
+// YUMA-AIA-D01  (DRAFT HUNT) Shadow AI: non-browser processes talking to AI model APIs (local agents, CLIs, scripts)
+// Table: DeviceNetworkEvents. Licence: Defender for Endpoint P2 (or Defender XDR / Microsoft 365 E5 Security).
+//   https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table
+// Maps: ISM-2074 (AI usage policy), ISM-2095, ISM-2134 (register) | E8 application control
+//   ATT&CK T1567 | ATLAS AML.T0112.000, AML.T0096, AML.T0040 | OWASP ASI04, LLM03
+// Tuning: add the customer's approved tools to ApprovedProcesses. Keep AIApiDomains in sync with the customer's AI usage policy (ISM-2074).
+let lookback = 7d;
+let AIApiDomains = dynamic(["api.openai.com", "chatgpt.com", "api.anthropic.com", "claude.ai",
+    "generativelanguage.googleapis.com", "aiplatform.googleapis.com", "api.mistral.ai", "api.deepseek.com",
+    "api.x.ai", "api.perplexity.ai", "api.groq.com", "api.together.xyz", "openrouter.ai", "api.cohere.com",
+    "huggingface.co", "api-inference.huggingface.co", "api.moonshot.cn", "dashscope.aliyuncs.com"]);
+let Browsers = dynamic(["msedge.exe", "chrome.exe", "firefox.exe", "brave.exe", "opera.exe", "safari", "iexplore.exe",
+    "msedgewebview2.exe"]);
+let ApprovedProcesses = dynamic([]);
+DeviceNetworkEvents
+| where Timestamp > ago(lookback)
+| where ActionType in ("ConnectionSuccess", "HttpConnectionInspected", "SslConnectionInspected")
+| where isnotempty(RemoteUrl) and RemoteUrl has_any (AIApiDomains)
+| where InitiatingProcessFileName !in~ (Browsers) and InitiatingProcessFileName !in~ (ApprovedProcesses)
+| summarize Connections = count(), FirstSeen = min(Timestamp), LastSeen = max(Timestamp),
+            Destinations = make_set(RemoteUrl, 20), SampleCommandLines = make_set(InitiatingProcessCommandLine, 5),
+            Parents = make_set(InitiatingProcessParentFileName, 5)
+         by DeviceName, DeviceId, InitiatingProcessFileName, InitiatingProcessAccountUpn
+| order by Connections desc

@@ -1,0 +1,37 @@
+// Function alias: YumaEvidenceMarkdown   (saved function; used by PB5 ISM evidence export)
+// Returns one row, one column (Markdown): a dated summary for assessors. Ordering relies on serialize + make_list,
+// which keeps input order in practice; UNVALIDATED at scale.
+let Generated = format_datetime(now(), "yyyy-MM-dd HH:mm");
+let Reg = YumaAIRegister();
+let Total = toscalar(Reg | count);
+let WithGaps = toscalar(Reg | where GapCount > 0 | count);
+let ReviewDue = toscalar(Reg | where ReviewStatus in ("Overdue", "Never reviewed") | count);
+let HighRisk = toscalar(Reg | where Flag_HighRiskPermissions | count);
+let esc = (s:string) { replace_string(replace_string(s, "|", "/"), "\n", " ") };
+let Head = datatable(Ord:long, Line:string) [
+    0, "# AI agent register and ISM evidence summary",
+    1, "",
+    3, "",
+    4, "Evidence supports an assessment. It is not a compliance determination. Statuses are computed from Microsoft Sentinel data; see controls.csv for metrics.",
+    5, "",
+    6, "## Register",
+    7, ""
+];
+let Gen = print Ord = tolong(2), Line = strcat("Generated ", Generated, " UTC from Microsoft Sentinel workspace data.");
+let RegLines = union
+    (print Ord = tolong(8), Line = strcat("- Active agents and AI apps: ", Total)),
+    (print Ord = tolong(9), Line = strcat("- Missing ISM-2135 fields: ", WithGaps)),
+    (print Ord = tolong(10), Line = strcat("- Overdue or never reviewed (ISM-2138): ", ReviewDue)),
+    (print Ord = tolong(11), Line = strcat("- Holding high-risk permissions (ISM-2156): ", HighRisk)),
+    (print Ord = tolong(12), Line = ""),
+    (print Ord = tolong(13), Line = "## ISM control evidence status"),
+    (print Ord = tolong(14), Line = ""),
+    (print Ord = tolong(15), Line = "| Control | Status | Metric | Evidence method |"),
+    (print Ord = tolong(16), Line = "|---|---|---|---|");
+let CtlLines = YumaISMControlStatus()
+    | serialize Ord = tolong(100 + row_number())
+    | project Ord, Line = strcat("| ", ControlId, " | ", Status, " | ", esc(Metric), " | ", EvidenceMethod, " |");
+union Head, Gen, RegLines, CtlLines
+| order by Ord asc
+| summarize Lines = make_list(Line, 10000)
+| project Markdown = strcat_array(Lines, "\n")

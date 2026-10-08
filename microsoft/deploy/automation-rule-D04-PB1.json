@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "comments": "UNVALIDATED. Runs PB1 on incidents created by the D04 rule. Sentinel needs Microsoft Sentinel Automation Contributor on the playbook resource group."
+  },
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    },
+    "automationRuleId": {
+      "type": "string",
+      "defaultValue": "[newGuid()]"
+    },
+    "analyticsRuleResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "ruleResourceId output from analytics-rule-D04.json"
+      }
+    },
+    "playbookResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of Yuma-PB1-Agent-Permission-Containment"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', parameters('automationRuleId'))]",
+      "properties": {
+        "displayName": "Yuma: run PB1 on AI agent permission incidents",
+        "order": 10,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentRelatedAnalyticRuleIds",
+                "operator": "Contains",
+                "propertyValues": [
+                  "[parameters('analyticsRuleResourceId')]"
+                ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('playbookResourceId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

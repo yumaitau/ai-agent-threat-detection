@@ -1,0 +1,36 @@
+// YUMA-GAI-G14  AI crawler or agent user agents enumerating an app, or a client probing MCP / LLM / agent-card endpoints
+// Status: DRAFT HUNT
+// Log type: GCP_LOADBALANCING (log_id "requests"). UDM: requestUrl -> target.url; userAgent -> network.http.user_agent.
+//   https://cloud.google.com/chronicle/docs/ingestion/default-parsers/collect-gcp-loadbalancing-logs
+// Overlap: Cloud Armor bot management with Google Cloud Fraud Defense (reCAPTCHA) scores and challenges bots at the edge;
+//   this hunt is about who is mapping your AI surface. https://docs.cloud.google.com/armor/docs/bot-management
+// Maps: ISM-2116 | ATT&CK T1595.002, T1593 | ATLAS AML.T0006 | OWASP LLM10
+rule yuma_gai_g14_ai_crawler_and_mcp_llm_endpoint_probe {
+  meta:
+    author = "Yuma IT"
+    description = "Client requested MCP, LLM-API or agent-card style paths, or an AI crawler enumerated many URLs, within one hour"
+    severity = "LOW"
+    yuma_id = "G14"
+    ism = "ISM-2116"
+
+  events:
+    $h.metadata.log_type = "GCP_LOADBALANCING"
+    $h.principal.ip = $ip
+    (
+      $h.target.url = /\/(mcp|sse|messages|\.well-known\/(mcp|agent\.json|agent-card\.json|ai-plugin\.json)|v1\/(chat\/completions|completions|messages|responses|models)|api\/(generate|chat|tags)|openapi\.json)(\?|\/|$)/ nocase
+      or $h.network.http.user_agent = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|Claude-SearchBot|PerplexityBot|Perplexity-User|Meta-ExternalAgent|Bytespider|CCBot|Google-Agent/ nocase
+    )
+
+  match:
+    $ip over 1h
+
+  outcome:
+    $distinct_urls = count_distinct($h.target.url)
+    $sample_urls = array_distinct($h.target.url)
+    $user_agents = array_distinct($h.network.http.user_agent)
+    $statuses = array_distinct($h.network.http.response_code)
+    $risk_score = max(30)
+
+  condition:
+    $h and $distinct_urls >= 5
+}

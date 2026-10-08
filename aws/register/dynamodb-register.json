@@ -1,0 +1,27 @@
+{
+  "TableName": "YumaAIAgentRegister",
+  "BillingMode": "PAY_PER_REQUEST",
+  "AttributeDefinitions": [
+    {"AttributeName": "pk", "AttributeType": "S"},
+    {"AttributeName": "sk", "AttributeType": "S"},
+    {"AttributeName": "status", "AttributeType": "S"},
+    {"AttributeName": "next_review_due", "AttributeType": "S"}
+  ],
+  "KeySchema": [
+    {"AttributeName": "pk", "KeyType": "HASH"},
+    {"AttributeName": "sk", "KeyType": "RANGE"}
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "by-status-review",
+      "KeySchema": [
+        {"AttributeName": "status", "KeyType": "HASH"},
+        {"AttributeName": "next_review_due", "KeyType": "RANGE"}
+      ],
+      "Projection": {"ProjectionType": "ALL"}
+    }
+  ],
+  "PointInTimeRecoverySpecification": {"PointInTimeRecoveryEnabled": true},
+  "SSESpecification": {"SSEEnabled": true},
+  "_comment": "Shape matches the DynamoDB CreateTable request. Item layout: pk = AGENT#<agent_id>; sk = CURRENT for the live record, or HIST#<ISO8601 UTC>#<RecordType> for append-only history. RecordType values: RegisterSnapshot, ChangeObserved, ApprovalDecision, ReviewCompleted, Retired. See register-record.schema.json."
+}

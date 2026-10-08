@@ -1,0 +1,1 @@
+AGWAccessLogs | where HttpStatus has "x" | extend y = strlen(HttpStatus)

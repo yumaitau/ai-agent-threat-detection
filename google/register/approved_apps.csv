@@ -1,0 +1,2 @@
+agent_key,oauth_client_id,service_account,display_name,owner,business_purpose,approved_by,approved_on,notes
+example-only,000000000000-example.apps.googleusercontent.com,,Example approved app (delete this row),<OWNER_EMAIL>,Example,<APPROVER_EMAIL>,2026-10-08,Seed row so the table is not empty

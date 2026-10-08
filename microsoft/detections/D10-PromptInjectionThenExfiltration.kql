@@ -1,0 +1,66 @@
+// YUMA-AIA-D10  Prompt-injection or jailbreak signal followed by exfiltration-like activity by the same user within 2h
+// Type: Sentinel scheduled analytics rule (every 1h, look back 3h) or Defender XDR custom detection.
+// Purpose: Microsoft already detects or blocks the injection itself (Defender for Endpoint "Suspicious AI prompt
+//   injection", Copilot Studio real-time protection, Copilot jailbreak rule). This rule does not re-detect injection;
+//   it correlates the alert with what the user or agent did next.
+//   https://learn.microsoft.com/en-us/defender-endpoint/ai-agent-runtime-protection-overview
+//   https://learn.microsoft.com/en-us/defender-xdr/security-for-ai/ai-agent-real-time-protection
+// Tables: AlertInfo, AlertEvidence (Defender XDR), CopilotActivity (Microsoft Copilot connector), CloudAppEvents
+//   (Defender for Cloud Apps with the Microsoft 365 app connector).
+//   https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-alertinfo-table
+//   https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-alertevidence-table
+//   https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/copilotactivity
+//   https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-cloudappevents-table
+// UNVALIDATED: alert titles for the Copilot Studio protection; whether CopilotActivity.ActorUserId is the Entra object
+//   ID; RawEventData.UserId as UPN; the exfil ActionType list (standard Microsoft 365 audit operation names).
+// Maps: ISM-2158 (retrieved content untrusted), ISM-1924, ISM-2113 | E8 n/a (detective)
+//   ATT&CK T1567, T1530, T1114 | ATLAS AML.T0051.001, AML.T0054, AML.T0086 | OWASP LLM01, LLM02, ASI01, ASI02
+let lookback = 3h;
+let window = 2h;
+let MinExfilEvents = 10;
+let ExfilActions = dynamic(["FileDownloaded", "FileSyncDownloadedFull", "FileCopied", "AnonymousLinkCreated",
+    "AnonymousLinkUsed", "CompanyLinkCreated", "SharingSet", "SharingInvitationCreated", "AddedToSecureLink",
+    "Send", "SendAs", "New-InboxRule", "Set-InboxRule", "UpdateInboxRules", "MailItemsAccessed"]);
+let InjectionTitles = dynamic(["prompt injection", "jailbreak", "XPIA", "UPIA"]);
+let DefenderTriggers = AlertInfo
+    | where Timestamp > ago(lookback)
+    | where Title has_any (InjectionTitles)
+    | join kind=inner (
+        AlertEvidence
+        | where Timestamp > ago(lookback)
+        | where EntityType =~ "User"
+        | project AlertId, AccountObjectId, AccountUpn
+      ) on AlertId
+    | project TriggerTime = Timestamp, TriggerSource = strcat("Defender: ", Title), TriggerId = AlertId,
+              AccountObjectId, AccountUpn;
+let CopilotTriggers = CopilotActivity
+    | where TimeGenerated > ago(lookback)
+    | where RecordType == "CopilotInteraction" and tostring(LLMEventData) has "JailbreakDetected"
+    | project TriggerTime = TimeGenerated, TriggerSource = strcat("CopilotActivity jailbreak: ", AppHost),
+              TriggerId = RecordId, AccountObjectId = ActorUserId, AccountUpn = ActorName;
+let Triggers = union isfuzzy=true DefenderTriggers, CopilotTriggers
+    | extend Keys = pack_array(tolower(AccountObjectId), tolower(AccountUpn))
+    | mv-expand Key = Keys to typeof(string)
+    | where isnotempty(Key);
+let Activity = CloudAppEvents
+    | where Timestamp > ago(lookback)
+    | where ActionType in (ExfilActions)
+    | extend Keys = pack_array(tolower(AccountObjectId), tolower(tostring(RawEventData.UserId)))
+    | mv-expand Key = Keys to typeof(string)
+    | where isnotempty(Key)
+    | project ActivityTime = Timestamp, Key, ActionType, Application, ObjectName, IPAddress, ReportId,
+              ActivityAccountObjectId = AccountObjectId, ActivityAccountName = AccountDisplayName;
+Triggers
+| join kind=inner Activity on Key
+| where ActivityTime between (TriggerTime .. (TriggerTime + window))
+| summarize ExfilEvents = dcount(ReportId),
+            Actions = make_set(ActionType, 20),
+            Apps = make_set(Application, 10),
+            SampleObjects = make_set(ObjectName, 20),
+            IPs = make_set(IPAddress, 10),
+            FirstActivity = min(ActivityTime), LastActivity = max(ActivityTime)
+         by TriggerId, TriggerSource, TriggerTime, AccountUpn, AccountObjectId = ActivityAccountObjectId
+| where ExfilEvents >= MinExfilEvents or Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule")
+| extend Severity = iff(Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule"), "High", "Medium")
+| project TriggerTime, TriggerSource, TriggerId, AccountUpn, AccountObjectId, ExfilEvents, Actions, Apps,
+          SampleObjects, IPs, FirstActivity, LastActivity, Severity

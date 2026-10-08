@@ -1,0 +1,4 @@
+YumaAIRegister()
+| where ReviewStatus != "Current"
+| project AgentName, Owners, Decision, LastReview, NextReviewDue, ReviewStatus, HighRiskPermissions
+| order by NextReviewDue asc

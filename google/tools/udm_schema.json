@@ -1,0 +1,1343 @@
+{
+ "EntityRisk": {
+  "risk_version": "string",
+  "risk_window": "google.type.Interval",
+  "risk_delta": "RiskDelta",
+  "detections_count": "int32",
+  "first_detection_time": "google.protobuf.Timestamp",
+  "last_detection_time": "google.protobuf.Timestamp",
+  "risk_score": "float",
+  "normalized_risk_score": "int32",
+  "risk_window_size": "Int64",
+  "raw_risk_delta": "RiskDelta",
+  "last_reset_time": "google.protobuf.Timestamp",
+  "detail_uri": "string",
+  "risk_window_has_new_detections": "bool"
+ },
+ "RiskDelta": {
+  "previous_range_end_time": "google.protobuf.Timestamp",
+  "risk_score_delta": "int32",
+  "previous_risk_score": "int32",
+  "risk_score_numeric_delta": "int32"
+ },
+ "AtiPrioritization": {
+  "gti_verdict": "int32",
+  "gti_severity": "int32",
+  "gti_threat_score": "int32",
+  "mandiant_analyst_confidence": "int32",
+  "gti_update_time": "google.protobuf.Timestamp",
+  "active_ir": "bool",
+  "active_ir_first_tagged_time": "google.protobuf.Timestamp",
+  "global_customer_count": "int64",
+  "global_hit_count": "int64",
+  "exclusive": "bool",
+  "osint": "bool",
+  "scanner": "bool",
+  "reviewed": "bool",
+  "attributed_malware": "SecurityResult.Association",
+  "attributed_threat_actors": "SecurityResult.Association"
+ },
+ "Entity": {
+  "metadata": "EntityMetadata",
+  "entity": "Noun",
+  "relations": "Relation",
+  "additional": "google.protobuf.Struct",
+  "risk_score": "EntityRisk",
+  "metric": "Metric"
+ },
+ "EntityMetadata": {
+  "product_entity_id": "string",
+  "collected_timestamp": "google.protobuf.Timestamp",
+  "creation_timestamp": "google.protobuf.Timestamp",
+  "interval": "google.type.Interval",
+  "vendor_name": "string",
+  "product_name": "string",
+  "feed": "string",
+  "product_version": "string",
+  "entity_type": "EntityMetadata.EntityType(Enumerated list)",
+  "description": "string",
+  "threat": "SecurityResult",
+  "source_type": "EntityMetadata.SourceType(Enumerated list)",
+  "source_labels": "Label",
+  "event_metadata": "Metadata",
+  "structured_fields": "google.protobuf.Struct",
+  "extracted": "google.protobuf.Struct",
+  "ati_prioritization": "AtiPrioritization",
+  "threat_intel": "ThreatIntel"
+ },
+ "Metric": {
+  "first_seen": "google.protobuf.Timestamp",
+  "last_seen": "google.protobuf.Timestamp",
+  "sum_measure": "Metric.Measure",
+  "total_events": "int64",
+  "metric_name": "Metric.MetricName(Enumerated list)",
+  "dimensions": "Metric.Dimension(Enumerated list)",
+  "export_window": "int64",
+  "display_name": "string",
+  "outcome_variables": "MetricVariable",
+  "match_variables": "MetricVariable",
+  "time_range": "google.type.Interval"
+ },
+ "Metric.Measure": {
+  "value": "double",
+  "aggregate_function": "Metric.AggregateFunction(Enumerated list)"
+ },
+ "MetricVariable": {
+  "name": "string",
+  "source_path": "string",
+  "bool_val": "bool",
+  "bytes_val": "bytes",
+  "double_val": "double",
+  "int64_val": "int64",
+  "uint64_val": "uint64",
+  "string_val": "string",
+  "timestamp_time": "google.protobuf.Timestamp",
+  "null_val": "bool",
+  "bool_seq": "BoolSequence",
+  "bytes_seq": "BytesSequence",
+  "double_seq": "DoubleSequence",
+  "int64_seq": "Int64Sequence",
+  "uint64_seq": "Uint64Sequence",
+  "string_seq": "StringSequence"
+ },
+ "Relation": {
+  "entity": "Noun",
+  "entity_type": "EntityMetadata.EntityType(Enumerated list)",
+  "relationship": "Relation.Relationship(Enumerated list)",
+  "direction": "Relation.Directionality(Enumerated list)",
+  "uid": "bytes",
+  "entity_label": "Relation.EntityLabel(Enumerated list)"
+ },
+ "UDM Event data model": {
+  "metadata": "Metadata",
+  "additional": "google.protobuf.Struct",
+  "principal": "Noun",
+  "src": "Noun",
+  "target": "Noun",
+  "intermediary": "Noun",
+  "observer": "Noun",
+  "about": "Noun",
+  "security_result": "SecurityResult",
+  "network": "Network",
+  "extensions": "Extensions",
+  "extracted": "google.protobuf.Struct",
+  "grouped": "GroupedFields"
+ },
+ "Extensions": {
+  "auth": "Authentication",
+  "vulns": "Vulnerabilities",
+  "entity_risk": "EntityRisk",
+  "linux_utmp": "LinuxUtmp",
+  "windows_event_log": "WindowsEventLog",
+  "resource_usage": "ResourceUsage",
+  "system_event_details": "SystemEventDetails",
+  "outlook_metadata": "OutlookMetadata",
+  "srum": "Srum",
+  "user_assist": "UserAssist"
+ },
+ "Metadata": {
+  "id": "bytes",
+  "product_log_id": "string",
+  "event_timestamp": "google.protobuf.Timestamp",
+  "event_timestamp_attributes": "Metadata.EventTimestampAttribute(Enumerated list)",
+  "collected_timestamp": "google.protobuf.Timestamp",
+  "ingested_timestamp": "google.protobuf.Timestamp",
+  "event_type": "Metadata.EventType(Enumerated list)",
+  "vendor_name": "string",
+  "product_name": "string",
+  "product_version": "string",
+  "product_event_type": "string",
+  "product_deployment_id": "string",
+  "description": "string",
+  "url_back_to_product": "string",
+  "ingestion_labels": "Label",
+  "tags": "Tags",
+  "enrichment_state": "Metadata.EnrichmentState(Enumerated list)",
+  "log_type": "string",
+  "base_labels": "DataAccessLabels",
+  "enrichment_labels": "DataAccessLabels",
+  "structured_fields": "google.protobuf.Struct",
+  "parser_version": "string",
+  "product_log_level": "Metadata.ProductLogLevel(Enumerated list)"
+ },
+ "Network": {
+  "sent_bytes": "uint64",
+  "received_bytes": "uint64",
+  "total_bytes": "int64",
+  "sent_packets": "int64",
+  "received_packets": "int64",
+  "session_duration": "Int64",
+  "session_id": "string",
+  "parent_session_id": "string",
+  "application_protocol_version": "string",
+  "community_id": "string",
+  "direction": "Network.Direction(Enumerated list)",
+  "ip_protocol": "Network.IpProtocol(Enumerated list)",
+  "ipv6": "bool",
+  "application_protocol": "Network.ApplicationProtocol(Enumerated list)",
+  "ftp": "Ftp",
+  "email": "Email",
+  "dns": "Dns",
+  "dhcp": "Dhcp",
+  "http": "Http",
+  "tls": "Tls",
+  "smtp": "Smtp",
+  "asn": "string",
+  "dns_domain": "string",
+  "carrier_name": "string",
+  "organization_name": "string",
+  "ip_subnet_range": "string",
+  "is_proxy": "bool",
+  "proxy_info": "ProxyInfo",
+  "connection_state": "Network.ConnectionState(Enumerated list)"
+ },
+ "Noun": {
+  "hostname": "string",
+  "domain": "Domain",
+  "artifact": "Artifact",
+  "url_metadata": "Url",
+  "browser": "Browser",
+  "asset_id": "string",
+  "user": "User",
+  "user_management_chain": "User",
+  "group": "Group",
+  "process": "Process",
+  "process_ancestors": "Process",
+  "asset": "Asset",
+  "ip": "string",
+  "nat_ip": "string",
+  "port": "int32",
+  "nat_port": "int32",
+  "mac": "string",
+  "administrative_domain": "string",
+  "namespace": "string",
+  "file": "File",
+  "email": "string",
+  "registry": "Registry",
+  "application": "string",
+  "platform": "Noun.Platform(Enumerated list)",
+  "platform_version": "string",
+  "platform_patch_level": "string",
+  "cloud": "Cloud",
+  "location": "Location",
+  "ip_location": "Location",
+  "ip_geo_artifact": "Artifact",
+  "resource": "Resource",
+  "resource_ancestors": "Resource",
+  "labels": "Label",
+  "object_reference": "Id",
+  "investigation": "Investigation",
+  "network": "Network",
+  "security_result": "SecurityResult",
+  "ai": "Ai",
+  "url": "string"
+ },
+ "SecurityResult": {
+  "about": "Noun",
+  "category": "SecurityResult.SecurityCategory(Enumerated list)",
+  "category_details": "string",
+  "threat_name": "string",
+  "rule_set": "string",
+  "rule_set_display_name": "string",
+  "ruleset_category_display_name": "string",
+  "rule_id": "string",
+  "rule_name": "string",
+  "display_name": "string",
+  "rule_version": "string",
+  "rule_type": "string",
+  "rule_author": "string",
+  "rule_labels": "Label",
+  "alert_state": "SecurityResult.AlertState(Enumerated list)",
+  "detection_fields": "Label",
+  "outcomes": "Label",
+  "variables": "SecurityResult.VariablesEntry",
+  "summary": "string",
+  "description": "string",
+  "action": "SecurityResult.Action(Enumerated list)",
+  "action_details": "string",
+  "severity": "SecurityResult.ProductSeverity(Enumerated list)",
+  "confidence": "SecurityResult.ProductConfidence(Enumerated list)",
+  "priority": "SecurityResult.ProductPriority(Enumerated list)",
+  "risk_score": "float",
+  "confidence_score": "float",
+  "analytics_metadata": "AnalyticsMetadata",
+  "severity_details": "string",
+  "confidence_details": "string",
+  "priority_details": "string",
+  "url_back_to_product": "string",
+  "threat_id": "string",
+  "threat_feed_name": "string",
+  "threat_id_namespace": "Id.Namespace",
+  "threat_status": "SecurityResult.ThreatStatus(Enumerated list)",
+  "attack_details": "AttackDetails",
+  "first_discovered_time": "google.protobuf.Timestamp",
+  "associations": "SecurityResult.Association",
+  "campaigns": "string",
+  "reports": "string",
+  "verdict": "SecurityResult.Verdict(Enumerated list)",
+  "last_updated_time": "google.protobuf.Timestamp",
+  "verdict_info": "SecurityResult.VerdictInfo",
+  "threat_verdict": "ThreatVerdict(Enumerated list)",
+  "last_discovered_time": "google.protobuf.Timestamp",
+  "detection_depth": "int64",
+  "threat_collections": "SecurityResult.ThreatCollectionItem"
+ },
+ "Ai": {
+  "product_object_id": "string",
+  "session_id": "string",
+  "type": "Ai.AiType(Enumerated list)",
+  "software": "Software",
+  "owners": "User",
+  "display_name": "string"
+ },
+ "AnalyticsMetadata": {
+  "analytic": "string"
+ },
+ "AppCompatMetadata": {
+  "sequence": "int32",
+  "executed": "bool",
+  "control_set": "string"
+ },
+ "Artifact": {
+  "ip": "string",
+  "prevalence": "Prevalence",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "last_seen_time": "google.protobuf.Timestamp",
+  "location": "Location",
+  "network": "Network",
+  "as_owner": "string",
+  "asn": "int64",
+  "jarm": "string",
+  "last_https_certificate": "SSLCertificate",
+  "last_https_certificate_date": "google.protobuf.Timestamp",
+  "regional_internet_registry": "string",
+  "tags": "string",
+  "whois": "string",
+  "whois_date": "google.protobuf.Timestamp",
+  "tunnels": "Tunnels",
+  "anonymous": "bool",
+  "artifact_client": "ArtifactClient",
+  "risks": "string"
+ },
+ "ArtifactClient": {
+  "behaviors": "string",
+  "proxies": "string"
+ },
+ "Asset": {
+  "product_object_id": "string",
+  "hostname": "string",
+  "asset_id": "string",
+  "ip": "string",
+  "mac": "string",
+  "nat_ip": "string",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "hardware": "Hardware",
+  "platform_software": "PlatformSoftware",
+  "software": "Software",
+  "location": "Location",
+  "category": "string",
+  "type": "Asset.AssetType(Enumerated list)",
+  "network_domain": "string",
+  "creation_time": "google.protobuf.Timestamp",
+  "first_discover_time": "google.protobuf.Timestamp",
+  "last_discover_time": "google.protobuf.Timestamp",
+  "system_last_update_time": "google.protobuf.Timestamp",
+  "last_boot_time": "google.protobuf.Timestamp",
+  "labels": "Label",
+  "deployment_status": "Asset.DeploymentStatus(Enumerated list)",
+  "vulnerabilities": "Vulnerability",
+  "attribute": "Attribute(Enumerated list)",
+  "wmi_persistence_item": "WmiPersistenceItem"
+ },
+ "AttackDetails": {
+  "version": "string",
+  "tactics": "AttackDetails.Tactic",
+  "techniques": "AttackDetails.Technique"
+ },
+ "AttackDetails.Tactic": {
+  "id": "string",
+  "name": "string"
+ },
+ "AttackDetails.Technique": {
+  "id": "string",
+  "name": "string",
+  "subtechnique_id": "string",
+  "subtechnique_name": "string"
+ },
+ "Attribute": {
+  "cloud": "Cloud",
+  "labels": "Label",
+  "permissions": "Permission",
+  "roles": "Role(Enumerated list)",
+  "creation_time": "google.protobuf.Timestamp",
+  "last_update_time": "google.protobuf.Timestamp"
+ },
+ "Authentication": {
+  "type": "Authentication.AuthType(Enumerated list)",
+  "mechanism": "Authentication.Mechanism(Enumerated list)",
+  "auth_details": "string",
+  "outcome": "Authentication.Outcome(Enumerated list)"
+ },
+ "BoolSequence": {
+  "bool_vals": "bool"
+ },
+ "Browser": {
+  "browser_type": "Browser.BrowserType(Enumerated list)",
+  "browser_version": "string",
+  "first_visit_time": "google.protobuf.Timestamp",
+  "last_visit_time": "google.protobuf.Timestamp",
+  "profile": "string",
+  "typed": "bool",
+  "visit_type": "Browser.UrlVisitType(Enumerated list)",
+  "hidden": "bool",
+  "request_origin_uri": "string",
+  "visit_count": "int64",
+  "visit_count_criteria": "string",
+  "indexed_content": "string",
+  "first_bookmarked_time": "google.protobuf.Timestamp",
+  "cookies": "Browser.Cookie",
+  "typed_count": "int64",
+  "visit_source": "Browser.VisitSource(Enumerated list)"
+ },
+ "Browser.Cookie": {
+  "name": "string",
+  "value": "string",
+  "domain": "string",
+  "path": "string",
+  "expiration_time": "google.protobuf.Timestamp",
+  "http_only": "bool",
+  "secure": "bool",
+  "max_age": "int64",
+  "same_site": "Browser.Cookie.CookieSameSite(Enumerated list)",
+  "session": "bool",
+  "partitioned": "bool"
+ },
+ "BytesSequence": {
+  "bytes_vals": "bytes"
+ },
+ "Certificate": {
+  "version": "string",
+  "serial": "string",
+  "subject": "string",
+  "issuer": "string",
+  "md5": "string",
+  "sha1": "string",
+  "sha256": "string",
+  "sha512": "string",
+  "not_before": "google.protobuf.Timestamp",
+  "not_after": "google.protobuf.Timestamp"
+ },
+ "Cloud": {
+  "environment": "Cloud.CloudEnvironment(Enumerated list)",
+  "vpc": "Resource",
+  "project": "Resource",
+  "availability_zone": "string"
+ },
+ "DNSRecord": {
+  "type": "string",
+  "value": "string",
+  "ttl": "Int64",
+  "priority": "int64",
+  "retry": "int64",
+  "refresh": "Int64",
+  "minimum": "Int64",
+  "expire": "Int64",
+  "serial": "int64",
+  "rname": "string"
+ },
+ "Dhcp": {
+  "opcode": "Dhcp.OpCode(Enumerated list)",
+  "htype": "uint32",
+  "hlen": "uint32",
+  "hops": "uint32",
+  "transaction_id": "uint32",
+  "seconds": "uint32",
+  "flags": "uint32",
+  "ciaddr": "string",
+  "yiaddr": "string",
+  "siaddr": "string",
+  "giaddr": "string",
+  "chaddr": "string",
+  "sname": "string",
+  "file": "string",
+  "options": "Dhcp.Option",
+  "type": "Dhcp.MessageType(Enumerated list)",
+  "lease_time_seconds": "uint32",
+  "client_hostname": "string",
+  "client_identifier": "bytes",
+  "requested_address": "string",
+  "client_identifier_string": "string"
+ },
+ "Dhcp.Option": {
+  "code": "uint32",
+  "data": "bytes"
+ },
+ "Dns": {
+  "id": "uint32",
+  "response": "bool",
+  "opcode": "uint32",
+  "authoritative": "bool",
+  "truncated": "bool",
+  "recursion_desired": "bool",
+  "recursion_available": "bool",
+  "response_code": "uint32",
+  "questions": "Dns.Question",
+  "answers": "Dns.ResourceRecord",
+  "authority": "Dns.ResourceRecord",
+  "additional": "Dns.ResourceRecord"
+ },
+ "Dns.Question": {
+  "name": "string",
+  "type": "uint32",
+  "class": "uint32",
+  "prevalence": "Prevalence"
+ },
+ "Dns.ResourceRecord": {
+  "name": "string",
+  "type": "uint32",
+  "class": "uint32",
+  "ttl": "uint32",
+  "data": "string",
+  "binary_data": "bytes"
+ },
+ "Domain": {
+  "name": "string",
+  "prevalence": "Prevalence",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "last_seen_time": "google.protobuf.Timestamp",
+  "registrar": "string",
+  "contact_email": "string",
+  "whois_server": "string",
+  "name_server": "string",
+  "creation_time": "google.protobuf.Timestamp",
+  "update_time": "google.protobuf.Timestamp",
+  "expiration_time": "google.protobuf.Timestamp",
+  "audit_update_time": "google.protobuf.Timestamp",
+  "status": "string",
+  "registrant": "User",
+  "admin": "User",
+  "tech": "User",
+  "billing": "User",
+  "zone": "User",
+  "whois_record_raw_text": "bytes",
+  "registry_data_raw_text": "bytes",
+  "iana_registrar_id": "int32",
+  "private_registration": "bool",
+  "categories": "string",
+  "favicon": "Favicon",
+  "jarm": "string",
+  "last_dns_records": "DNSRecord",
+  "last_dns_records_time": "google.protobuf.Timestamp",
+  "last_https_certificate": "SSLCertificate",
+  "last_https_certificate_time": "google.protobuf.Timestamp",
+  "popularity_ranks": "PopularityRank",
+  "tags": "string",
+  "whois_time": "google.protobuf.Timestamp"
+ },
+ "DoubleSequence": {
+  "double_vals": "double"
+ },
+ "Email": {
+  "from": "string",
+  "reply_to": "string",
+  "to": "string",
+  "cc": "string",
+  "bcc": "string",
+  "mail_id": "string",
+  "subject": "string",
+  "bounce_address": "string"
+ },
+ "ExifInfo": {
+  "original_file": "string",
+  "product": "string",
+  "company": "string",
+  "file_description": "string",
+  "entry_point": "int64",
+  "compilation_time": "google.protobuf.Timestamp"
+ },
+ "Favicon": {
+  "raw_md5": "string",
+  "dhash": "string"
+ },
+ "File": {
+  "sha256": "string",
+  "md5": "string",
+  "sha1": "string",
+  "sha512": "string",
+  "size": "uint64",
+  "full_path": "string",
+  "mime_type": "string",
+  "file_metadata": "FileMetadata",
+  "security_result": "SecurityResult",
+  "pe_file": "FileMetadataPE",
+  "ssdeep": "string",
+  "vhash": "string",
+  "ahash": "string",
+  "authentihash": "string",
+  "symhash": "string",
+  "prefetch_file_metadata": "PrefetchFileMetadata",
+  "file_type": "File.FileType(Enumerated list)",
+  "capabilities_tags": "string",
+  "names": "string",
+  "tags": "string",
+  "last_modification_time": "google.protobuf.Timestamp",
+  "create_time": "google.protobuf.Timestamp",
+  "last_access_time": "google.protobuf.Timestamp",
+  "prevalence": "Prevalence",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "last_seen_time": "google.protobuf.Timestamp",
+  "stat_mode": "uint64",
+  "stat_inode": "uint64",
+  "stat_dev": "uint64",
+  "stat_nlink": "uint64",
+  "stat_flags": "uint32",
+  "last_analysis_time": "google.protobuf.Timestamp",
+  "embedded_urls": "string",
+  "embedded_domains": "string",
+  "embedded_ips": "string",
+  "exif_info": "ExifInfo",
+  "signature_info": "SignatureInfo",
+  "pdf_info": "PDFInfo",
+  "first_submission_time": "google.protobuf.Timestamp",
+  "last_submission_time": "google.protobuf.Timestamp",
+  "main_icon": "Favicon",
+  "ntfs": "NtfsFileMetadata",
+  "app_compat_cache": "AppCompatMetadata"
+ },
+ "FileMetadata": {
+  "pe": "PeFileMetadata"
+ },
+ "FileMetadataCodesign": {
+  "id": "string",
+  "format": "string",
+  "compilation_time": "google.protobuf.Timestamp",
+  "team_id": "string"
+ },
+ "FileMetadataImports": {
+  "library": "string",
+  "functions": "string"
+ },
+ "FileMetadataPE": {
+  "imphash": "string",
+  "entry_point": "int64",
+  "entry_point_exiftool": "int64",
+  "compilation_time": "google.protobuf.Timestamp",
+  "compilation_exiftool_time": "google.protobuf.Timestamp",
+  "section": "FileMetadataSection",
+  "imports": "FileMetadataImports",
+  "resource": "FileMetadataPeResourceInfo",
+  "resources_type_count": "StringToInt64MapEntry",
+  "resources_language_count": "StringToInt64MapEntry",
+  "resources_type_count_str": "Label",
+  "resources_language_count_str": "Label",
+  "signature_info": "FileMetadataSignatureInfo"
+ },
+ "FileMetadataPeResourceInfo": {
+  "sha256_hex": "string",
+  "filetype_magic": "string",
+  "language_code": "string",
+  "entropy": "double",
+  "file_type": "string"
+ },
+ "FileMetadataSection": {
+  "name": "string",
+  "entropy": "double",
+  "raw_size_bytes": "int64",
+  "virtual_size_bytes": "int64",
+  "md5_hex": "string"
+ },
+ "FileMetadataSignatureInfo": {
+  "verification_message": "string",
+  "verified": "bool",
+  "signer": "string",
+  "signers": "SignerInfo",
+  "x509": "X509"
+ },
+ "FindingVariable": {
+  "type": "FindingVariable.Type(Enumerated list)",
+  "value": "string",
+  "source_path": "string",
+  "bool_val": "bool",
+  "bytes_val": "bytes",
+  "double_val": "double",
+  "int64_val": "int64",
+  "uint64_val": "uint64",
+  "string_val": "string",
+  "timestamp_time": "google.protobuf.Timestamp",
+  "null_val": "bool",
+  "bool_seq": "BoolSequence",
+  "bytes_seq": "BytesSequence",
+  "double_seq": "DoubleSequence",
+  "int64_seq": "Int64Sequence",
+  "uint64_seq": "Uint64Sequence",
+  "string_seq": "StringSequence"
+ },
+ "Ftp": {
+  "command": "string"
+ },
+ "Group": {
+  "product_object_id": "string",
+  "creation_time": "google.protobuf.Timestamp",
+  "group_display_name": "string",
+  "attribute": "Attribute(Enumerated list)",
+  "email_addresses": "string",
+  "windows_sid": "string"
+ },
+ "GroupedFields": {
+  "ip": "string",
+  "domain": "string",
+  "hostname": "string",
+  "user": "string",
+  "email": "string",
+  "file_path": "string",
+  "hash": "string",
+  "process_id": "string"
+ },
+ "Hardware": {
+  "serial_number": "string",
+  "manufacturer": "string",
+  "model": "string",
+  "cpu_platform": "string",
+  "cpu_model": "string",
+  "cpu_clock_speed": "uint64",
+  "cpu_max_clock_speed": "uint64",
+  "cpu_number_cores": "uint64",
+  "ram": "uint64"
+ },
+ "Http": {
+  "method": "string",
+  "referral_url": "string",
+  "user_agent": "string",
+  "response_code": "int32",
+  "parsed_user_agent": ""
+ },
+ "Int64Sequence": {
+  "int64_vals": "int64"
+ },
+ "Investigation": {
+  "verdict": "Verdict(Enumerated list)",
+  "reputation": "Reputation(Enumerated list)",
+  "severity_score": "uint32",
+  "status": "Status(Enumerated list)",
+  "comments": "string",
+  "priority": "Priority(Enumerated list)",
+  "root_cause": "string",
+  "reason": "Reason(Enumerated list)",
+  "risk_score": "uint32",
+  "id": "string"
+ },
+ "Label": {
+  "key": "string",
+  "value": "string",
+  "source": "string",
+  "rbac_enabled": "bool"
+ },
+ "LinuxUtmp": {
+  "record_type": "LinuxUtmp.RecordType(Enumerated list)"
+ },
+ "Location": {
+  "city": "string",
+  "state": "string",
+  "country_or_region": "string",
+  "name": "string",
+  "desk_name": "string",
+  "floor_name": "string",
+  "region_latitude": "float",
+  "region_longitude": "float",
+  "region_coordinates": "google.type.LatLng"
+ },
+ "NtfsFileMetadata": {
+  "change_time": "google.protobuf.Timestamp",
+  "filename_create_time": "google.protobuf.Timestamp",
+  "filename_modify_time": "google.protobuf.Timestamp",
+  "filename_access_time": "google.protobuf.Timestamp",
+  "filename_change_time": "google.protobuf.Timestamp",
+  "usn_journal": "UsnJournal"
+ },
+ "OutlookMetadata": {
+  "comment": "string",
+  "template": "string",
+  "title": "string",
+  "security_flags_count": "int32"
+ },
+ "PDFInfo": {
+  "js": "int64",
+  "javascript": "int64",
+  "launch_action_count": "int64",
+  "object_stream_count": "int64",
+  "endobj_count": "int64",
+  "header": "string",
+  "acroform": "int64",
+  "autoaction": "int64",
+  "embedded_file": "int64",
+  "encrypted": "int64",
+  "flash": "int64",
+  "jbig2_compression": "int64",
+  "obj_count": "int64",
+  "endstream_count": "int64",
+  "page_count": "int64",
+  "stream_count": "int64",
+  "openaction": "int64",
+  "startxref": "int64",
+  "suspicious_colors": "int64",
+  "trailer": "int64",
+  "xfa": "int64",
+  "xref": "int64"
+ },
+ "PeFileMetadata": {
+  "import_hash": "string"
+ },
+ "Permission": {
+  "name": "string",
+  "description": "string",
+  "type": "Permission.PermissionType(Enumerated list)"
+ },
+ "PlatformSoftware": {
+  "platform": "Noun.Platform(Enumerated list)",
+  "platform_version": "string",
+  "platform_patch_level": "string"
+ },
+ "PopularityRank": {
+  "giver": "string",
+  "rank": "int64",
+  "ingestion_time": "google.protobuf.Timestamp"
+ },
+ "PrefetchFileMetadata": {
+  "run_count": "int64",
+  "prefetch_hash": "string"
+ },
+ "Prevalence": {
+  "rolling_max": "int32",
+  "day_count": "int32",
+  "rolling_max_sub_domains": "int32",
+  "day_max": "int32",
+  "day_max_sub_domains": "int32"
+ },
+ "Process": {
+  "pid": "string",
+  "parent_pid": "string",
+  "parent_process": "Process",
+  "file": "File",
+  "command_line": "string",
+  "command_line_history": "string",
+  "product_specific_process_id": "string",
+  "access_mask": "uint64",
+  "integrity_level_rid": "uint64",
+  "euid": "string",
+  "ruid": "string",
+  "egid": "string",
+  "rgid": "string",
+  "pgid": "string",
+  "session_leader_pid": "string",
+  "tty": "string",
+  "token_elevation_type": "Process.TokenElevationType(Enumerated list)",
+  "product_specific_parent_process_id": "string",
+  "ipv6": "bool",
+  "kernel_duration": "Int64",
+  "user_duration": "Int64",
+  "real_duration": "Int64",
+  "state": "Process.State(Enumerated list)",
+  "working_directory": "string"
+ },
+ "ProxyInfo": {
+  "anonymous": "bool",
+  "anonymous_vpn": "bool",
+  "public_proxy": "bool",
+  "tor_exit_node": "bool",
+  "smart_dns_proxy": "bool",
+  "hosting_provider": "bool",
+  "vpn_datacenter": "bool",
+  "residential_proxy": "bool",
+  "vpn_service_name": "string",
+  "proxy_over_vpn": "bool",
+  "relay_proxy": "bool"
+ },
+ "Registry": {
+  "registrykey": "string",
+  "registry_value_name": "string",
+  "registry_value_data": "string",
+  "registry_value_type": "Registry.Type(Enumerated list)",
+  "registry_value_binary_data": "bytes"
+ },
+ "Resource": {
+  "type": "string",
+  "resource_type": "Resource.ResourceType(Enumerated list)",
+  "resource_subtype": "string",
+  "id": "string",
+  "name": "string",
+  "parent": "string",
+  "product_object_id": "string",
+  "attribute": "Attribute(Enumerated list)",
+  "scheduled_task": "ScheduledTask",
+  "scheduled_cron_task": "ScheduledCronTask",
+  "scheduled_anacron_task": "ScheduledAnacronTask",
+  "windows_scheduled_task": "WindowsScheduledTask",
+  "volume": "Volume",
+  "service": "Service"
+ },
+ "ResourceUsage": {
+  "used_entity": "string",
+  "used_entity_id": "string"
+ },
+ "Role": {
+  "name": "string",
+  "description": "string",
+  "type": "Role.Type(Enumerated list)"
+ },
+ "SSLCertificate": {
+  "cert_signature": "SSLCertificate.CertSignature",
+  "extension": "SSLCertificate.Extension",
+  "cert_extensions": "google.protobuf.Struct",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "issuer": "SSLCertificate.Subject",
+  "ec": "SSLCertificate.EC",
+  "serial_number": "string",
+  "signature_algorithm": "string",
+  "size": "int64",
+  "subject": "SSLCertificate.Subject",
+  "thumbprint": "string",
+  "thumbprint_sha256": "string",
+  "validity": "SSLCertificate.Validity",
+  "version": "string",
+  "public_key": "SSLCertificate.PublicKey"
+ },
+ "SSLCertificate.AuthorityKeyId": {
+  "keyid": "string",
+  "serial_number": "string"
+ },
+ "SSLCertificate.CertSignature": {
+  "signature": "string",
+  "signature_algorithm": "string"
+ },
+ "SSLCertificate.DSA": {
+  "p": "string",
+  "q": "string",
+  "g": "string",
+  "pub": "string"
+ },
+ "SSLCertificate.EC": {
+  "oid": "string",
+  "pub": "string"
+ },
+ "SSLCertificate.Extension": {
+  "ca": "bool",
+  "subject_key_id": "string",
+  "authority_key_id": "SSLCertificate.AuthorityKeyId",
+  "key_usage": "string",
+  "ca_info_access": "string",
+  "crl_distribution_points": "string",
+  "extended_key_usage": "string",
+  "subject_alternative_name": "string",
+  "certificate_policies": "string",
+  "netscape_cert_comment": "string",
+  "cert_template_name_dc": "string",
+  "netscape_certificate": "bool",
+  "pe_logotype": "bool",
+  "old_authority_key_id": "bool"
+ },
+ "SSLCertificate.PublicKey": {
+  "algorithm": "string",
+  "rsa": "SSLCertificate.RSA"
+ },
+ "SSLCertificate.RSA": {
+  "key_size": "int64",
+  "modulus": "string",
+  "exponent": "string"
+ },
+ "SSLCertificate.Subject": {
+  "country_name": "string",
+  "common_name": "string",
+  "locality": "string",
+  "organization": "string",
+  "organizational_unit": "string",
+  "state_or_province_name": "string"
+ },
+ "SSLCertificate.Validity": {
+  "expiry_time": "google.protobuf.Timestamp",
+  "issue_time": "google.protobuf.Timestamp"
+ },
+ "ScheduledAnacronTask": {
+  "period": "string",
+  "delay_minutes": "int64",
+  "job_id": "string",
+  "path": "string",
+  "source_line": "string"
+ },
+ "ScheduledCronTask": {
+  "minute": "string",
+  "hour": "string",
+  "month_day": "string",
+  "month": "string",
+  "week_day": "string",
+  "comment": "string",
+  "author": "string",
+  "event": "string",
+  "path": "string"
+ },
+ "ScheduledTask": {
+  "minute": "int32",
+  "hour": "int32",
+  "month_day": "int32",
+  "month": "int32",
+  "week_day": "int32",
+  "comment": "string",
+  "author": "string"
+ },
+ "SecurityResult.AnalystVerdict": {
+  "confidence_score": "int32",
+  "verdict_time": "google.protobuf.Timestamp",
+  "verdict_response": "SecurityResult.VerdictResponse(Enumerated list)"
+ },
+ "SecurityResult.Association": {
+  "id": "string",
+  "country_code": "string",
+  "type": "SecurityResult.Association.AssociationType(Enumerated list)",
+  "name": "string",
+  "description": "string",
+  "role": "string",
+  "source_country": "string",
+  "alias": "SecurityResult.Association.AssociationAlias",
+  "first_reference_time": "google.protobuf.Timestamp",
+  "last_reference_time": "google.protobuf.Timestamp",
+  "industries_affected": "string",
+  "associated_actors": "SecurityResult.Association",
+  "region_code": "Location",
+  "sponsor_region": "Location",
+  "targeted_regions": "Location",
+  "tags": "string"
+ },
+ "SecurityResult.Association.AssociationAlias": {
+  "name": "string",
+  "company": "string"
+ },
+ "SecurityResult.IoCStats": {
+  "ioc_stats_type": "SecurityResult.IoCStatsType(Enumerated list)",
+  "first_level_source": "string",
+  "second_level_source": "string",
+  "benign_count": "int32",
+  "quality": "SecurityResult.ProductConfidence(Enumerated list)",
+  "malicious_count": "int32",
+  "response_count": "int32",
+  "source_count": "int32"
+ },
+ "SecurityResult.ProviderMLVerdict": {
+  "source_provider": "string",
+  "benign_count": "int32",
+  "malicious_count": "int32",
+  "confidence_score": "int32",
+  "mandiant_sources": "SecurityResult.Source",
+  "third_party_sources": "SecurityResult.Source"
+ },
+ "SecurityResult.Source": {
+  "name": "string",
+  "benign_count": "int32",
+  "malicious_count": "int32",
+  "quality": "SecurityResult.ProductConfidence(Enumerated list)",
+  "response_count": "int32",
+  "source_count": "int32",
+  "threat_intelligence_sources": "SecurityResult.Source"
+ },
+ "SecurityResult.ThreatCollectionItem": {
+  "id": "string",
+  "type": "SecurityResult.ThreatCollectionType(Enumerated list)",
+  "alt_names": "string"
+ },
+ "SecurityResult.VariablesEntry": {
+  "key": "string",
+  "value": "FindingVariable"
+ },
+ "SecurityResult.Verdict": {
+  "source_count": "int32",
+  "response_count": "int32",
+  "neighbour_influence": "string",
+  "verdict": "SecurityResult.ProviderMLVerdict",
+  "analyst_verdict": "SecurityResult.AnalystVerdict"
+ },
+ "SecurityResult.VerdictInfo": {
+  "source_count": "int32",
+  "response_count": "int32",
+  "neighbour_influence": "string",
+  "verdict_type": "SecurityResult.VerdictType(Enumerated list)",
+  "source_provider": "string",
+  "benign_count": "int32",
+  "malicious_count": "int32",
+  "confidence_score": "int32",
+  "ioc_stats": "SecurityResult.IoCStats",
+  "verdict_time": "google.protobuf.Timestamp",
+  "verdict_response": "SecurityResult.VerdictResponse(Enumerated list)",
+  "global_customer_count": "int32",
+  "global_hits_count": "int32",
+  "pwn": "bool",
+  "category_details": "string",
+  "pwn_first_tagged_time": "google.protobuf.Timestamp",
+  "ml_priority_score": "double"
+ },
+ "Service": {
+  "display_name": "string",
+  "service_type": "Service.ServiceType(Enumerated list)",
+  "service_types": "Service.ServiceType(Enumerated list)",
+  "startup_type": "Service.StartupType(Enumerated list)",
+  "state": "Service.State(Enumerated list)"
+ },
+ "SignatureInfo": {
+  "sigcheck": "FileMetadataSignatureInfo",
+  "codesign": "FileMetadataCodesign"
+ },
+ "SignerInfo": {
+  "name": "string",
+  "status": "string",
+  "valid_usage": "string",
+  "cert_issuer": "string"
+ },
+ "Smtp": {
+  "helo": "string",
+  "mail_from": "string",
+  "rcpt_to": "string",
+  "server_response": "string",
+  "message_path": "string",
+  "is_webmail": "bool",
+  "is_tls": "bool"
+ },
+ "Software": {
+  "name": "string",
+  "version": "string",
+  "permissions": "Permission",
+  "description": "string",
+  "vendor_name": "string"
+ },
+ "Srum": {
+  "id": "string",
+  "background_bytes_read": "int64",
+  "background_bytes_written": "int64",
+  "background_context_switches": "int64",
+  "background_cycle_count": "int64",
+  "background_flushes_count": "int64",
+  "background_read_operations": "int64",
+  "background_write_operations": "int64",
+  "interface_luid": "string"
+ },
+ "StringSequence": {
+  "string_vals": "string"
+ },
+ "StringToInt64MapEntry": {
+  "key": "string",
+  "value": "int64"
+ },
+ "SystemEventDetails": {
+  "message_type": "string",
+  "sender_image_id": "string",
+  "subsystem": "string"
+ },
+ "Tags": {
+  "tenant_id": "bytes",
+  "data_tap_config_name": "string"
+ },
+ "TimeOff": {
+  "interval": "google.type.Interval",
+  "description": "string"
+ },
+ "Tls": {
+  "client": "Tls.Client",
+  "server": "Tls.Server",
+  "cipher": "string",
+  "curve": "string",
+  "version": "string",
+  "version_protocol": "string",
+  "established": "bool",
+  "next_protocol": "string",
+  "resumed": "bool"
+ },
+ "Tls.Client": {
+  "certificate": "Certificate",
+  "ja3": "string",
+  "server_name": "string",
+  "supported_ciphers": "string",
+  "ja4": "string"
+ },
+ "Tls.Server": {
+  "certificate": "Certificate",
+  "ja3s": "string",
+  "ja4s": "string"
+ },
+ "Tracker": {
+  "tracker": "string",
+  "id": "string",
+  "timestamp": "google.protobuf.Timestamp"
+ },
+ "Tunnels": {
+  "provider": "string",
+  "type": "string"
+ },
+ "Uint64Sequence": {
+  "uint64_vals": "uint64"
+ },
+ "Url": {
+  "categories": "string",
+  "favicon": "Favicon",
+  "html_meta": "google.protobuf.Struct",
+  "last_final_url": "string",
+  "last_http_response_code": "int32",
+  "last_http_response_content_length": "int64",
+  "last_http_response_content_sha256": "string",
+  "last_http_response_cookies": "google.protobuf.Struct",
+  "last_http_response_headers": "google.protobuf.Struct",
+  "tags": "string",
+  "title": "string",
+  "trackers": "Tracker"
+ },
+ "User": {
+  "product_object_id": "string",
+  "userid": "string",
+  "user_display_name": "string",
+  "first_name": "string",
+  "middle_name": "string",
+  "last_name": "string",
+  "phone_numbers": "string",
+  "personal_address": "Location",
+  "attribute": "Attribute(Enumerated list)",
+  "first_seen_time": "google.protobuf.Timestamp",
+  "account_type": "User.AccountType(Enumerated list)",
+  "groupid": "string",
+  "group_identifiers": "string",
+  "windows_sid": "string",
+  "email_addresses": "string",
+  "employee_id": "string",
+  "title": "string",
+  "company_name": "string",
+  "department": "string",
+  "office_address": "Location",
+  "managers": "User",
+  "hire_date": "google.protobuf.Timestamp",
+  "termination_date": "google.protobuf.Timestamp",
+  "time_off": "TimeOff",
+  "last_login_time": "google.protobuf.Timestamp",
+  "last_password_change_time": "google.protobuf.Timestamp",
+  "password_expiration_time": "google.protobuf.Timestamp",
+  "account_expiration_time": "google.protobuf.Timestamp",
+  "account_lockout_time": "google.protobuf.Timestamp",
+  "last_bad_password_attempt_time": "google.protobuf.Timestamp",
+  "user_authentication_status": "Authentication.AuthenticationStatus(Enumerated list)",
+  "role_name": "string",
+  "role_description": "string",
+  "user_role": "User.Role(Enumerated list)"
+ },
+ "UserAssist": {
+  "application_focus_count": "int64",
+  "application_focus_duration": "Int64",
+  "executions_count": "int64",
+  "entry_index": "int64"
+ },
+ "UsnJournal": {
+  "attributes_flag": "string",
+  "attributes": "UsnJournal.Attribute(Enumerated list)",
+  "file_attributes": "UsnJournal.Attribute(Enumerated list)",
+  "allocated": "bool",
+  "reason": "UsnJournal.Reason(Enumerated list)",
+  "reasons": "UsnJournal.Reason(Enumerated list)"
+ },
+ "Volume": {
+  "file_system": "string",
+  "mount_point": "string",
+  "device_path": "string",
+  "is_mounted": "bool",
+  "is_read_only": "bool",
+  "name": "string"
+ },
+ "Vulnerabilities": {
+  "vulnerabilities": "Vulnerability"
+ },
+ "Vulnerability": {
+  "about": "Noun",
+  "name": "string",
+  "description": "string",
+  "vendor": "string",
+  "scan_start_time": "google.protobuf.Timestamp",
+  "scan_end_time": "google.protobuf.Timestamp",
+  "first_found": "google.protobuf.Timestamp",
+  "last_found": "google.protobuf.Timestamp",
+  "severity": "Vulnerability.Severity(Enumerated list)",
+  "severity_details": "string",
+  "cvss_base_score": "float",
+  "cvss_vector": "string",
+  "cvss_version": "string",
+  "cve_id": "string",
+  "cve_description": "string",
+  "vendor_vulnerability_id": "string",
+  "vendor_knowledge_base_article_id": "string"
+ },
+ "WindowsEventLog": {
+  "channel": "WindowsEventLog.Channel(Enumerated list)",
+  "event_id": "string",
+  "activity_id": "string"
+ },
+ "WindowsScheduledTask": {
+  "author": "string",
+  "virtual_path": "string",
+  "exit_code": "int32",
+  "state": "WindowsScheduledTask.TaskState(Enumerated list)",
+  "logon_type": "WindowsScheduledTask.TaskLogonType(Enumerated list)",
+  "task_actions": "WindowsScheduledTask.TaskAction",
+  "task_triggers": "WindowsScheduledTask.TaskTrigger"
+ },
+ "WindowsScheduledTask.TaskAction": {
+  "action_type": "WindowsScheduledTask.TaskAction.ActionType(Enumerated list)",
+  "exec_arguments": "string",
+  "exec_working_directory": "string",
+  "com_class_id": "string",
+  "com_data": "string"
+ },
+ "WindowsScheduledTask.TaskTrigger": {
+  "enabled": "bool",
+  "duration": "Int64",
+  "interval": "string",
+  "trigger_type": "WindowsScheduledTask.TaskTrigger.TriggerType(Enumerated list)"
+ },
+ "WmiPersistenceItem": {
+  "caption": "string",
+  "name": "string",
+  "setting_id": "string",
+  "derivation": "string",
+  "property_count": "int64",
+  "rel_path": "string",
+  "dynasty": "string",
+  "wmi_super_class": "string",
+  "wmi_class": "string",
+  "genus": "int64"
+ },
+ "X509": {
+  "name": "string",
+  "algorithm": "string",
+  "thumbprint": "string",
+  "cert_issuer": "string",
+  "serial_number": "string"
+ },
+ "DataAccessIngestionLabel": {
+  "key": "string",
+  "value": "string"
+ },
+ "DataAccessLabels": {
+  "log_types": "string",
+  "ingestion_labels": "string",
+  "namespaces": "string",
+  "custom_labels": "string",
+  "ingestion_kv_labels": "DataAccessIngestionLabel",
+  "allow_scoped_access": "bool"
+ },
+ "Standard datatypes": {
+  "double": "",
+  "float": "",
+  "int32": "Uses variable-length encoding. Inefficient for encoding negative numbers \u2013 if your field is likely to have negative values, use sint32 instead.",
+  "int64": "Uses variable-length encoding. Inefficient for encoding negative numbers \u2013 if your field is likely to have negative values, use sint64 instead.",
+  "uint32": "Uses variable-length encoding.",
+  "uint64": "Uses variable-length encoding.",
+  "sint32": "Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.",
+  "sint64": "Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.",
+  "fixed32": "Always four bytes. More efficient than uint32 if values are often greater than 2^28.",
+  "fixed64": "Always eight bytes. More efficient than uint64 if values are often greater than 2^56.",
+  "sfixed32": "Always four bytes.",
+  "sfixed64": "Always eight bytes.",
+  "bool": "",
+  "string": "A string must always contain UTF-8 encoded or 7-bit ASCII text.",
+  "bytes": "May contain any arbitrary sequence of bytes."
+ }
+}

@@ -1,0 +1,2 @@
+YumaISMControlStatus()
+| summarize Controls = count() by Status

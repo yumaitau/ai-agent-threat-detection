@@ -1,0 +1,37 @@
+// YUMA-GAI-G03  Workspace AI agent (Workspace Studio / Gemini Enterprise agent) touching many Drive files or sharing externally in one hour
+// Status: DRAFT HUNT (agent attribution is new; volumes unknown)
+// UDM: actor.agentAttributionInfo.agentType WORKSPACE_STUDIO_AGENT or GEMINI_ENTERPRISE_AGENT -> principal.ai.type = AGENT;
+//   agentId -> principal.ai.product_object_id; agentName -> principal.ai.display_name; agentOwner.email -> principal.ai.owners.email_addresses
+//   https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/workspace-activity
+// Drive event names (download, copy, change_user_access, change_document_visibility, change_document_access_scope):
+//   same parser page event table; also used by Google's community Workspace rules.
+// Maps: ISM-2157, ISM-2159, ISM-2133 | ATT&CK T1530, T1567 | ATLAS AML.T0086, AML.T0085.001 | OWASP ASI02, ASI10
+rule yuma_gai_g03_workspace_agent_bulk_drive_activity {
+  meta:
+    author = "Yuma IT"
+    description = "A Workspace AI agent downloaded, copied or re-shared many Drive items in one hour"
+    severity = "MEDIUM"
+    yuma_id = "G03"
+    ism = "ISM-2157, ISM-2159, ISM-2133"
+
+  events:
+    $d.metadata.vendor_name = "Google Workspace"
+    $d.metadata.product_name = "drive"
+    $d.principal.ai.type = "AGENT"
+    $d.metadata.product_event_type = /^(download|copy|change_user_access|change_document_visibility|change_document_access_scope)$/
+    $d.principal.ai.product_object_id = $agent_id
+
+  match:
+    $agent_id over 1h
+
+  outcome:
+    $distinct_docs = count_distinct($d.target.resource.product_object_id)
+    $actions = array_distinct($d.metadata.product_event_type)
+    $agent_name = array_distinct($d.principal.ai.display_name)
+    $agent_owner = array_distinct($d.principal.ai.owners.email_addresses)
+    $on_behalf_of = array_distinct($d.principal.user.email_addresses)
+    $risk_score = max(if($d.metadata.product_event_type = "change_document_visibility", 75, 55))
+
+  condition:
+    $d and $distinct_docs > 25
+}

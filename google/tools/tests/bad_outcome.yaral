@@ -1,0 +1,17 @@
+rule bad_outcome {
+  meta:
+    author = "t"
+    description = "t"
+    severity = "LOW"
+    yuma_id = "T3"
+    ism = "x"
+  events:
+    $e.metadata.product_event_type = "x"
+    $e.principal.ip = $ip
+  match:
+    $ip over 1h
+  outcome:
+    $ua = $e.network.http.user_agent
+  condition:
+    $e and $undefined_count > 3
+}

@@ -1,0 +1,20 @@
+# Yuma AIA-A02: Bedrock model use by a principal that is not in the register, or a model it is not approved for
+# Source: Bedrock model invocation logs in CloudWatch Logs (log group set in PutModelInvocationLoggingConfiguration)
+# Fields (documented): timestamp, accountId, region, requestId, operation, modelId, identity.arn,
+#   input.inputTokenCount, output.outputTokenCount
+#   https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html
+# Register-aware via a CloudWatch Logs lookup table "yuma_aia_register" that PB4 refreshes daily with UpdateLookupTable
+# (columns: role_name, agent_id, agent_name, owner, approved_models as a pipe-separated list).
+#   https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax-Lookup.html
+# Complements GuardDuty AI Protection (Impact:IAMUser/AnomalousModelInvocation), which needs no setup but is not
+# register-aware. Run hourly over the last hour. The AWSReservedSSO_ filter drops human Identity Center sessions;
+# remove it to review human model use against the AI usage policy (ISM-2074).
+fields identity.arn as principal, modelId, operation, input.inputTokenCount as inTok, output.outputTokenCount as outTok
+| parse principal /assumed-role\/(?<role_name>[^\/]+)\//
+| filter role_name not like /^AWSReservedSSO_/
+| lookup yuma_aia_register role_name OUTPUT agent_id, agent_name, owner, approved_models
+| filter isempty(agent_id) or strcontains(approved_models, modelId) = 0
+| stats count(*) as calls, sum(inTok) as inputTokens, sum(outTok) as outputTokens, earliest(@timestamp) as firstSeen
+        by principal, role_name, agent_id, owner, modelId, operation
+| sort inputTokens desc
+| limit 1000

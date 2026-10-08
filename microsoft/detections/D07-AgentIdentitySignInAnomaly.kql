@@ -1,0 +1,59 @@
+// YUMA-AIA-D07  Agent identity or AI service principal signs in from a new IP/ASN, to a new resource,
+//               with a new credential type, or with a burst of failures (14-day baseline)
+// Type: Sentinel scheduled analytics rule (every 1h, look back 14d). Feeds playbook PB1.
+// Table: AADServicePrincipalSignInLogs (column Agent = "Details of agentic sign-in").
+// Licence: Entra ID P1 or P2 to ingest sign-in logs.
+//   https://learn.microsoft.com/en-us/azure/sentinel/connect-azure-active-directory
+//   https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/aadserviceprincipalsigninlogs
+//   https://learn.microsoft.com/en-us/entra/agent-id/sign-in-audit-logs-agents
+// Agent is a string column holding JSON; agentType / parentAppId keys follow the Graph agentSignIn resource
+//   (https://learn.microsoft.com/en-us/graph/api/resources/agentic-agentsignin?view=graph-rest-beta). UNVALIDATED
+//   against live data: confirm key casing in a tenant with Entra Agent ID before enabling.
+// Fallback: tenants without Agent ID data are covered by the AI name match.
+// Maps: ISM-2133, ISM-2136, ISM-2141, ISM-2142, ISM-2148 (response via PB1) | E8 restrict administrative privileges
+//   ATT&CK T1078.004, T1550.001 | ATLAS AML.T0012, AML.T0055 | OWASP ASI03, ASI10
+let lookback = 14d;
+let recent = 1h;
+let FailureThreshold = 20;
+let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+    "deepseek", "mistral", "grok", "n8n", "zapier", "langchain", "agent", "mcp"]);
+let AgentSignIns = AADServicePrincipalSignInLogs
+    | where TimeGenerated > ago(lookback)
+    | extend AgentInfo = parse_json(Agent)
+    | extend AgentType = tostring(AgentInfo.agentType),
+             ParentAppId = tostring(AgentInfo.parentAppId)
+    | extend IsAgentic = isnotempty(AgentType) and AgentType !~ "notAgentic"
+    | where IsAgentic or ServicePrincipalName has_any (AIKeywords)
+    | extend Succeeded = ResultType == "0" or ResultType =~ "Success";
+let Baseline = AgentSignIns
+    | where TimeGenerated <= ago(recent) and Succeeded
+    | summarize KnownIPs = make_set(IPAddress, 1000),
+                KnownASNs = make_set(AutonomousSystemNumber, 500),
+                KnownResources = make_set(ResourceDisplayName, 500),
+                KnownCredTypes = make_set(ClientCredentialType, 20),
+                BaselineSignIns = count()
+             by ServicePrincipalId;
+AgentSignIns
+| where TimeGenerated > ago(recent)
+| summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+            SuccessCount = countif(Succeeded), FailureCount = countif(not(Succeeded)),
+            FailureCodes = make_set_if(ResultType, not(Succeeded), 20)
+         by ServicePrincipalId, ServicePrincipalName, AppId, AgentType, ParentAppId, IsAgentic,
+            IPAddress, AutonomousSystemNumber, ResourceDisplayName, ClientCredentialType
+| join kind=leftouter Baseline on ServicePrincipalId
+| extend HasBaseline = isnotnull(BaselineSignIns)
+| extend NewIP = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownIPs, IPAddress)),
+         NewASN = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownASNs, AutonomousSystemNumber)),
+         NewResource = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownResources, ResourceDisplayName)),
+         NewCredentialType = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownCredTypes, ClientCredentialType)),
+         FailureBurst = FailureCount >= FailureThreshold,
+         UsesSecret = ClientCredentialType has "secret"   // ISM-2141/2142 prefer managed or certificate credentials
+| where NewASN or NewResource or NewCredentialType or FailureBurst or (NewIP and UsesSecret)
+| extend Reasons = strcat_array(pack_array(
+             iff(NewIP, "new IP", ""), iff(NewASN, "new ASN", ""), iff(NewResource, "new resource", ""),
+             iff(NewCredentialType, "new credential type", ""), iff(FailureBurst, "failure burst", ""),
+             iff(UsesSecret, "static secret", "")), "; ")
+| extend Severity = case((NewASN and NewResource) or FailureBurst, "High", IsAgentic, "Medium", "Low")
+| project FirstSeen, LastSeen, ServicePrincipalName, ServicePrincipalId, AppId, AgentType, ParentAppId, IsAgentic,
+          IPAddress, AutonomousSystemNumber, ResourceDisplayName, ClientCredentialType, SuccessCount, FailureCount,
+          FailureCodes, Reasons, Severity

@@ -1,0 +1,14 @@
+{
+ "version": "0",
+ "id": "2",
+ "detail-type": "GuardDuty Finding",
+ "source": "aws.guardduty",
+ "account": "000000000000",
+ "time": "2026-10-08T01:00:00Z",
+ "region": "ap-southeast-2",
+ "resources": [],
+ "detail": {
+  "type": "Recon:EC2/PortProbeUnprotectedPort",
+  "severity": 2
+ }
+}

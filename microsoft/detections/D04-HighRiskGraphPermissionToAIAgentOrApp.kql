@@ -1,0 +1,66 @@
+// YUMA-AIA-D04  High-risk Microsoft Graph permission granted to an AI agent or AI app
+// Type: Sentinel scheduled analytics rule (run every 1h, look back 1h). Also runs as a hunt with a longer lookback.
+// Table: AuditLogs (Entra ID connector). Licence: any Entra ID tier for audit logs.
+//   https://learn.microsoft.com/en-us/azure/sentinel/connect-azure-active-directory
+//   https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/auditlogs
+// Agent field: agentType on targetResources (notAgentic, agenticApp, agenticAppInstance,
+//   agentIdentityBlueprintPrincipal, agentIDuser).
+//   https://learn.microsoft.com/en-us/entra/agent-id/sign-in-audit-logs-agents
+// Maps: ISM-2156, ISM-2137, ISM-2138, ISM-2139 | E8 restrict administrative privileges
+//   ATT&CK T1098.003 | ATLAS AML.T0081, AML.T0108 | OWASP LLM06, ASI03
+// Field paths (AppRole.Value, ConsentAction.Permissions, ServicePrincipal.DisplayName/ObjectID) follow
+//   Microsoft's own Entra ID rules in Azure/Azure-Sentinel (AdminPromoAfterRoleMgmtAppPermissionGrant,
+//   CredentialAddedAfterAdminConsent). DelegatedPermissionGrant.Scope is UNVALIDATED.
+// Tuning: extend AIKeywords with the customer's AI vendor list. Approved apps are suppressed through the watchlist
+//   YumaAIRegisterApproved (SearchKey = service principal object ID), which PB2 maintains. Deploy register-infra first.
+let lookback = 1h;
+let AllowedAppIds = _GetWatchlist("YumaAIRegisterApproved") | project SearchKey;   // approved in the AI register
+let HighRiskPermissions = dynamic([
+    "Application.ReadWrite.All", "AppRoleAssignment.ReadWrite.All", "Directory.ReadWrite.All",
+    "AgentIdentity.ReadWrite.All", "DelegatedPermissionGrant.ReadWrite.All",
+    "RoleManagement.ReadWrite.Directory", "User.ReadWrite.All", "Group.ReadWrite.All",
+    "Policy.ReadWrite.ConditionalAccess", "Mail.Read", "Mail.ReadWrite", "Mail.Send",
+    "MailboxSettings.ReadWrite", "full_access_as_app", "EWS.AccessAsUser.All",
+    "Files.Read.All", "Files.ReadWrite.All", "Sites.Read.All", "Sites.ReadWrite.All",
+    "Sites.FullControl.All", "Chat.Read.All", "Chat.ReadWrite.All", "ChannelMessage.Read.All"]);
+let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+    "deepseek", "mistral", "grok", "otter", "fireflies", "n8n", "zapier", "langchain", "cursor"]);
+AuditLogs
+| where TimeGenerated > ago(lookback)
+| where LoggedByService =~ "Core Directory" and Category =~ "ApplicationManagement"
+| where OperationName in~ ("Add app role assignment to service principal", "Consent to application",
+                           "Add delegated permission grant")
+| where Result =~ "success"
+| mv-apply TargetResource = TargetResources on (
+      where tostring(TargetResource.type) =~ "ServicePrincipal"
+      | extend TargetSpId = tostring(TargetResource.id),
+               TargetSpName = tostring(TargetResource.displayName),
+               TargetAgentType = tostring(TargetResource.agentType),
+               Props = TargetResource.modifiedProperties
+      | take 1)
+| mv-apply Prop = Props on (
+      summarize Bag = make_bag(bag_pack(tostring(Prop.displayName), trim(@'[\"\s]+', tostring(Prop.newValue))), 100))
+| extend GrantedPermissions = strcat(tostring(Bag["AppRole.Value"]), " ", tostring(Bag["ConsentAction.Permissions"]),
+                                     " ", tostring(Bag["DelegatedPermissionGrant.Scope"]))
+// For app role assignments the client app sits in modifiedProperties; for consent it is the target SP.
+| extend ClientAppName = iff(isnotempty(tostring(Bag["ServicePrincipal.DisplayName"])), tostring(Bag["ServicePrincipal.DisplayName"]), TargetSpName),
+         ClientSpId = iff(isnotempty(tostring(Bag["ServicePrincipal.ObjectID"])), tostring(Bag["ServicePrincipal.ObjectID"]), TargetSpId),
+         IsAdminConsent = tostring(Bag["ConsentContext.IsAdminConsent"])
+| extend MatchedPermissions = set_intersect(extract_all(@"([A-Za-z_]+(?:\.[A-Za-z]+)+|full_access_as_app)", GrantedPermissions), HighRiskPermissions)
+| where array_length(MatchedPermissions) > 0
+| where ClientSpId !in (AllowedAppIds)
+| extend InitiatorAgentType = tostring(InitiatedBy.app.agentType)
+| extend IsAgentic = (isnotempty(TargetAgentType) and TargetAgentType !~ "notAgentic")
+                     or (isnotempty(InitiatorAgentType) and InitiatorAgentType !~ "notAgentic"),
+         IsAINamed = ClientAppName has_any (AIKeywords) or ClientAppName matches regex @"(?i)\b(ai|gpt|llm|mcp|agent|bot)\b",
+         IsSelfGrantByApp = isnotempty(tostring(InitiatedBy.app.servicePrincipalId))
+| where IsAgentic or IsAINamed or IsSelfGrantByApp
+| extend InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName),
+         InitiatedByApp = tostring(InitiatedBy.app.displayName),
+         InitiatedByIp = iff(isnotempty(tostring(InitiatedBy.user.ipAddress)), tostring(InitiatedBy.user.ipAddress), tostring(InitiatedBy.app.ipAddress))
+| extend Severity = case(MatchedPermissions has_any ("RoleManagement.ReadWrite.Directory", "Application.ReadWrite.All", "AppRoleAssignment.ReadWrite.All", "Directory.ReadWrite.All", "AgentIdentity.ReadWrite.All"), "High",
+                         IsAgentic, "High",
+                         "Medium")
+| project TimeGenerated, OperationName, ClientAppName, ClientSpId, TargetAgentType, IsAgentic, IsAINamed, IsSelfGrantByApp,
+          MatchedPermissions, GrantedPermissions, IsAdminConsent, InitiatedByUpn, InitiatedByApp, InitiatedByIp,
+          Severity, CorrelationId

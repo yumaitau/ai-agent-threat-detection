@@ -1,0 +1,50 @@
+// YUMA-GAI-G04  AI or agent OAuth app pulling an unusual volume of Workspace data (Gmail, Drive, Calendar ...) in one hour
+// Status: RULE-GRADE (offline-linted only). Static thresholds here; the BigQuery version adds a 14-day per-app baseline.
+// Log type: WORKSPACE_ACTIVITY, application "token", event "activity" (OAuth API activity by third-party apps).
+//   Events and parameters (api_name, method_name, num_response_bytes, product_bucket):
+//     https://developers.google.com/workspace/admin/reports/v1/appendix/activity/token
+//   UDM mapping: num_response_bytes -> network.received_bytes; product_bucket, method_name, api_name ->
+//     target.resource.attribute.labels[...]; client_id -> target.resource.product_object_id
+//     https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/workspace-activity
+// Maps: ISM-2157, ISM-2159 | E8 restrict administrative privileges (supporting)
+//   ATT&CK T1114.002, T1530 | ATLAS AML.T0085.001, AML.T0086, AML.T0036 | OWASP LLM06, LLM02, ASI02, ASI10
+// Tuning: raise thresholds for approved high-volume apps (backup, archiving). Approved apps are NOT excluded on purpose:
+//   an approved agent that suddenly pulls 10x its normal volume is the case we care about.
+rule yuma_gai_g04_agent_oauth_data_pull_burst {
+  meta:
+    author = "Yuma IT"
+    description = "AI or agent-named OAuth app, or an app not in the approved register, read a large volume of Workspace data or touched many users' data in one hour"
+    severity = "MEDIUM"
+    priority = "MEDIUM"
+    yuma_id = "G04"
+    ism = "ISM-2157, ISM-2159"
+    mitre_attack_technique_id = "T1114.002, T1530"
+    atlas = "AML.T0085.001, AML.T0086, AML.T0036"
+    owasp = "LLM06, LLM02, ASI02, ASI10"
+
+  events:
+    $a.metadata.vendor_name = "Google Workspace"
+    $a.metadata.product_name = "token"
+    $a.metadata.product_event_type = "activity"
+    $a.target.resource.product_object_id = $client_id
+    (
+      re.regex($a.target.resource.name, `(?i)(openai|chatgpt|anthropic|claude|copilot|gemini|perplexity|deepseek|mistral|grok|otter|fireflies|notetaker|zapier|n8n|make\.com|langchain|cursor|\bai\b|gpt|llm|mcp|agent|assistant|\bbot\b)`)
+      or not $a.target.resource.product_object_id in %yuma_ai_approved_oauth_clients
+    )
+
+  match:
+    $client_id over 1h
+
+  outcome:
+    $total_response_bytes = sum($a.network.received_bytes)
+    $api_calls = count_distinct($a.metadata.id)
+    $distinct_users = count_distinct($a.principal.user.email_addresses)
+    $product_buckets = array_distinct($a.target.resource.attribute.labels["product_bucket"])
+    $methods = array_distinct($a.target.resource.attribute.labels["method_name"])
+    $app_name = array_distinct($a.target.resource.name)
+    $principal_ip = array_distinct($a.principal.ip)
+    $risk_score = max(if($a.target.resource.attribute.labels["product_bucket"] = "GMAIL", 75, 60))
+
+  condition:
+    $a and ($total_response_bytes > 500000000 or $distinct_users > 25 or $api_calls > 20000)
+}

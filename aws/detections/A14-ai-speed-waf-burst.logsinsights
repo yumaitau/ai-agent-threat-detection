@@ -1,0 +1,17 @@
+# Yuma AIA-A14: AI-speed exploitation burst - one client hitting many WAF rules across many paths in 10 minutes
+# Source: AWS WAF logs in CloudWatch Logs. Fields as A13, plus ruleGroupList[].terminatingRule.ruleId (the managed
+# rule inside a rule group; terminatingRuleId alone only names the group).
+#   https://docs.aws.amazon.com/waf/latest/developerguide/logging-fields.html
+# Behaviour-based on purpose: user agents are spoofable, so they are enrichment only. Feeds PB3 (enrich + block).
+# Thresholds are starting guesses: >= 5 distinct blocking rules, or >= 300 requests over >= 60 distinct paths.
+fields httpRequest.clientIp as ip, httpRequest.country as country, httpRequest.uri as uri, action, terminatingRuleId
+| parse @message '"terminatingRule":{"ruleId":"*"' as managedRuleId
+| fields coalesce(managedRuleId, terminatingRuleId) as rule
+| stats count(*) as requests,
+        countDistinct(uri) as paths,
+        countDistinct(rule) as rulesHit,
+        latest(action) as lastAction
+        by ip, country, bin(10m)
+| filter rulesHit >= 5 or (requests >= 300 and paths >= 60)
+| sort rulesHit desc
+| limit 200

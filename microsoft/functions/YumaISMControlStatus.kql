@@ -1,0 +1,110 @@
+// Function alias: YumaISMControlStatus   (saved function; depends on YumaAIRegister and watchlist YumaISMControlMap)
+// One row per ISM control in scope (ISM-2133 to 2140, ISM-2156 to 2159) with an evidence status computed from data.
+// Status meanings: "Evidence present" = the data shows the expected state; "Gap" = the data shows a problem;
+//   "No data" = the source table is empty or missing; "Attestation required" = needs a human statement plus the metric.
+// This is evidence to support an assessment, not a compliance determination.
+// Tables that are not connected are tolerated with union isfuzzy=true and count as "No data".
+let Lookback = 30d;
+let Reg = YumaAIRegister();
+let RegTotal = toscalar(Reg | count);
+let RegNoIdentity = toscalar(Reg | where Gap_NoUniqueIdentity | count);
+let RegWithGaps = toscalar(Reg | where GapCount > 0 | count);
+let RegReviewDue = toscalar(Reg | where ReviewStatus in ("Overdue", "Never reviewed") | count);
+let RegHighRisk = toscalar(Reg | where Flag_HighRiskPermissions | count);
+let RegLastWrite = toscalar(union isfuzzy=true (AIAgentRegister_CL | summarize t = max(TimeGenerated)), (print t = datetime(null)) | summarize max(t));
+let YumaAlerts = union isfuzzy=true
+        (SecurityAlert
+         | where TimeGenerated > ago(Lookback)
+         | where AlertName startswith "Yuma AIA-"
+         | extend DetectionId = extract(@"Yuma AIA-(D\d+)", 1, AlertName)
+         | summarize n = count() by DetectionId),
+        (datatable(DetectionId:string, n:long)[]);
+let AlertsFor = (id:string) { toscalar(YumaAlerts | where DetectionId == id | summarize tolong(sum(n))) };
+let MsInjectionAlerts = toscalar(union isfuzzy=true
+        (SecurityAlert | where TimeGenerated > ago(Lookback) | where AlertName has_any ("prompt injection", "jailbreak") | summarize n = count()),
+        (print n = tolong(0)) | summarize sum(n));
+let UserConsents = toscalar(union isfuzzy=true
+        (AuditLogs
+         | where TimeGenerated > ago(90d)
+         | where OperationName =~ "Consent to application" and Result =~ "success"
+         | mv-expand TargetResource = TargetResources
+         | mv-expand Prop = TargetResource.modifiedProperties
+         | where tostring(Prop.displayName) == "ConsentContext.IsAdminConsent" and tostring(Prop.newValue) has "False"
+         | summarize n = dcount(CorrelationId)),
+        (print n = tolong(0)) | summarize sum(n));
+let AuditRows = toscalar(union isfuzzy=true (AuditLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let SpSignInRows = toscalar(union isfuzzy=true (AADServicePrincipalSignInLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let GraphRows = toscalar(union isfuzzy=true (MicrosoftGraphActivityLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let AgenticNetRows = toscalar(union isfuzzy=true (NetworkAccessTraffic | where TimeGenerated > ago(1d) and IsAgentic == true | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let CopilotRows = toscalar(union isfuzzy=true (CopilotActivity | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let SigninRows = toscalar(union isfuzzy=true (SigninLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));
+let DeviceCode = toscalar(union isfuzzy=true
+        (SigninLogs | where TimeGenerated > ago(Lookback) and AuthenticationProtocol =~ "deviceCode" | summarize n = count()),
+        (print n = tolong(0)) | summarize sum(n));
+let DeviceCodeUsers = toscalar(union isfuzzy=true
+        (SigninLogs | where TimeGenerated > ago(Lookback) and AuthenticationProtocol =~ "deviceCode" | summarize n = dcount(UserPrincipalName)),
+        (print n = tolong(0)) | summarize sum(n));
+let AgentCA = union isfuzzy=true
+        (AADServicePrincipalSignInLogs
+         | where TimeGenerated > ago(Lookback)
+         | extend AgentType = tostring(parse_json(Agent).agentType)
+         | where isnotempty(AgentType) and AgentType !~ "notAgentic"
+         | summarize Total = count(), NotApplied = countif(ConditionalAccessStatus =~ "notApplied")),
+        (datatable(Total:long, NotApplied:long)[]);
+let AgentSignIns = toscalar(AgentCA | summarize tolong(sum(Total)));
+let AgentNoCA = toscalar(AgentCA | summarize tolong(sum(NotApplied)));
+let Rows = union
+    (print ControlId = "ISM-2133",
+           Status = case(RegTotal == 0, "No data", RegNoIdentity == 0, "Evidence present", "Gap"),
+           Metric = strcat(RegNoIdentity, " of ", RegTotal, " registered agents have no unique Entra identity"),
+           AlertsLookback = coalesce(AlertsFor("D07"), 0)),
+    (print ControlId = "ISM-2134",
+           Status = case(isnull(RegLastWrite), "No data", RegLastWrite > ago(7d), "Evidence present", "Gap"),
+           Metric = strcat("Register last written ", format_datetime(RegLastWrite, "yyyy-MM-dd HH:mm"), " UTC; ", RegTotal, " active agents"),
+           AlertsLookback = tolong(0)),
+    (print ControlId = "ISM-2135",
+           Status = case(RegTotal == 0, "No data", RegWithGaps == 0, "Evidence present", "Gap"),
+           Metric = strcat(RegWithGaps, " of ", RegTotal, " agents missing owner, purpose, identity or permissions"),
+           AlertsLookback = tolong(0)),
+    (print ControlId = "ISM-2136",
+           Status = case(coalesce(AgentSignIns, 0) == 0, "No data", "Attestation required"),
+           Metric = strcat(coalesce(AgentNoCA, 0), " of ", coalesce(AgentSignIns, 0), " agentic service principal sign-ins had no Conditional Access applied (30d)"),
+           AlertsLookback = coalesce(AlertsFor("D07"), 0)),
+    (print ControlId = "ISM-2137",
+           Status = case(AuditRows == 0, "No data", UserConsents == 0, "Evidence present", "Gap"),
+           Metric = strcat(UserConsents, " user (non-admin) app consents in 90 days"),
+           AlertsLookback = coalesce(AlertsFor("D05"), 0)),
+    (print ControlId = "ISM-2138",
+           Status = case(RegTotal == 0, "No data", RegReviewDue == 0, "Evidence present", "Gap"),
+           Metric = strcat(RegReviewDue, " of ", RegTotal, " agents overdue or never reviewed (6-month cycle)"),
+           AlertsLookback = tolong(0)),
+    (print ControlId = "ISM-2139",
+           Status = case(AuditRows > 0 and SpSignInRows > 0 and GraphRows > 0, "Evidence present", AuditRows > 0, "Gap", "No data"),
+           Metric = strcat("Last 24h rows: AuditLogs ", AuditRows, "; service principal sign-ins ", SpSignInRows, "; Graph activity ", GraphRows),
+           AlertsLookback = tolong(0)),
+    (print ControlId = "ISM-2140",
+           Status = case(SigninRows == 0, "No data", DeviceCode == 0, "Evidence present", "Gap"),
+           Metric = strcat(DeviceCode, " device code sign-ins by ", DeviceCodeUsers, " users in 30 days"),
+           AlertsLookback = tolong(0)),
+    (print ControlId = "ISM-2156",
+           Status = case(RegTotal == 0, "No data", RegHighRisk == 0, "Evidence present", "Attestation required"),
+           Metric = strcat(RegHighRisk, " agents hold high-risk permissions; justify each or reduce"),
+           AlertsLookback = coalesce(AlertsFor("D04"), 0)),
+    (print ControlId = "ISM-2157",
+           Status = "Attestation required",
+           Metric = strcat(coalesce(AlertsFor("D08"), 0), " agent Graph data-burst alerts in 30 days"),
+           AlertsLookback = coalesce(AlertsFor("D08"), 0)),
+    (print ControlId = "ISM-2158",
+           Status = "Attestation required",
+           Metric = strcat(MsInjectionAlerts, " prompt-injection or jailbreak alerts; ", coalesce(AlertsFor("D10"), 0), " followed by exfil-like activity (30d)"),
+           AlertsLookback = coalesce(AlertsFor("D10"), 0)),
+    (print ControlId = "ISM-2159",
+           Status = case(GraphRows > 0 and (AgenticNetRows > 0 or CopilotRows > 0), "Evidence present", GraphRows > 0 or AgenticNetRows > 0 or CopilotRows > 0, "Gap", "No data"),
+           Metric = strcat("Last 24h rows: Graph activity ", GraphRows, "; GSA agentic traffic ", AgenticNetRows, "; CopilotActivity ", CopilotRows),
+           AlertsLookback = coalesce(AlertsFor("D15"), 0));
+Rows
+| join kind=leftouter (_GetWatchlist("YumaISMControlMap") | project ControlId, Control, Theme, PackEvidence, EvidenceMethod) on ControlId
+| project-away ControlId1
+| extend CheckedAtUtc = now()
+| project ControlId, Theme, Control, Status, Metric, AlertsLookback, PackEvidence, EvidenceMethod, CheckedAtUtc
+| order by ControlId asc

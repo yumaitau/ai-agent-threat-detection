@@ -1,0 +1,37 @@
+// YUMA-GAI-G10  Gemini/Agent Platform model invocation burst by one principal from outside Google's network (cost harvesting / LLMjacking)
+// Status: DRAFT HUNT. Needs Data Access (DATA_READ) audit logs for aiplatform.googleapis.com, which are OFF by default and are
+//   NOT in the default SecOps export filter (only Admin Activity, System Event and DNS are).
+//   Method name google.cloud.aiplatform.v1.PredictionService.GenerateContent appears in Google's own CSA sample log (4.31):
+//   https://github.com/GoogleCloudPlatform/security-analytics/blob/main/src/4.31/4.31.md
+//   Data Access operations (endpoints.predict, rawPredict ...): https://docs.cloud.google.com/vertex-ai/docs/general/audit-logging
+// Overlap: SCC ETD "Persistence: New AI API Method", "Persistence: New Geography for AI Service" (Premium).
+// Maps: ISM-2159, ISM-2136 | ATT&CK T1496 | ATLAS AML.T0034, AML.T0040 | OWASP LLM10
+rule yuma_gai_g10_model_invocation_abuse_llmjacking {
+  meta:
+    author = "Yuma IT"
+    description = "High volume of model inference calls by one principal from a non-Google network in one hour"
+    severity = "MEDIUM"
+    yuma_id = "G10"
+    ism = "ISM-2159, ISM-2136"
+
+  events:
+    $p.metadata.log_type = "GCP_CLOUDAUDIT"
+    $p.target.application = "aiplatform.googleapis.com"
+    $p.metadata.product_event_type = /PredictionService\.(GenerateContent|StreamGenerateContent|Predict|RawPredict|StreamRawPredict)$/
+    $p.principal.ip_geo_artifact.network.organization_name != /google/ nocase
+    $p.principal.user.userid = $principal
+
+  match:
+    $principal over 1h
+
+  outcome:
+    $calls = count_distinct($p.metadata.id)
+    $models = array_distinct($p.target.resource.name)
+    $source_ips = array_distinct($p.principal.ip)
+    $countries = array_distinct($p.principal.ip_geo_artifact.location.country_or_region)
+    $user_agents = array_distinct($p.network.http.user_agent)
+    $risk_score = max(60)
+
+  condition:
+    $p and $calls > 500
+}

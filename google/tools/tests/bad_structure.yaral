@@ -1,0 +1,6 @@
+rule bad_structure {
+  meta:
+    author = "t"
+  events:
+    $e.metadata.vendor_name = "x"
+    re.regex($e.target.url, `unterminated)

@@ -1,0 +1,37 @@
+// YUMA-GAI-G05  Gemini in Workspace used by someone outside the approved user list (AI usage policy, ISM-2074)
+// Status: DRAFT HUNT. Informational; feeds the AI usage policy review, not an incident.
+// Event: gemini_in_workspace_apps / feature_utilization (params app_name, action, event_category, feature_source)
+//   https://developers.google.com/workspace/admin/reports/v1/appendix/activity/gemini-in-workspace-apps
+//   UDM: app_name -> target.application; event_category -> security_result.category_details;
+//   feature_source -> security_result.action_details (workspace-activity parser page)
+// UNVALIDATED: metadata.product_name value for this application.
+// Reference list: %yuma_gemini_approved_users (STRING list of user emails, or replace with a group check)
+// Maps: ISM-2074, ISM-2134 | ATLAS n/a (governance) | OWASP LLM02
+rule yuma_gai_g05_gemini_workspace_use_outside_approved_users {
+  meta:
+    author = "Yuma IT"
+    description = "Gemini in Workspace feature used by a user not on the approved list"
+    severity = "LOW"
+    yuma_id = "G05"
+    ism = "ISM-2074, ISM-2134"
+
+  events:
+    $g.metadata.vendor_name = "Google Workspace"
+    $g.metadata.product_name = "gemini_in_workspace_apps"
+    $g.metadata.product_event_type = "feature_utilization"
+    $g.principal.user.email_addresses = $user
+    not $g.principal.user.email_addresses in %yuma_gemini_approved_users
+
+  match:
+    $user over 24h
+
+  outcome:
+    $apps = array_distinct($g.target.application)
+    $categories = array_distinct($g.security_result.category_details)
+    $features = array_distinct($g.security_result.action_details)
+    $uses = count_distinct($g.metadata.id)
+    $risk_score = max(20)
+
+  condition:
+    $g
+}

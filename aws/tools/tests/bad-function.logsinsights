@@ -1,0 +1,4 @@
+# negative control: dcount() is KQL; Logs Insights uses countDistinct(); unbalanced parenthesis
+# Source doc: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver-query-logs-format.html
+fields query_name
+| stats dcount(query_name by srcaddr

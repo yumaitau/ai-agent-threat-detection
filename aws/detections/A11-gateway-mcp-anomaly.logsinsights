@@ -1,0 +1,24 @@
+# Yuma AIA-A11 (CloudWatch Logs variant): AgentCore Gateway MCP tool-call anomalies
+# Source: the CloudTrail trail delivered to CloudWatch Logs, with InvokeGateway data events selected.
+# Logs Insights discovers JSON fields and flattens arrays (resources.0.ARN), so nested CloudTrail keys use dots.
+#   https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/understanding-gateway-cloudtrail-log-entries.html
+#   https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_AnalyzeLogData-discoverable-fields.html
+# Three queries (one Logs Insights run each). PB1's scheduler Lambda runs all three every 10 minutes over 10 minutes.
+# --- query: A11a tool-call burst or breadth per JWT subject
+fields resources.0.ARN as gateway, additionalEventData.jwt.claims.sub as caller, requestParameters.body.params.name as tool
+| filter eventSource = "bedrock-agentcore.amazonaws.com" and eventName = "InvokeGateway" and requestParameters.body.method = "tools/call"
+| stats count(*) as toolCalls, countDistinct(tool) as distinctTools by gateway, caller, bin(10m)
+| filter toolCalls >= 100 or distinctTools >= 15
+| sort toolCalls desc
+# --- query: A11b authentication failure burst per source IP
+fields resources.0.ARN as gateway, sourceIPAddress as srcIp, responseElements.statusCode as status
+| filter eventSource = "bedrock-agentcore.amazonaws.com" and eventName = "InvokeGateway" and status in [401, 403]
+| stats count(*) as authFailures by gateway, srcIp, bin(10m)
+| filter authFailures >= 20
+| sort authFailures desc
+# --- query: A11c sensitive tool names called through a gateway
+fields @timestamp, resources.0.ARN as gateway, additionalEventData.jwt.claims.sub as caller, sourceIPAddress as srcIp, requestParameters.body.params.name as tool, responseElements.statusCode as status
+| filter eventSource = "bedrock-agentcore.amazonaws.com" and eventName = "InvokeGateway" and requestParameters.body.method = "tools/call"
+| filter tool like /(?i)(delete|drop|remove|write|send|transfer|exec|admin|secret|credential|payment)/
+| stats count(*) as calls, earliest(@timestamp) as firstSeen by gateway, caller, tool
+| sort calls desc

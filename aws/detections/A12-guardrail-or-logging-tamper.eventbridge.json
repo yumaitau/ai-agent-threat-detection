@@ -1,0 +1,15 @@
+{
+  "source": [{"prefix": "aws."}],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["bedrock.amazonaws.com", "cloudtrail.amazonaws.com", "guardduty.amazonaws.com"],
+    "eventName": [
+      "DeleteGuardrail", "UpdateGuardrail",
+      "DeleteEnforcedGuardrailConfiguration", "PutEnforcedGuardrailConfiguration",
+      "DeleteModelInvocationLoggingConfiguration", "PutModelInvocationLoggingConfiguration",
+      "PutEventSelectors", "StopLogging", "DeleteTrail", "DeleteEventDataStore", "StopEventDataStoreIngestion",
+      "UpdateDetector", "DeleteDetector"
+    ],
+    "errorCode": [{"exists": false}]
+  }
+}

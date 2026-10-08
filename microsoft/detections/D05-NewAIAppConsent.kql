@@ -1,0 +1,50 @@
+// YUMA-AIA-D05  New AI app consent (user or admin), first seen in the tenant
+// Type: Sentinel scheduled analytics rule (every 1h, look back 1h, baseline 30d). Triggers playbook PB2 (register).
+// Table: AuditLogs. Licence: any Entra ID tier.
+//   https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/auditlogs
+// Maps: ISM-2137 (no user consent to agents), ISM-2138 (review consents), ISM-2139 (log consent),
+//   ISM-2134/2135 (register) | E8 restrict administrative privileges
+//   ATT&CK T1528 | ATLAS AML.T0012 | OWASP ASI03, ASI04, LLM03
+// Field paths match Microsoft's CredentialAddedAfterAdminConsent and SuspiciousOAuthApp_OfflineAccess rules.
+// Approved apps (watchlist YumaAIRegisterApproved, maintained by PB2) are suppressed unless consent is by a user.
+// Note: Defender for Cloud Apps app governance (OAuthAppInfo) gives richer data if licensed; see README.
+let lookback = 1h;
+let baseline = 30d;
+let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+    "deepseek", "mistral", "grok", "otter", "fireflies", "read.ai", "n8n", "zapier", "langchain",
+    "cursor", "notion ai", "jasper", "writer", "poe", "character.ai", "huggingface"]);
+let Consents = AuditLogs
+    | where TimeGenerated > ago(baseline)
+    | where LoggedByService =~ "Core Directory" and Category =~ "ApplicationManagement"
+    | where OperationName =~ "Consent to application" and Result =~ "success"
+    | mv-apply TargetResource = TargetResources on (
+          where tostring(TargetResource.type) =~ "ServicePrincipal"
+          | extend AppSpId = tostring(TargetResource.id),
+                   AppName = tostring(TargetResource.displayName),
+                   AppAgentType = tostring(TargetResource.agentType),
+                   Props = TargetResource.modifiedProperties
+          | take 1)
+    | mv-apply Prop = Props on (
+          summarize Bag = make_bag(bag_pack(tostring(Prop.displayName), trim(@'[\"\s]+', tostring(Prop.newValue))), 100));
+let Approved = _GetWatchlist("YumaAIRegisterApproved") | project SearchKey;
+let PreviouslySeen = Consents
+    | where TimeGenerated <= ago(lookback)
+    | distinct AppSpId;
+Consents
+| where TimeGenerated > ago(lookback)
+| extend IsAdminConsent = tostring(Bag["ConsentContext.IsAdminConsent"]),
+         ConsentAction = tostring(Bag["ConsentAction.Permissions"])
+| parse ConsentAction with * "ConsentType: " ConsentType ", Scope: " Scopes "," *
+| extend IsAgentic = isnotempty(AppAgentType) and AppAgentType !~ "notAgentic",
+         IsAINamed = AppName has_any (AIKeywords) or AppName matches regex @"(?i)\b(ai|gpt|llm|mcp|agent|copilot)\b",
+         IsFirstSeen = AppSpId !in (PreviouslySeen),
+         IsUserConsent = IsAdminConsent =~ "False"
+| where IsAgentic or IsAINamed
+| where IsFirstSeen or IsUserConsent
+| where AppSpId !in (Approved) or IsUserConsent
+| extend ConsentedByUpn = tostring(InitiatedBy.user.userPrincipalName),
+         ConsentedByIp = tostring(InitiatedBy.user.ipAddress)
+| extend Severity = iff(IsUserConsent, "Medium", "Low"),
+         RegisterAction = "Create or update ISM-2135 register entry; schedule ISM-2138 review in 6 months"
+| project TimeGenerated, AppName, AppSpId, AppAgentType, IsAgentic, IsAINamed, IsFirstSeen, IsUserConsent,
+          ConsentType, Scopes, ConsentedByUpn, ConsentedByIp, Severity, RegisterAction, CorrelationId

@@ -1,0 +1,16 @@
+AuditLogs
+| where TimeGenerated > ago(30d)
+| where OperationName =~ "Consent to application" and Result =~ "success"
+| mv-apply TargetResource = TargetResources on (
+      where tostring(TargetResource.type) =~ "ServicePrincipal"
+      | extend AppName = tostring(TargetResource.displayName), AppSpId = tostring(TargetResource.id),
+               AgentType = tostring(TargetResource.agentType), Props = TargetResource.modifiedProperties
+      | take 1)
+| mv-apply Prop = Props on (
+      summarize Bag = make_bag(bag_pack(tostring(Prop.displayName), trim(@'[\"\s]+', tostring(Prop.newValue))), 100))
+| extend IsAdminConsent = tostring(Bag["ConsentContext.IsAdminConsent"]), Permissions = tostring(Bag["ConsentAction.Permissions"])
+| extend ConsentedBy = tostring(InitiatedBy.user.userPrincipalName)
+| join kind=leftouter (YumaAIRegister() | project AppSpId = ServicePrincipalId, InRegister = true, RegisterDecision = Decision) on AppSpId
+| project TimeGenerated, AppName, AppSpId, AgentType, IsAdminConsent, ConsentedBy, Permissions,
+          InRegister = coalesce(InRegister, false), RegisterDecision
+| order by TimeGenerated desc

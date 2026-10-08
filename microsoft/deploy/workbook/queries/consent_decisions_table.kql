@@ -1,0 +1,6 @@
+AIAgentRegister_CL
+| where TimeGenerated > ago(30d)
+| where RecordType == "ConsentDecision"
+| project TimeGenerated, AgentName, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,
+          Permissions, IncidentArmId
+| order by TimeGenerated desc

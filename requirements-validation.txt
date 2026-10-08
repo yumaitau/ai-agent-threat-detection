@@ -1,0 +1,5 @@
+boto3==1.43.109
+botocore==1.43.109
+cfn-lint==1.57.2
+PyYAML==6.0.3
+sqlglot==30.21.0

@@ -1,0 +1,284 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "title": "Yuma-PB5-ISM-Evidence-Export",
+    "author": "Yuma IT",
+    "description": "Monthly (or run on demand): calls the pack's evidence functions and writes a dated folder (agent-register.csv, ism-controls.csv, summary.md, manifest.json) to a Blob container for assessors.",
+    "comments": "UNVALIDATED skeleton. Grant the managed identity Log Analytics Reader on the workspace and Storage Blob Data Contributor on the container. Turn on blob versioning or a time-based immutability policy on the container so evidence cannot be altered."
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "Yuma-PB5-ISM-Evidence-Export"
+    },
+    "WorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace ID (GUID)"
+      }
+    },
+    "StorageAccountName": {
+      "type": "string"
+    },
+    "ContainerName": {
+      "type": "string",
+      "defaultValue": "ism-evidence"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "Yuma-PB5-ISM-Evidence-Export",
+        "hidden-SentinelTemplateVersion": "0.1"
+      },
+      "properties": {
+        "state": "Disabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "WorkspaceId": {
+              "type": "String",
+              "defaultValue": "[parameters('WorkspaceId')]"
+            },
+            "StorageAccountName": {
+              "type": "String",
+              "defaultValue": "[parameters('StorageAccountName')]"
+            },
+            "ContainerName": {
+              "type": "String",
+              "defaultValue": "[parameters('ContainerName')]"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "type": "Recurrence",
+              "recurrence": {
+                "frequency": "Month",
+                "interval": 1,
+                "schedule": {
+                  "monthDays": [
+                    1
+                  ],
+                  "hours": [
+                    "7"
+                  ]
+                },
+                "timeZone": "AUS Eastern Standard Time"
+              }
+            }
+          },
+          "actions": {
+            "Init_RunFolder": {
+              "type": "InitializeVariable",
+              "runAfter": {},
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "RunFolder",
+                    "type": "string",
+                    "value": "@{formatDateTime(utcNow(), 'yyyy-MM-dd')}"
+                  }
+                ]
+              }
+            },
+            "Query_register_csv": {
+              "type": "Http",
+              "runAfter": {
+                "Init_RunFolder": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "POST",
+                "uri": "https://api.loganalytics.azure.com/v1/workspaces/@{parameters('WorkspaceId')}/query",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "query": "YumaEvidenceRegisterCsv()"
+                },
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://api.loganalytics.io"
+                }
+              }
+            },
+            "Query_controls_csv": {
+              "type": "Http",
+              "runAfter": {
+                "Init_RunFolder": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "POST",
+                "uri": "https://api.loganalytics.azure.com/v1/workspaces/@{parameters('WorkspaceId')}/query",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "query": "YumaEvidenceControlsCsv()"
+                },
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://api.loganalytics.io"
+                }
+              }
+            },
+            "Query_summary_md": {
+              "type": "Http",
+              "runAfter": {
+                "Init_RunFolder": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "POST",
+                "uri": "https://api.loganalytics.azure.com/v1/workspaces/@{parameters('WorkspaceId')}/query",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "query": "YumaEvidenceMarkdown()"
+                },
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://api.loganalytics.io"
+                }
+              }
+            },
+            "Put_agent_register_csv": {
+              "type": "Http",
+              "runAfter": {
+                "Query_register_csv": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "PUT",
+                "uri": "https://@{parameters('StorageAccountName')}.blob.core.windows.net/@{parameters('ContainerName')}/@{variables('RunFolder')}/agent-register.csv",
+                "headers": {
+                  "x-ms-blob-type": "BlockBlob",
+                  "x-ms-version": "2021-08-06",
+                  "x-ms-date": "@{utcNow('R')}",
+                  "Content-Type": "text/csv; charset=utf-8"
+                },
+                "body": "@{body('Query_register_csv')?['tables'][0]?['rows'][0][0]}",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://storage.azure.com/"
+                }
+              }
+            },
+            "Put_ism_controls_csv": {
+              "type": "Http",
+              "runAfter": {
+                "Query_controls_csv": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "PUT",
+                "uri": "https://@{parameters('StorageAccountName')}.blob.core.windows.net/@{parameters('ContainerName')}/@{variables('RunFolder')}/ism-controls.csv",
+                "headers": {
+                  "x-ms-blob-type": "BlockBlob",
+                  "x-ms-version": "2021-08-06",
+                  "x-ms-date": "@{utcNow('R')}",
+                  "Content-Type": "text/csv; charset=utf-8"
+                },
+                "body": "@{body('Query_controls_csv')?['tables'][0]?['rows'][0][0]}",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://storage.azure.com/"
+                }
+              }
+            },
+            "Put_summary_md": {
+              "type": "Http",
+              "runAfter": {
+                "Query_summary_md": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "PUT",
+                "uri": "https://@{parameters('StorageAccountName')}.blob.core.windows.net/@{parameters('ContainerName')}/@{variables('RunFolder')}/summary.md",
+                "headers": {
+                  "x-ms-blob-type": "BlockBlob",
+                  "x-ms-version": "2021-08-06",
+                  "x-ms-date": "@{utcNow('R')}",
+                  "Content-Type": "text/markdown; charset=utf-8"
+                },
+                "body": "@{body('Query_summary_md')?['tables'][0]?['rows'][0][0]}",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://storage.azure.com/"
+                }
+              }
+            },
+            "Put_manifest_json": {
+              "type": "Http",
+              "runAfter": {
+                "Put_agent_register_csv": [
+                  "Succeeded"
+                ],
+                "Put_ism_controls_csv": [
+                  "Succeeded"
+                ],
+                "Put_summary_md": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "PUT",
+                "uri": "https://@{parameters('StorageAccountName')}.blob.core.windows.net/@{parameters('ContainerName')}/@{variables('RunFolder')}/manifest.json",
+                "headers": {
+                  "x-ms-blob-type": "BlockBlob",
+                  "x-ms-version": "2021-08-06",
+                  "x-ms-date": "@{utcNow('R')}",
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "generatedUtc": "@{utcNow()}",
+                  "workspaceId": "@{parameters('WorkspaceId')}",
+                  "logicAppRunId": "@{workflow()?['run']?['name']}",
+                  "files": [
+                    "agent-register.csv",
+                    "ism-controls.csv",
+                    "summary.md"
+                  ],
+                  "sourceFunctions": [
+                    "YumaEvidenceRegisterCsv",
+                    "YumaEvidenceControlsCsv",
+                    "YumaEvidenceMarkdown"
+                  ],
+                  "note": "Evidence to support an assessment, not a compliance determination."
+                },
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://storage.azure.com/"
+                }
+              }
+            }
+          },
+          "outputs": {}
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "playbookPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+    }
+  }
+}

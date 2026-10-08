@@ -1,0 +1,1 @@
+AuditLogs | where TimeGenerated > ago(1h) | summarize count( by

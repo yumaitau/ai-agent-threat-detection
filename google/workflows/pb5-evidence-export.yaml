@@ -1,0 +1,88 @@
+# PB5 - Monthly ISM evidence export to Cloud Storage (ISM-2133..2140, 2156..2159)
+# Status: SKELETON. YAML-parsed offline; NOT deployed or executed.
+# Writes gs://BUCKET/ism-evidence/YYYY-MM/: register_current-*.csv, ism_control_status-*.csv, detection_hits-*.csv,
+#   decisions-*.csv, summary.md, manifest.json. Put a retention policy / Bucket Lock on the bucket so evidence can't be edited.
+#   EXPORT DATA: https://cloud.google.com/bigquery/docs/reference/standard-sql/export-statements
+#   Storage connector media upload: https://docs.cloud.google.com/workflows/docs/reference/googleapis/storage/v1/objects/insert
+# Env: REGISTER_DATASET, EVIDENCE_BUCKET
+main:
+  params: [args]
+  steps:
+    - init:
+        assign:
+          - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - ds: ${sys.get_env("REGISTER_DATASET")}
+          - bucket: ${sys.get_env("EVIDENCE_BUCKET")}
+    - get_period:
+        call: googleapis.bigquery.v2.jobs.query
+        args:
+          projectId: ${project}
+          body:
+            useLegacySql: false
+            query: "SELECT FORMAT_DATE('%Y-%m', DATE_SUB(DATE_TRUNC(CURRENT_DATE('Australia/Sydney'), MONTH), INTERVAL 1 MONTH)) AS period, CAST(DATE_SUB(DATE_TRUNC(CURRENT_DATE('Australia/Sydney'), MONTH), INTERVAL 1 MONTH) AS STRING) AS start_d, CAST(DATE_TRUNC(CURRENT_DATE('Australia/Sydney'), MONTH) AS STRING) AS end_d"
+        result: p
+    - set_period:
+        assign:
+          - period: ${p.rows[0].f[0].v}
+          - start_d: ${p.rows[0].f[1].v}
+          - end_d: ${p.rows[0].f[2].v}
+          - prefix: ${"gs://" + bucket + "/ism-evidence/" + period + "/"}
+          - window: ${"TIMESTAMP('" + start_d + "', 'Australia/Sydney') AND TIMESTAMP('" + end_d + "', 'Australia/Sydney')"}
+          - exports:
+              - name: register_current
+                sql: ${"SELECT * EXCEPT(owners, identities, user_accounts_and_credentials, permissions, declared_tools, mcp_servers, data_sources, shared_with), ARRAY_TO_STRING(owners, ';') AS owners, ARRAY_TO_STRING(permissions, ';') AS permissions, ARRAY_TO_STRING(declared_tools, ';') AS declared_tools, ARRAY_TO_STRING(data_sources, ';') AS data_sources FROM `" + ds + ".v_register_current`"}
+              - name: ism_control_status
+                sql: ${"SELECT * FROM `" + ds + ".v_ism_control_status`"}
+              - name: detection_hits
+                sql: ${"SELECT hit_time, detection_id, severity, entity, summary, TO_JSON_STRING(details) AS details, case_ref FROM `" + ds + ".detection_hits` WHERE hit_time BETWEEN " + window}
+              - name: decisions
+                sql: ${"SELECT record_time, record_type, agent_key, decision, decision_by, decision_reason, case_ref, notes FROM `" + ds + ".ai_agent_register` WHERE record_type IN ('ConsentDecision','ContainmentDecision','ReviewCompleted','Retired') AND record_time BETWEEN " + window}
+          - files: []
+    - run_exports:
+        for:
+          value: x
+          in: ${exports}
+          steps:
+            - export_one:
+                call: googleapis.bigquery.v2.jobs.insert
+                args:
+                  projectId: ${project}
+                  body:
+                    configuration:
+                      query:
+                        useLegacySql: false
+                        query: ${"EXPORT DATA OPTIONS(uri='" + prefix + x.name + "-*.csv', format='CSV', overwrite=false, header=true) AS " + x.sql}
+                result: job
+            - note_file:
+                assign:
+                  - files: ${list.concat(files, prefix + x.name + "-*.csv")}
+    - summary_query:
+        call: googleapis.bigquery.v2.jobs.query
+        args:
+          projectId: ${project}
+          body:
+            useLegacySql: false
+            query: ${"SELECT summary_md FROM `" + ds + ".v_evidence_summary_md`"}
+        result: s
+    - write_summary:
+        call: googleapis.storage.v1.objects.insert
+        args:
+          bucket: ${bucket}
+          name: ${"ism-evidence/" + period + "/summary.md"}
+          uploadType: "media"
+          body: ${s.rows[0].f[0].v}
+    - write_manifest:
+        call: googleapis.storage.v1.objects.insert
+        args:
+          bucket: ${bucket}
+          name: ${"ism-evidence/" + period + "/manifest.json"}
+          uploadType: "media"
+          body:
+            period: ${period}
+            generated_at: ${time.format(sys.now())}
+            workflow_execution: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+            files: ${list.concat(files, "summary.md")}
+            controls: ["ISM-2133", "ISM-2134", "ISM-2135", "ISM-2136", "ISM-2137", "ISM-2138", "ISM-2139", "ISM-2140", "ISM-2156", "ISM-2157", "ISM-2158", "ISM-2159"]
+            note: "Automated signals from the AI agent register and detections. ISM-2140 requires owner attestation."
+    - done:
+        return: ${prefix}

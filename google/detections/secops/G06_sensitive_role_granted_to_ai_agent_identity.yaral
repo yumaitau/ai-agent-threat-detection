@@ -1,0 +1,63 @@
+// YUMA-GAI-G06  Sensitive IAM role granted to an AI agent identity, the Agent Runtime service agent, or a registered AI service account
+// Status: RULE-GRADE (offline-linted only)
+// Log type: GCP_CLOUDAUDIT (Admin Activity; exported to SecOps by default).
+//   GCP_CLOUDAUDIT mapping: methodName -> metadata.product_event_type; serviceData.policyDelta.bindingDeltas[].role ->
+//   principal.user.attribute.roles.name; bindingDeltas[].member -> target.user.userid; bindingDeltas[].action ->
+//   principal.user.attribute.roles.description. https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/gcp-cloudaudit
+//   Google's own community rule gcp_admin_privileged_roles_added_to_service_accounts uses
+//   target.resource.attribute.labels["ser_binding_deltas_*"] instead, so both are checked (OR).
+//   https://github.com/chronicle/detection-rules/tree/main/rules/community/gcp
+// Agent identity principal format: principal://agents.global.org-ORG_ID.system.id.goog/resources/aiplatform/projects/...
+//   https://docs.cloud.google.com/iam/docs/auth-agent-own-identity
+// Agent Runtime service agent: service-PROJECT_NUMBER@gcp-sa-aiplatform-re... (ReasoningEngine spec.effectiveIdentity, aiplatform v1 discovery doc)
+// Reference list: %yuma_ai_service_accounts (REGEX list of AI service account emails / unique IDs; PB4 maintains it)
+// Maps: ISM-2156, ISM-2133, ISM-2157 | E8 restrict administrative privileges
+//   ATT&CK T1098.003 | ATLAS AML.T0081, AML.T0108 | OWASP LLM06, ASI03
+// Known limit: an event with several binding deltas is matched "any role x any member", so a pairing can be wrong.
+//   The BigQuery version unnests each delta and pairs them correctly.
+// Overlap: SCC Event Threat Detection has "Persistence: IAM Anomalous Grant to Agentic Identity" and
+//   "Defense Evasion: ... Token Creator Role Granted to AI Agent" (Premium). This rule is deterministic, register-aware
+//   and runs without SCC Premium. https://docs.cloud.google.com/security-command-center/docs/ai-protection-overview
+rule yuma_gai_g06_sensitive_role_granted_to_ai_agent_identity {
+  meta:
+    author = "Yuma IT"
+    description = "A sensitive IAM role was added for an AI agent identity, the Agent Runtime service agent or a registered AI service account"
+    severity = "HIGH"
+    priority = "HIGH"
+    yuma_id = "G06"
+    ism = "ISM-2156, ISM-2133, ISM-2157"
+    mitre_attack_technique_id = "T1098.003"
+    atlas = "AML.T0081, AML.T0108"
+    owasp = "LLM06, ASI03"
+
+  events:
+    $g.metadata.log_type = "GCP_CLOUDAUDIT"
+    $g.metadata.product_event_type = /SetIamPolicy$/ nocase
+    $g.security_result.action = "ALLOW"
+    (
+      $g.target.user.userid = /agents\.global\.|gcp-sa-aiplatform-re\.|gcp-sa-aiplatform\.|gcp-sa-discoveryengine\./ nocase
+      or $g.target.user.userid in regex %yuma_ai_service_accounts
+      or $g.target.resource.attribute.labels["ser_binding_deltas_member"] = /agents\.global\.|gcp-sa-aiplatform-re\.|gcp-sa-aiplatform\.|gcp-sa-discoveryengine\./ nocase
+    )
+    (
+      $g.principal.user.attribute.roles.name = /roles\/(owner|editor|iam\.serviceAccountTokenCreator|iam\.serviceAccountUser|iam\.serviceAccountKeyAdmin|iam\.serviceAccountAdmin|iam\.workloadIdentityUser|iam\.securityAdmin|resourcemanager\.|storage\.admin|bigquery\.(admin|dataOwner|dataEditor)|secretmanager\.(admin|secretAccessor)|cloudkms\.|compute\.admin|aiplatform\.admin|discoveryengine\.admin|run\.admin|cloudfunctions\.admin)/ nocase
+      or $g.target.resource.attribute.labels["ser_binding_deltas_role"] = /roles\/(owner|editor|iam\.serviceAccountTokenCreator|iam\.serviceAccountUser|iam\.serviceAccountKeyAdmin|iam\.serviceAccountAdmin|iam\.workloadIdentityUser|iam\.securityAdmin|resourcemanager\.|storage\.admin|bigquery\.(admin|dataOwner|dataEditor)|secretmanager\.(admin|secretAccessor)|cloudkms\.|compute\.admin|aiplatform\.admin|discoveryengine\.admin|run\.admin|cloudfunctions\.admin)/ nocase
+    )
+    $g.target.resource.name = $resource
+
+  match:
+    $resource over 10m
+
+  outcome:
+    $risk_score = max(if(re.regex($g.principal.user.attribute.roles.name, `(?i)roles/(owner|editor|iam\.serviceAccountTokenCreator)`), 85, 70))
+    $grantor = array_distinct($g.principal.user.userid)
+    $grantees = array_distinct($g.target.user.userid)
+    $roles = array_distinct($g.principal.user.attribute.roles.name)
+    $delta_actions = array_distinct($g.principal.user.attribute.roles.description)
+    $project = array_distinct($g.target.cloud.project.name)
+    $principal_ip = array_distinct($g.principal.ip)
+    $user_agent = array_distinct($g.network.http.user_agent)
+
+  condition:
+    $g
+}

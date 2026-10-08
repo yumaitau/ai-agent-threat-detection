@@ -1,0 +1,1 @@
+{"Comment": "negative control: missing StartAt and an invalid state type", "States": {"X": {"Type": "Wait4", "End": true}}}

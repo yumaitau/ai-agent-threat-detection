@@ -1,0 +1,9 @@
+{
+  "source": ["aws.sso"],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["sso.amazonaws.com"],
+    "eventName": ["CreateApplication", "CreateApplicationAssignment", "PutApplicationGrant", "PutApplicationAccessScope", "PutApplicationAuthenticationMethod", "PutApplicationAssignmentConfiguration"],
+    "errorCode": [{"exists": false}]
+  }
+}

@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: negative control, unknown property on a real resource type
+Resources:
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      NotARealProperty: true
+      KeySchema: [{AttributeName: pk, KeyType: HASH}]
+      AttributeDefinitions: [{AttributeName: pk, AttributeType: S}]

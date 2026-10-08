@@ -1,0 +1,97 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "author": "Yuma IT",
+    "comments": "UNVALIDATED skeleton. Test in a non-production workspace first."
+  },
+  "parameters": {
+    "workspace": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace name with Microsoft Sentinel enabled"
+      }
+    },
+    "ruleId": {
+      "type": "string",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "Rule GUID; set a fixed value to make redeploys idempotent"
+      }
+    },
+    "enabled": {
+      "type": "bool",
+      "defaultValue": false
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', parameters('ruleId'))]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "Yuma AIA-D14 AI-speed exploitation burst against App Gateway WAF",
+        "description": "One client IP tripped many distinct WAF rules across many URIs within 10 minutes, typical of automated or LLM-driven exploit tooling. Maps to ISM-2116 and Essential Eight patch applications.",
+        "severity": "Medium",
+        "enabled": "[parameters('enabled')]",
+        "query": "let lookback = 1h;\nlet binSize = 10m;\nlet MinDistinctRules = 8;\nlet MinDistinctUris = 15;\nlet MinHits = 40;\nlet AIAgentUA = dynamic([\"GPTBot\", \"ChatGPT-User\", \"OAI-SearchBot\", \"ClaudeBot\", \"Claude-User\", \"Claude-SearchBot\",\n    \"PerplexityBot\", \"Perplexity-User\", \"Meta-ExternalAgent\", \"Bytespider\", \"CCBot\", \"Google-Extended\"]);\nlet AutomationUA = dynamic([\"python-requests\", \"aiohttp\", \"httpx\", \"Go-http-client\", \"curl/\", \"Wget\", \"node-fetch\",\n    \"axios\", \"HeadlessChrome\", \"Playwright\", \"puppeteer\", \"nuclei\", \"sqlmap\"]);\nlet Bursts = AGWFirewallLogs\n    | where TimeGenerated > ago(lookback)\n    | where Action in (\"Matched\", \"Blocked\", \"Detected\")\n    | summarize Hits = count(), DistinctRules = dcount(RuleId), DistinctUris = dcount(RequestUri),\n                Rules = make_set(RuleId, 50), Messages = make_set(Message, 20), SampleUris = make_set(RequestUri, 20),\n                Hosts = make_set(Hostname, 5), Actions = make_set(Action, 3)\n             by ClientIp, Window = bin(TimeGenerated, binSize)\n    | where DistinctRules >= MinDistinctRules and DistinctUris >= MinDistinctUris and Hits >= MinHits;\nlet UAContext = AGWAccessLogs\n    | where TimeGenerated > ago(lookback)\n    | where ClientIp in ((Bursts | project ClientIp))\n    | summarize UserAgents = make_set(UserAgent, 10), Requests = count(),\n                Status4xx = countif(HttpStatus between (400 .. 499)), Status5xx = countif(HttpStatus >= 500),\n                Status2xx = countif(HttpStatus between (200 .. 299))\n             by ClientIp;\nlet TI = ThreatIntelIndicators\n    | where TimeGenerated > ago(14d) and IsActive == true\n    | where ObservableKey has \"ipv4-addr\" or ObservableKey has \"ipv6-addr\"\n    | summarize TIConfidence = max(Confidence) by ClientIp = ObservableValue;\nBursts\n| join kind=leftouter UAContext on ClientIp\n| join kind=leftouter TI on ClientIp\n| extend UAText = tostring(UserAgents)\n| extend ClaimsAIAgent = UAText has_any (AIAgentUA),\n         AutomationClient = UAText has_any (AutomationUA),\n         Got2xxDuringBurst = coalesce(Status2xx, 0) > 0 and Actions has \"Matched\"\n| extend Severity = case(Got2xxDuringBurst or coalesce(TIConfidence, 0) >= 70, \"High\",\n                         \"Medium\")\n| project Window, ClientIp, Hits, DistinctRules, DistinctUris, Rules, Messages, SampleUris, Hosts, Actions, UserAgents,\n          ClaimsAIAgent, AutomationClient, Requests, Status2xx, Status4xx, Status5xx, TIConfidence, Severity\n",
+        "queryFrequency": "PT10M",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess",
+          "Reconnaissance"
+        ],
+        "techniques": [
+          "T1190",
+          "T1595"
+        ],
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ClientIp"
+              }
+            ]
+          }
+        ],
+        "customDetails": {
+          "DistinctRules": "DistinctRules",
+          "DistinctUris": "DistinctUris",
+          "ClaimsAIAgent": "ClaimsAIAgent"
+        },
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Yuma AIA-D14: exploit burst from {{ClientIp}}",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "ruleResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspace'), 'Microsoft.SecurityInsights', parameters('ruleId'))]"
+    }
+  }
+}

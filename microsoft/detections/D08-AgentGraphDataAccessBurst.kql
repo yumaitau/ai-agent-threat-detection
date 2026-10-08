@@ -1,0 +1,55 @@
+// YUMA-AIA-D08  Agent or AI app Microsoft Graph data-access burst (mail, files, sites, chats, users, MCP for Enterprise)
+// Type: Sentinel scheduled analytics rule (every 1h, look back 14d). Feeds playbook PB1.
+// Table: MicrosoftGraphActivityLogs. Licence: Entra ID P1 or P2 plus a diagnostic setting; volume can be large.
+//   https://learn.microsoft.com/en-us/graph/microsoft-graph-activity-logs-overview
+//   https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/microsoftgraphactivitylogs
+// Requests to the Microsoft MCP Server for Enterprise have "/enterprise" in RequestUri (per the overview page).
+// Agent scoping: service principals seen with an agentic sign-in (AADServicePrincipalSignInLogs.Agent) or an AI name.
+// Maps: ISM-2157 (lesser of user and task scope), ISM-2159 (log tool invocations) | E8 restrict administrative privileges
+//   ATT&CK T1114.002, T1530, T1087.004 | ATLAS AML.T0085.001, AML.T0086, AML.T0036 | OWASP LLM06, LLM02, ASI02, ASI10
+let lookback = 14d;
+let recent = 1h;
+let MinRequests = 200;        // floor so tiny apps do not alert on noise
+let SigmaThreshold = 3.0;
+let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+    "deepseek", "mistral", "grok", "n8n", "zapier", "langchain", "agent", "mcp"]);
+let AgentApps = AADServicePrincipalSignInLogs
+    | where TimeGenerated > ago(lookback)
+    | extend AgentType = tostring(parse_json(Agent).agentType)
+    | where (isnotempty(AgentType) and AgentType !~ "notAgentic") or ServicePrincipalName has_any (AIKeywords)
+    | summarize AppName = take_any(ServicePrincipalName), AgentType = take_any(AgentType) by AppId;
+let SensitiveCalls = MicrosoftGraphActivityLogs
+    | where TimeGenerated > ago(lookback)
+    | where AppId in ((AgentApps | project AppId))
+    | extend Path = tolower(tostring(split(RequestUri, "?")[0]))
+    | extend Category = case(Path has "/enterprise", "MCPEnterprise",
+                             Path has "/messages" or Path has "/mailfolders", "Mail",
+                             Path has "/drive" or Path has "/drives", "Files",
+                             Path has "/sites", "Sites",
+                             Path has "/chats" or Path has "/channels", "Chat",
+                             Path has "/users" or Path has "/groups", "Directory",
+                             "Other")
+    | where Category != "Other"
+    | extend TargetUser = extract(@"/users/([^/]+)/", 1, Path);
+let Baseline = SensitiveCalls
+    | where TimeGenerated <= ago(recent)
+    | summarize Hourly = count() by AppId, bin(TimeGenerated, 1h)
+    | summarize AvgHourly = avg(Hourly), StdHourly = stdev(Hourly), BaselineHours = count() by AppId;
+SensitiveCalls
+| where TimeGenerated > ago(recent)
+| summarize Requests = count(),
+            BytesOut = sum(ResponseSizeBytes),
+            DistinctTargetUsers = dcount(TargetUser),
+            Categories = make_set(Category, 10),
+            Methods = make_set(RequestMethod, 10),
+            IPs = make_set(IPAddress, 20),
+            SampleUris = make_set(RequestUri, 10),
+            FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+         by AppId, ServicePrincipalId
+| join kind=inner AgentApps on AppId
+| join kind=leftouter Baseline on AppId
+| extend Threshold = iff(isnull(AvgHourly), real(MinRequests), max_of(real(MinRequests), AvgHourly + SigmaThreshold * coalesce(StdHourly, 0.0)))
+| where Requests > Threshold
+| extend Severity = iff(Categories has_any ("Mail", "Files", "MCPEnterprise") and DistinctTargetUsers > 5, "High", "Medium")
+| project FirstSeen, LastSeen, AppName, AppId, ServicePrincipalId, AgentType, Requests, Threshold, AvgHourly, StdHourly,
+          BytesOut, DistinctTargetUsers, Categories, Methods, IPs, SampleUris, Severity

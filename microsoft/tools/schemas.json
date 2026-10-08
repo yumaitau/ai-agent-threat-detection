@@ -1,0 +1,6759 @@
+{
+ "AuditLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/auditlogs",
+  "title": "Azure Monitor Logs reference - AuditLogs - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Azure Resources, Sec",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AADOperationType",
+    "string",
+    "Type of the operation. Possible values are Add Update Delete and Other."
+   ],
+   [
+    "AADTenantId",
+    "string",
+    "ID of the ADD tenant"
+   ],
+   [
+    "ActivityDateTime",
+    "datetime",
+    "Date and time the activity was performed in UTC."
+   ],
+   [
+    "ActivityDisplayName",
+    "string",
+    "Activity name or the operation name. Examples include Create User and Add member to group. For full list see Azure AD activity list."
+   ],
+   [
+    "AdditionalDetails",
+    "dynamic",
+    "Indicates additional details on the activity."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "Category",
+    "string",
+    "Currently Audit is the only supported value."
+   ],
+   [
+    "CorrelationId",
+    "string",
+    "Optional GUID that's passed by the client. Can help correlate client-side operations with server-side operations and is useful when tracking logs that span serv"
+   ],
+   [
+    "DurationMs",
+    "long",
+    "Property is not used and can be ignored."
+   ],
+   [
+    "Id",
+    "string",
+    "GUID that uniquely identifies the activity."
+   ],
+   [
+    "Identity",
+    "string",
+    "Identity from the token that was presented when the request was made. The identity can be a user account system account or service principal."
+   ],
+   [
+    "InitiatedBy",
+    "dynamic",
+    "User or app initiated the activity."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "Level",
+    "string",
+    "Message type. This is currently always Informational."
+   ],
+   [
+    "Location",
+    "string",
+    "Location of the datacenter."
+   ],
+   [
+    "LoggedByService",
+    "string",
+    "Service that initiated the activity (For example: Self-service Password Management Core Directory B2C Invited Users Microsoft Identity Manager Privileged Identi"
+   ],
+   [
+    "OperationName",
+    "string",
+    "Name of the operation."
+   ],
+   [
+    "OperationVersion",
+    "string",
+    "REST API version that's requested by the client."
+   ],
+   [
+    "Resource",
+    "string",
+    ""
+   ],
+   [
+    "ResourceGroup",
+    "string",
+    ""
+   ],
+   [
+    "ResourceId",
+    "string",
+    ""
+   ],
+   [
+    "ResourceProvider",
+    "string",
+    ""
+   ],
+   [
+    "Result",
+    "string",
+    "Result of the activity. Possible values are: success failure timeout unknownFutureValue."
+   ],
+   [
+    "ResultDescription",
+    "string",
+    "Additional description of the result."
+   ],
+   [
+    "ResultReason",
+    "string",
+    "Describes cause of failure or timeout results."
+   ],
+   [
+    "ResultSignature",
+    "string",
+    "Property is not used and can be ignored."
+   ],
+   [
+    "ResultType",
+    "string",
+    "Result of the operation. Possible values are Success and Failure."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "TargetResources",
+    "dynamic",
+    "Indicates information on which resource was changed due to the activity. Target Resource Type can be User Device Directory App Role Group Policy or Other."
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "Date and time the record was created."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ]
+  ]
+ },
+ "AADServicePrincipalSignInLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/aadserviceprincipalsigninlogs",
+  "title": "Azure Monitor Logs reference - AADServicePrincipalSignInLogs - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Audit, Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AADTenantId",
+    "string",
+    "ID of the AAD tenant."
+   ],
+   [
+    "Agent",
+    "string",
+    "Details of agentic sign-in."
+   ],
+   [
+    "AppId",
+    "string",
+    "Unique GUID representing the app ID in the Microsoft Entra ID"
+   ],
+   [
+    "AppOwnerTenantId",
+    "string",
+    "The tenant identifier of the owenr of the application in Microsoft Entra ID"
+   ],
+   [
+    "AuthenticationContextClassReferences",
+    "string",
+    "The authentication contexts of the sign-in"
+   ],
+   [
+    "AuthenticationProcessingDetails",
+    "string",
+    "Provides the details associated with authentication processor"
+   ],
+   [
+    "AutonomousSystemNumber",
+    "string",
+    "Autonomous System Number for the network."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "Category",
+    "string",
+    "Category of the sign-in event"
+   ],
+   [
+    "ClientCredentialType",
+    "string",
+    "The type of client credential used. Examples include client assertion, client secret, etc."
+   ],
+   [
+    "ConditionalAccessAudiences",
+    "string",
+    "Details of the conditional access audiences being applied for the sign-in."
+   ],
+   [
+    "ConditionalAccessPolicies",
+    "string",
+    "Details of the conditional access policies being applied for the sign-in"
+   ],
+   [
+    "ConditionalAccessStatus",
+    "string",
+    "Status of all the conditionalAccess policies related to the sign-in"
+   ],
+   [
+    "CorrelationId",
+    "string",
+    "ID to provide sign-in trail"
+   ],
+   [
+    "CreatedDateTime",
+    "datetime",
+    "Datetime of the sign-in activity."
+   ],
+   [
+    "DurationMs",
+    "long",
+    "The duration of the operation in milliseconds"
+   ],
+   [
+    "FederatedCredentialId",
+    "string",
+    "Th identifier of an application's federated identity credential if a federated identity credential was used to sign in."
+   ],
+   [
+    "Id",
+    "string",
+    "Unique ID representing the sign-in activity"
+   ],
+   [
+    "Identity",
+    "string",
+    "The identity from the token that was presented when you made the request. It can be a user account, system account, or service principal"
+   ],
+   [
+    "IPAddress",
+    "string",
+    "IP address of the client used to sign in"
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "Level",
+    "string",
+    "The severity level of the event"
+   ],
+   [
+    "Location",
+    "string",
+    "The region of the resource emitting the event"
+   ],
+   [
+    "LocationDetails",
+    "string",
+    "Details of the sign-in location"
+   ],
+   [
+    "NetworkLocationDetails",
+    "string",
+    "Provides the details associated with Authentication processor."
+   ],
+   [
+    "OperationName",
+    "string",
+    "For sign-ins, this value is always Sign-in activity"
+   ],
+   [
+    "OperationVersion",
+    "string",
+    "The REST API version that's requested by the client"
+   ],
+   [
+    "ResourceDisplayName",
+    "string",
+    "Name of the resource that the service principal signed into"
+   ],
+   [
+    "ResourceGroup",
+    "string",
+    "Resource group for the logs"
+   ],
+   [
+    "ResourceIdentity",
+    "string",
+    "ID of the resource that the service principal signed into"
+   ],
+   [
+    "ResourceOwnerTenantId",
+    "string",
+    "The tenant identifier of the owner of the resource referenced in the sign in"
+   ],
+   [
+    "ResourceServicePrincipalId",
+    "string",
+    "Service Principal Id of the resource"
+   ],
+   [
+    "ResultDescription",
+    "string",
+    "Provides the error description for the sign-in operation"
+   ],
+   [
+    "ResultSignature",
+    "string",
+    "Contains the error code, if any, for the sign-in operation"
+   ],
+   [
+    "ResultType",
+    "string",
+    "The result of the sign-in operation can be Success or Failure"
+   ],
+   [
+    "ServicePrincipalCredentialKeyId",
+    "string",
+    "Key id of the service principal that initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalCredentialThumbprint",
+    "string",
+    "Thumbprint of the service principal that initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "ID of the service principal who initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalName",
+    "string",
+    "Service Principal Name of the service principal who initiated the sign-in"
+   ],
+   [
+    "SessionId",
+    "string",
+    "Id of the session that was generated during the signIn."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The date and time of the event in UTC"
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueTokenIdentifier",
+    "string",
+    "Unique token identifier for the request"
+   ],
+   [
+    "UserAgent",
+    "string",
+    "User Agent for the sign-in"
+   ]
+  ]
+ },
+ "AADManagedIdentitySignInLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/aadmanagedidentitysigninlogs",
+  "title": "Azure Monitor Logs reference - AADManagedIdentitySignInLogs - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Audit, Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AADTenantId",
+    "string",
+    "The AADTenantId GUID that's associated with the logs"
+   ],
+   [
+    "Agent",
+    "string",
+    "Details of agentic sign-in."
+   ],
+   [
+    "AppId",
+    "string",
+    "Unique GUID representing the app ID in the Microsoft Entra ID"
+   ],
+   [
+    "AppOwnerTenantId",
+    "string",
+    "The tenant identifier of the owenr of the application in Microsoft Entra ID"
+   ],
+   [
+    "AuthenticationContextClassReferences",
+    "string",
+    "The authentication contexts of the sign-in"
+   ],
+   [
+    "AuthenticationProcessingDetails",
+    "string",
+    "Provides the details associated with authentication processor"
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "Category",
+    "string",
+    "Category of the sign-in event"
+   ],
+   [
+    "ClientCredentialType",
+    "string",
+    ""
+   ],
+   [
+    "ConditionalAccessAudiences",
+    "string",
+    "Details of the conditional access audiences being applied for the sign-in."
+   ],
+   [
+    "ConditionalAccessPolicies",
+    "string",
+    "Details of the conditional access policies being applied for the sign-in"
+   ],
+   [
+    "ConditionalAccessStatus",
+    "string",
+    "Status of all the conditionalAccess policies related to the sign-in"
+   ],
+   [
+    "CorrelationId",
+    "string",
+    "ID to provide sign-in trail"
+   ],
+   [
+    "CreatedDateTime",
+    "datetime",
+    "Datetime of the sign-in activity."
+   ],
+   [
+    "DurationMs",
+    "long",
+    "The duration of the operation in milliseconds"
+   ],
+   [
+    "FederatedCredentialId",
+    "string",
+    "Th identifier of an application's federated identity credential if a federated identity credential was used to sign in."
+   ],
+   [
+    "Id",
+    "string",
+    "Unique ID representing the sign-in activity"
+   ],
+   [
+    "Identity",
+    "string",
+    "The identity from the token that was presented when you made the request. It can be a user account, system account, or service principal"
+   ],
+   [
+    "IPAddress",
+    "string",
+    "IP address of the client used to sign in"
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "Level",
+    "string",
+    "The severity level of the event"
+   ],
+   [
+    "Location",
+    "string",
+    "The region of the resource emitting the event"
+   ],
+   [
+    "LocationDetails",
+    "string",
+    "Details of the sign-in location"
+   ],
+   [
+    "ManagedServiceIdentity",
+    "string",
+    "Details of the Managed Service Identity used to Sign In."
+   ],
+   [
+    "NetworkLocationDetails",
+    "string",
+    "Provides the details associated with Authentication processor."
+   ],
+   [
+    "OperationName",
+    "string",
+    "For sign-ins, this value is always Sign-in activity"
+   ],
+   [
+    "OperationVersion",
+    "string",
+    "The REST API version that's requested by the client"
+   ],
+   [
+    "ResourceDisplayName",
+    "string",
+    "Name of the resource that the service principal signed into"
+   ],
+   [
+    "ResourceGroup",
+    "string",
+    "Resource group for the logs"
+   ],
+   [
+    "ResourceIdentity",
+    "string",
+    "ID of the resource that the service principal signed into"
+   ],
+   [
+    "ResourceOwnerTenantId",
+    "string",
+    "The tenant identifier of the owner of the resource referenced in the sign in"
+   ],
+   [
+    "ResourceServicePrincipalId",
+    "string",
+    "Service Principal Id of the resource"
+   ],
+   [
+    "ResultDescription",
+    "string",
+    "Provides the error description for the sign-in operation"
+   ],
+   [
+    "ResultSignature",
+    "string",
+    "Contains the error code, if any, for the sign-in operation"
+   ],
+   [
+    "ResultType",
+    "string",
+    "The result of the sign-in operation can be Success or Failure"
+   ],
+   [
+    "ServicePrincipalCredentialKeyId",
+    "string",
+    "Key id of the service principal that initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalCredentialThumbprint",
+    "string",
+    "Thumbprint of the service principal that initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "ID of the service principal who initiated the sign-in"
+   ],
+   [
+    "ServicePrincipalName",
+    "string",
+    "Service Principal Name of the service principal who initiated the sign-in"
+   ],
+   [
+    "SessionId",
+    "string",
+    "Id of the session that was generated during the signIn."
+   ],
+   [
+    "SourceAppClientId",
+    "string",
+    "The client ID of the application that initiated the sign-in"
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The date and time of the event in UTC"
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueTokenIdentifier",
+    "string",
+    "Unique token identifier for the request"
+   ],
+   [
+    "UserAgent",
+    "string",
+    "User Agent for the sign-in"
+   ]
+  ]
+ },
+ "MicrosoftGraphActivityLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/microsoftgraphactivitylogs",
+  "title": "Azure Monitor Logs reference - MicrosoftGraphActivityLogs - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Audit, Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AadTenantId",
+    "string",
+    "The Azure AD tenant ID."
+   ],
+   [
+    "ApiVersion",
+    "string",
+    "The API version of the event."
+   ],
+   [
+    "AppId",
+    "string",
+    "The identifier for the application."
+   ],
+   [
+    "ATContent",
+    "string",
+    "Reserved for future use."
+   ],
+   [
+    "ATContentH",
+    "string",
+    "Reserved for future use."
+   ],
+   [
+    "ATContentP",
+    "string",
+    "Reserved for future use."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ClientAuthMethod",
+    "int",
+    "Indicates how the client was authenticated. For a public client, the value is 0. If client ID and client secret are used, the value is 1. If a client certificat"
+   ],
+   [
+    "ClientRequestId",
+    "string",
+    "Optional. The client request identifier when sent. If no client request identifier is sent, the value will be equal to the operation identifier."
+   ],
+   [
+    "DeviceId",
+    "string",
+    "The identifier of the device from which the authentication request originated."
+   ],
+   [
+    "DurationMs",
+    "int",
+    "The duration of the request in milliseconds."
+   ],
+   [
+    "IdentityProvider",
+    "string",
+    "The identity provider that authenticated the subject of the token."
+   ],
+   [
+    "IPAddress",
+    "string",
+    "The IP address of the client from where the request occurred."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "Location",
+    "string",
+    "The name of the region that served the request."
+   ],
+   [
+    "OperationId",
+    "string",
+    "The identifier for the batch. For non-batched requests, this will be unique per request. For batched requests, this will be the same for all requests in the bat"
+   ],
+   [
+    "RequestId",
+    "string",
+    "The identifier representing the request."
+   ],
+   [
+    "RequestMethod",
+    "string",
+    "The HTTP method of the event."
+   ],
+   [
+    "RequestUri",
+    "string",
+    "The URI of the request."
+   ],
+   [
+    "ResponseSizeBytes",
+    "int",
+    "The size of the response in Bytes."
+   ],
+   [
+    "ResponseStatusCode",
+    "int",
+    "The HTTP response status code for the event."
+   ],
+   [
+    "Roles",
+    "string",
+    "The roles in token claims."
+   ],
+   [
+    "Scopes",
+    "string",
+    "The scopes in token claims."
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "The identifier of the servicePrincipal making the request."
+   ],
+   [
+    "SessionId",
+    "string",
+    "The unique identifier for the authentication session."
+   ],
+   [
+    "SignInActivityId",
+    "string",
+    "The identifier representing the sign-in activitys."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The date and time the request was received."
+   ],
+   [
+    "TokenIssuedAt",
+    "datetime",
+    "The timestamp the token was issued at."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueTokenId",
+    "string",
+    "The unique token identifier of the API call used to make the audited change."
+   ],
+   [
+    "UserAgent",
+    "string",
+    "The user agent information related to request."
+   ],
+   [
+    "UserId",
+    "string",
+    "The identifier of the user making the request."
+   ],
+   [
+    "Wids",
+    "string",
+    "Denotes the tenant-wide roles assigned to this user."
+   ]
+  ]
+ },
+ "DnsEvents": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/dnsevents",
+  "title": "Azure Monitor Logs reference - DnsEvents - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Network",
+    ""
+   ],
+   [
+    "Solutions",
+    "DnsAnalytics, Securi",
+    ""
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ClientIP",
+    "string",
+    ""
+   ],
+   [
+    "Computer",
+    "string",
+    ""
+   ],
+   [
+    "Confidence",
+    "string",
+    ""
+   ],
+   [
+    "Description",
+    "string",
+    ""
+   ],
+   [
+    "EventId",
+    "int",
+    ""
+   ],
+   [
+    "IndicatorThreatType",
+    "string",
+    ""
+   ],
+   [
+    "IPAddresses",
+    "string",
+    ""
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "MaliciousIP",
+    "string",
+    ""
+   ],
+   [
+    "Message",
+    "string",
+    ""
+   ],
+   [
+    "QueryType",
+    "string",
+    ""
+   ],
+   [
+    "RemoteIPCountry",
+    "string",
+    ""
+   ],
+   [
+    "RemoteIPLatitude",
+    "real",
+    ""
+   ],
+   [
+    "RemoteIPLongitude",
+    "real",
+    ""
+   ],
+   [
+    "_ResourceId",
+    "string",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "Result",
+    "string",
+    ""
+   ],
+   [
+    "ResultCode",
+    "int",
+    ""
+   ],
+   [
+    "Severity",
+    "int",
+    ""
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "_SubscriptionId",
+    "string",
+    "A unique identifier for the subscription that the record is associated with"
+   ],
+   [
+    "SubType",
+    "string",
+    ""
+   ],
+   [
+    "TaskCategory",
+    "string",
+    ""
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    ""
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ]
+  ]
+ },
+ "OfficeActivity": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/officeactivity",
+  "title": "Azure Monitor Logs reference - OfficeActivity - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "AzureSentinelPrivate",
+    ""
+   ],
+   [
+    "AADGroupId",
+    "string",
+    "Microsoft Entra ID group id"
+   ],
+   [
+    "AADTarget",
+    "string",
+    "The user that the action (identified by the Operation property) was performed on"
+   ],
+   [
+    "Activity",
+    "string",
+    "The activity that the user performed."
+   ],
+   [
+    "Actor",
+    "string",
+    "The user or service principal that performed the action"
+   ],
+   [
+    "ActorContextId",
+    "string",
+    "The GUID of the organization that the actor belongs to"
+   ],
+   [
+    "ActorIpAddress",
+    "string",
+    "The actor's IP address in IPV4 or IPV6 address format"
+   ],
+   [
+    "AddOnGuid",
+    "string",
+    "The unique identifier of the add-on generated this event"
+   ],
+   [
+    "AddonName",
+    "string",
+    "The name of the add-on that generated this event"
+   ],
+   [
+    "AddOnType",
+    "string",
+    "The type of add-on that generated this event"
+   ],
+   [
+    "AffectedItems",
+    "string",
+    "Information about each item in the group"
+   ],
+   [
+    "AppAccessContext",
+    "dynamic",
+    "The application context for the user or service principal that performed the action."
+   ],
+   [
+    "AppDistributionMode",
+    "string",
+    "Application distribution mode"
+   ],
+   [
+    "AppId",
+    "string",
+    "Application ID"
+   ],
+   [
+    "Application",
+    "string",
+    "The application name"
+   ],
+   [
+    "ApplicationId",
+    "string",
+    "SharePoint application ID"
+   ],
+   [
+    "AppPoolName",
+    "string",
+    "The App pool name"
+   ],
+   [
+    "ArtifactsShared",
+    "dynamic",
+    "The artifacts shared in the meeting."
+   ],
+   [
+    "Attendees",
+    "dynamic",
+    "The list of attendees for the meeting."
+   ],
+   [
+    "AzureActiveDirectory_EventType",
+    "string",
+    "The type of Azure AD event"
+   ],
+   [
+    "AzureADAppId",
+    "string",
+    "Teams Application Azure AD ID"
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ChannelGuid",
+    "string",
+    "A unique identifier for the channel being audited"
+   ],
+   [
+    "ChannelName",
+    "string",
+    "The name of the channel being audited"
+   ],
+   [
+    "ChannelType",
+    "string",
+    "The type of channel being audited (Standard/Private)"
+   ],
+   [
+    "ChatName",
+    "string",
+    "The name of the chat"
+   ],
+   [
+    "ChatThreadId",
+    "string",
+    "The Id of the chat thread"
+   ],
+   [
+    "Client",
+    "string",
+    "Details about the client device, device OS, and device browser that was used for the of the account login event"
+   ],
+   [
+    "Client_IPAddress",
+    "string",
+    "The IP address of the device that was used when the operation was logged"
+   ],
+   [
+    "ClientAppId",
+    "string",
+    "Client application ID"
+   ],
+   [
+    "ClientInfoString",
+    "string",
+    "Information about the email client that was used to perform the operation"
+   ],
+   [
+    "ClientIP",
+    "string",
+    "The IP address of the device that was used when the activity was logged"
+   ],
+   [
+    "ClientMachineName",
+    "string",
+    "The machine name that hosts the Outlook client"
+   ],
+   [
+    "ClientProcessName",
+    "string",
+    "The email client that was used to access the mailbox"
+   ],
+   [
+    "ClientVersion",
+    "string",
+    "The version of the email client"
+   ],
+   [
+    "CommunicationType",
+    "string",
+    "The type of communications that was conducted"
+   ],
+   [
+    "CrossMailboxOperations",
+    "bool",
+    "Indicates if the operation involved more than one mailbox"
+   ],
+   [
+    "CustomEvent",
+    "string",
+    "Optional string for custom events"
+   ],
+   [
+    "DataCenterSecurityEventType",
+    "int",
+    "The type of dmdlet event in lock box"
+   ],
+   [
+    "DestFolder",
+    "string",
+    "The destination folder"
+   ],
+   [
+    "DestinationFileExtension",
+    "string",
+    "The file extension of a file that is copied or moved"
+   ],
+   [
+    "DestinationFileName",
+    "string",
+    "The name of the file that is copied or moved"
+   ],
+   [
+    "DestinationRelativeUrl",
+    "string",
+    "The URL of the destination folder where a file is copied or moved"
+   ],
+   [
+    "DestMailboxId",
+    "string",
+    "Set only if the CrossMailboxOperations parameter is True"
+   ],
+   [
+    "DestMailboxOwnerMasterAccountSid",
+    "string",
+    "Set only if the CrossMailboxOperations parameter is True"
+   ],
+   [
+    "DestMailboxOwnerSid",
+    "string",
+    "Set only if the CrossMailboxOperations parameter is True"
+   ],
+   [
+    "DestMailboxOwnerUPN",
+    "string",
+    "Set only if the CrossMailboxOperations parameter is True"
+   ],
+   [
+    "DeviceInformation",
+    "string",
+    "The user device information."
+   ],
+   [
+    "EffectiveOrganization",
+    "string",
+    "The name of the tenant that the elevation/cmdlet was targeted at"
+   ],
+   [
+    "ElevationApprovedTime",
+    "datetime",
+    "The timestamp for when the elevation was approved"
+   ],
+   [
+    "ElevationApprover",
+    "string",
+    "The name of a Microsoft manager"
+   ],
+   [
+    "ElevationDuration",
+    "int",
+    "The duration for which the elevation was active (in Hours)"
+   ],
+   [
+    "ElevationRequestId",
+    "string",
+    "A unique identifier for the elevation request"
+   ],
+   [
+    "ElevationRole",
+    "string",
+    "The role the elevation was requested for"
+   ],
+   [
+    "ElevationTime",
+    "datetime",
+    "The start time of the elevation"
+   ],
+   [
+    "Event_Data",
+    "string",
+    "Optional payload for custom events"
+   ],
+   [
+    "EventSource",
+    "string",
+    "Identifies that an event occurred in SharePoint. Possible values are SharePoint or ObjectModel"
+   ],
+   [
+    "ExtendedProperties",
+    "string",
+    "The extended properties of the Azure AD event"
+   ],
+   [
+    "ExternalAccess",
+    "string",
+    "Specifies whether the cmdlet was run by a user in your organization"
+   ],
+   [
+    "ExtraProperties",
+    "dynamic",
+    "A list of extra properties"
+   ],
+   [
+    "Folder",
+    "string",
+    "The folder where a group of items is located"
+   ],
+   [
+    "Folders",
+    "string",
+    "Information about the source folders involved in an operation"
+   ],
+   [
+    "GenericInfo",
+    "string",
+    "Used for comments and other generic information"
+   ],
+   [
+    "InternalLogonType",
+    "int",
+    "Reserved for internal use"
+   ],
+   [
+    "InterSystemsId",
+    "string",
+    "The GUID that track the actions across components within the Office 365 service"
+   ],
+   [
+    "IntraSystemId",
+    "string",
+    "The GUID that's generated by Microsoft Entra ID to track the action"
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "IsJoinedFromLobby",
+    "bool",
+    "Indicates whether the user join from the lobby."
+   ],
+   [
+    "IsManagedDevice",
+    "bool",
+    "Indicates if operation was created by a device managed by the organization"
+   ],
+   [
+    "Item",
+    "string",
+    "Represents the item upon which the operation was performed"
+   ],
+   [
+    "ItemName",
+    "string",
+    "The string in the Subject field of the email message"
+   ],
+   [
+    "ItemType",
+    "string",
+    "The type of object that was accessed or modified. See the ItemType table for details on the types of objects"
+   ],
+   [
+    "JoinTime",
+    "datetime",
+    "The time the user joined the meeting."
+   ],
+   [
+    "LeaveTime",
+    "datetime",
+    "The time the user left the meeting."
+   ],
+   [
+    "ListItemUniqueId",
+    "string",
+    "The Guid of uniquely an identifiable item of list. This information is present only if it is applicable."
+   ],
+   [
+    "LoginStatus",
+    "int",
+    "This property is from OrgIdLogon.LoginStatus directly. The mapping of various interesting logon failures could be done by alerting algorithms"
+   ],
+   [
+    "Logon_Type",
+    "string",
+    "Indicates the type of user who accessed the mailbox and performed the operation that was logged"
+   ],
+   [
+    "LogonUserDisplayName",
+    "string",
+    "The user-friendly name of the user who performed the operation"
+   ],
+   [
+    "LogonUserSid",
+    "string",
+    "The SID of the user who performed the operation"
+   ],
+   [
+    "MachineDomainInfo",
+    "string",
+    "Information about device sync operations"
+   ],
+   [
+    "MachineId",
+    "string",
+    "Information about device sync operations"
+   ],
+   [
+    "MailboxGuid",
+    "string",
+    "The Exchange GUID of the mailbox that was accessed"
+   ],
+   [
+    "MailboxOwnerMasterAccountSid",
+    "string",
+    "Mailbox owner account's master account SID"
+   ],
+   [
+    "MailboxOwnerSid",
+    "string",
+    "The SID of the mailbox owner"
+   ],
+   [
+    "MailboxOwnerUPN",
+    "string",
+    "The email address of the person who owns the mailbox that was accessed"
+   ],
+   [
+    "MeetingDetailId",
+    "string",
+    "The meeting detail ID."
+   ],
+   [
+    "Members",
+    "dynamic",
+    "A list of users within a Team"
+   ],
+   [
+    "MessageId",
+    "string",
+    "An identifier for a chat or channel message"
+   ],
+   [
+    "ModifiedObjectResolvedName",
+    "string",
+    "This is the user friendly name of the object that was modified by the cmdlet"
+   ],
+   [
+    "ModifiedProperties",
+    "string",
+    "The property is included for admin events, such as adding a user as a member of a site or a site collection admin group"
+   ],
+   [
+    "NewValue",
+    "string",
+    "Only present for settings events. New value of the setting"
+   ],
+   [
+    "OfficeId",
+    "string",
+    "Unique identifier of an audit record"
+   ],
+   [
+    "OfficeObjectId",
+    "string",
+    "For SharePoint and OneDrive for Business activity"
+   ],
+   [
+    "OfficeTenantId",
+    "string",
+    "The office tenant id"
+   ],
+   [
+    "OfficeWorkload",
+    "string",
+    "The Office 365 service where the activity occurred"
+   ],
+   [
+    "OldValue",
+    "string",
+    "Only present for settings events. Old value of the setting"
+   ],
+   [
+    "Operation",
+    "string",
+    "The name of the operation that the user is performing"
+   ],
+   [
+    "OperationProperties",
+    "dynamic",
+    "Additional operation properties"
+   ],
+   [
+    "OperationScope",
+    "string",
+    "The scope the operation was performed on"
+   ],
+   [
+    "OrganizationId",
+    "string",
+    "The GUID for your organization's Office 365 tenant. This value will always be the same for your organization"
+   ],
+   [
+    "OrganizationName",
+    "string",
+    "The name of the tenant"
+   ],
+   [
+    "OriginatingServer",
+    "string",
+    "The name of the server from which the cmdlet was executed"
+   ],
+   [
+    "Parameters",
+    "string",
+    "The name and value for all parameters that were used with the cmdlet that is identified in the Operations property"
+   ],
+   [
+    "RecordType",
+    "string",
+    "The type of operation indicated by the record. See the AuditLogRecordType table for details on the types of audit log records"
+   ],
+   [
+    "_ResourceId",
+    "string",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "ResultReasonType",
+    "string",
+    "Reason for the result reported in ResultType"
+   ],
+   [
+    "ResultStatus",
+    "string",
+    "Indicates whether the action (specified in the Operation property) was successful or not"
+   ],
+   [
+    "SendAsUserMailboxGuid",
+    "string",
+    "The Exchange GUID of the mailbox that was accessed to send email as"
+   ],
+   [
+    "SendAsUserSmtp",
+    "string",
+    "SMTP address of the user who is being impersonated"
+   ],
+   [
+    "SendonBehalfOfUserMailboxGuid",
+    "string",
+    "The Exchange GUID of the mailbox that was accessed to send mail on behalf of"
+   ],
+   [
+    "SendOnBehalfOfUserSmtp",
+    "string",
+    "SMTP address of the user on whose behalf the email is sent"
+   ],
+   [
+    "SensitivityLabelId",
+    "string",
+    "The current sensitivity label ID of the file."
+   ],
+   [
+    "SharingType",
+    "string",
+    "The type of sharing permissions that were assigned to the user that the resource was shared with. This user is identified by the UserSharedWith parameter"
+   ],
+   [
+    "Site_",
+    "string",
+    "The GUID of the site where the file or folder accessed by the user is located"
+   ],
+   [
+    "Site_Url",
+    "string",
+    "The URL of the site where the file or folder accessed by the user is located"
+   ],
+   [
+    "Source_Name",
+    "string",
+    "The entity that triggered the audited operation. Possible values are SharePoint or ObjectModel"
+   ],
+   [
+    "SourceFileExtension",
+    "string",
+    "The file extension of the file that was accessed by the user"
+   ],
+   [
+    "SourceFileName",
+    "string",
+    "The name of the file or folder accessed by the user"
+   ],
+   [
+    "SourceRecordId",
+    "string",
+    "Unique identifier of an audit record"
+   ],
+   [
+    "SourceRelativeUrl",
+    "string",
+    "The URL of the folder that contains the file accessed by the user"
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "SRPolicyId",
+    "string",
+    "Policy ID"
+   ],
+   [
+    "SRPolicyName",
+    "string",
+    "Policy name"
+   ],
+   [
+    "SRRuleMatchDetails",
+    "dynamic",
+    "Rule details"
+   ],
+   [
+    "Start_Time",
+    "datetime",
+    "The date and time at which the cmdlet was executed"
+   ],
+   [
+    "_SubscriptionId",
+    "string",
+    "A unique identifier for the subscription that the record is associated with"
+   ],
+   [
+    "SupportTicketId",
+    "string",
+    "The customer support ticket ID for the action in 'act-on-behalf-of' situations"
+   ],
+   [
+    "TabType",
+    "string",
+    "The type of tab that generated this event"
+   ],
+   [
+    "TargetContextId",
+    "string",
+    "The GUID of the organization that the targeted user belongs to"
+   ],
+   [
+    "TargetUserId",
+    "string",
+    "Target user id"
+   ],
+   [
+    "TargetUserOrGroupName",
+    "string",
+    "Stores the UPN or name of the target user or group that a resource was shared with"
+   ],
+   [
+    "TargetUserOrGroupType",
+    "string",
+    "Identifies whether the target user or group is a Member, Guest, Group, or Partner"
+   ],
+   [
+    "TeamGuid",
+    "string",
+    "A unique identifier for the team being audited"
+   ],
+   [
+    "TeamName",
+    "string",
+    "The name of the team being audited"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The date and time in Coordinated Universal Time (UTC) when the user performed the activity"
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueSharingId",
+    "string",
+    "The unique sharing ID associated with the sharing operation."
+   ],
+   [
+    "UserAgent",
+    "string",
+    "The user agent"
+   ],
+   [
+    "UserDomain",
+    "string",
+    "The domain of the user"
+   ],
+   [
+    "UserId",
+    "string",
+    "The UPN (User Principal Name) of the user who performed the action (specified in the Operation property) that resulted in the record being logged"
+   ],
+   [
+    "UserKey",
+    "string",
+    "An alternative ID for the user identified in the UserId property"
+   ],
+   [
+    "UserSharedWith",
+    "string",
+    "The user that a resource was shared with"
+   ],
+   [
+    "UserType",
+    "string",
+    "The type of user that performed the operation. See the UserType table for details on the types of users"
+   ]
+  ]
+ },
+ "AzureDiagnostics": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/azurediagnostics",
+  "title": "Azure Monitor Logs reference - AzureDiagnostics - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "abc",
+    "def",
+    "123"
+   ],
+   [
+    "abc",
+    "def",
+    "123"
+   ],
+   [
+    "abc",
+    "def",
+    "123"
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv3",
+    "microsoft.sql/server",
+    ""
+   ],
+   [
+    "MicrosoftAzureCosmosDB",
+    "microsoft.documentdb",
+    ""
+   ],
+   [
+    "AzureFirewall",
+    "microsoft.network/az",
+    ""
+   ],
+   [
+    "AzureApplicationGatewayService",
+    "microsoft.network/ap",
+    ""
+   ],
+   [
+    "AKSCustomerData",
+    "microsoft.containers",
+    ""
+   ],
+   [
+    "AzureFrontdoor",
+    "microsoft.cdn/profil",
+    ""
+   ],
+   [
+    "LNMAgentService",
+    "microsoft.network/ne",
+    ""
+   ],
+   [
+    "MicrosoftOrcasBreadthServers",
+    "microsoft.dbforpostg",
+    ""
+   ],
+   [
+    "servicebus",
+    "microsoft.eventhub/n",
+    ""
+   ],
+   [
+    "AzureFrontdoor",
+    "microsoft.network/fr",
+    ""
+   ],
+   [
+    "AzureKeyVault",
+    "microsoft.keyvault/v",
+    ""
+   ],
+   [
+    "AzureDataLake",
+    "microsoft.datalakest",
+    ""
+   ],
+   [
+    "ApiManagement",
+    "microsoft.apimanagem",
+    ""
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv3",
+    "microsoft.sql/manage",
+    ""
+   ],
+   [
+    "ASAzureRP",
+    "microsoft.analysisse",
+    ""
+   ],
+   [
+    "MicrosoftOrcasBreadthServers",
+    "microsoft.dbformysql",
+    ""
+   ],
+   [
+    "servicebus",
+    "microsoft.servicebus",
+    ""
+   ],
+   [
+    "AzureIotHub",
+    "microsoft.devices/io",
+    ""
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv2",
+    "microsoft.dbforpostg",
+    ""
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv2",
+    "microsoft.dbformaria",
+    ""
+   ],
+   [
+    "MicrosoftAutomation",
+    "microsoft.automation",
+    ""
+   ],
+   [
+    "TrafficManager",
+    "microsoft.network/tr",
+    ""
+   ],
+   [
+    "MicrosoftOrcasBreadthServers",
+    "microsoft.dbforpostg",
+    ""
+   ],
+   [
+    "AzureSearch",
+    "microsoft.search/sea",
+    ""
+   ],
+   [
+    "AzureHybrid",
+    "microsoft.network/vi",
+    ""
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv3",
+    "microsoft.sql/manage",
+    ""
+   ],
+   [
+    "PBIDedicatedRP",
+    "microsoft.powerbided",
+    ""
+   ],
+   [
+    "AzureHybrid",
+    "microsoft.network/vp",
+    ""
+   ],
+   [
+    "MicrosoftDatafactory",
+    "microsoft.datafactor",
+    ""
+   ],
+   [
+    "MicrosoftCognitiveServices",
+    "microsoft.cognitives",
+    ""
+   ],
+   [
+    "AzureRecoveryServices",
+    "microsoft.recoveryse",
+    ""
+   ],
+   [
+    "AzureBatch",
+    "microsoft.batch/batc",
+    ""
+   ],
+   [
+    "AzureHybrid",
+    "microsoft.network/p2",
+    ""
+   ],
+   [
+    "MicrosoftSqlAzureTelemetryv2",
+    "microsoft.dbformysql",
+    ""
+   ],
+   [
+    "AzureKeyVault",
+    "microsoft.keyvault/m",
+    ""
+   ],
+   [
+    "NetMon",
+    "microsoft.network/pu",
+    ""
+   ],
+   [
+    "AzureDataLake",
+    "microsoft.datalakean",
+    ""
+   ],
+   [
+    "MicrosoftStreamanalytics",
+    "microsoft.streamanal",
+    ""
+   ],
+   [
+    "servicebus",
+    "microsoft.relay/name",
+    ""
+   ],
+   [
+    "AzureIotDps",
+    "microsoft.devices/pr",
+    ""
+   ],
+   [
+    "MicrosoftAzureCosmosDB",
+    "microsoft.documentdb",
+    ""
+   ],
+   [
+    "MicrosoftAzureCosmosDB",
+    "microsoft.documentdb",
+    ""
+   ],
+   [
+    "AKSCustomerData",
+    "microsoft.containers",
+    ""
+   ],
+   [
+    "PBIDedicatedRP",
+    "microsoft.powerbi/te",
+    ""
+   ],
+   [
+    "AzureFrontdoor",
+    "microsoft.cdn/cdnweb",
+    ""
+   ],
+   [
+    "AzureHybrid",
+    "microsoft.network/ex",
+    ""
+   ],
+   [
+    "MicrosoftAzureCosmosDB",
+    "microsoft.dbforpostg",
+    ""
+   ],
+   [
+    "NetMon",
+    "microsoft.network/pu",
+    ""
+   ],
+   [
+    "AzureCdn",
+    "microsoft.cdn/profil",
+    ""
+   ],
+   [
+    "Firewalls",
+    "Microsoft.Network/az",
+    ""
+   ],
+   [
+    "action_id_s",
+    "String",
+    ""
+   ],
+   [
+    "action_name_s",
+    "String",
+    ""
+   ],
+   [
+    "action_s",
+    "String",
+    ""
+   ],
+   [
+    "ActivityId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "AdditionalFields",
+    "",
+    ""
+   ],
+   [
+    "AdHocOrScheduledJob_s",
+    "String",
+    ""
+   ],
+   [
+    "application_name_s",
+    "String",
+    ""
+   ],
+   [
+    "audit_schema_version_d",
+    "Double",
+    ""
+   ],
+   [
+    "avg_cpu_percent_s",
+    "String",
+    ""
+   ],
+   [
+    "avg_mean_time_s",
+    "String",
+    ""
+   ],
+   [
+    "backendHostname_s",
+    "String",
+    ""
+   ],
+   [
+    "Caller_s",
+    "String",
+    ""
+   ],
+   [
+    "callerId_s",
+    "String",
+    ""
+   ],
+   [
+    "CallerIPAddress",
+    "String",
+    ""
+   ],
+   [
+    "calls_s",
+    "String",
+    ""
+   ],
+   [
+    "Category",
+    "String",
+    ""
+   ],
+   [
+    "client_ip_s",
+    "String",
+    ""
+   ],
+   [
+    "clientInfo_s",
+    "String",
+    ""
+   ],
+   [
+    "clientIP_s",
+    "String",
+    ""
+   ],
+   [
+    "clientIp_s",
+    "String",
+    ""
+   ],
+   [
+    "clientIpAddress_s",
+    "String",
+    ""
+   ],
+   [
+    "clientPort_d",
+    "Double",
+    ""
+   ],
+   [
+    "code_s",
+    "String",
+    ""
+   ],
+   [
+    "collectionName_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_destinationIP_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_destinationPortRange_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_None_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_protocols_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_sourceIP_s",
+    "String",
+    ""
+   ],
+   [
+    "conditions_sourcePortRange_s",
+    "String",
+    ""
+   ],
+   [
+    "CorrelationId",
+    "String",
+    ""
+   ],
+   [
+    "count_executions_d",
+    "Double",
+    ""
+   ],
+   [
+    "cpu_time_d",
+    "Double",
+    ""
+   ],
+   [
+    "database_name_s",
+    "String",
+    ""
+   ],
+   [
+    "database_principal_name_s",
+    "String",
+    ""
+   ],
+   [
+    "DatabaseName_s",
+    "String",
+    ""
+   ],
+   [
+    "db_id_s",
+    "String",
+    ""
+   ],
+   [
+    "direction_s",
+    "String",
+    ""
+   ],
+   [
+    "dop_d",
+    "Double",
+    ""
+   ],
+   [
+    "duration_d",
+    "Double",
+    ""
+   ],
+   [
+    "duration_milliseconds_d",
+    "Double",
+    ""
+   ],
+   [
+    "DurationMs",
+    "BigInt",
+    ""
+   ],
+   [
+    "ElasticPoolName_s",
+    "String",
+    ""
+   ],
+   [
+    "endTime_t",
+    "DateTime",
+    ""
+   ],
+   [
+    "Environment_s",
+    "String",
+    ""
+   ],
+   [
+    "error_code_s",
+    "String",
+    ""
+   ],
+   [
+    "error_message_s",
+    "String",
+    ""
+   ],
+   [
+    "errorLevel_s",
+    "String",
+    ""
+   ],
+   [
+    "event_class_s",
+    "String",
+    ""
+   ],
+   [
+    "event_s",
+    "String",
+    ""
+   ],
+   [
+    "event_subclass_s",
+    "String",
+    ""
+   ],
+   [
+    "event_time_t",
+    "DateTime",
+    ""
+   ],
+   [
+    "EventName_s",
+    "String",
+    ""
+   ],
+   [
+    "execution_type_d",
+    "Double",
+    ""
+   ],
+   [
+    "executionInfo_endTime_t",
+    "DateTime",
+    ""
+   ],
+   [
+    "executionInfo_exitCode_d",
+    "Double",
+    ""
+   ],
+   [
+    "executionInfo_startTime_t",
+    "DateTime",
+    ""
+   ],
+   [
+    "host_s",
+    "String",
+    ""
+   ],
+   [
+    "httpMethod_s",
+    "String",
+    ""
+   ],
+   [
+    "httpStatus_d",
+    "Double",
+    ""
+   ],
+   [
+    "httpStatusCode_d",
+    "Double",
+    ""
+   ],
+   [
+    "httpStatusCode_s",
+    "String",
+    ""
+   ],
+   [
+    "httpVersion_s",
+    "String",
+    ""
+   ],
+   [
+    "id_s",
+    "String",
+    ""
+   ],
+   [
+    "identity_claim_appid_g",
+    "Guid",
+    ""
+   ],
+   [
+    "identity_claim_ipaddr_s",
+    "String",
+    ""
+   ],
+   [
+    "instanceId_s",
+    "String",
+    ""
+   ],
+   [
+    "interval_end_time_d",
+    "Double",
+    ""
+   ],
+   [
+    "interval_start_time_d",
+    "Double",
+    ""
+   ],
+   [
+    "ip_s",
+    "String",
+    ""
+   ],
+   [
+    "is_column_permission_s",
+    "String",
+    ""
+   ],
+   [
+    "isAccessPolicyMatch_b",
+    "Bool",
+    ""
+   ],
+   [
+    "JobDurationInSecs_s",
+    "String",
+    ""
+   ],
+   [
+    "JobFailureCode_s",
+    "String",
+    ""
+   ],
+   [
+    "JobId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "jobId_s",
+    "String",
+    ""
+   ],
+   [
+    "JobOperation_s",
+    "String",
+    ""
+   ],
+   [
+    "JobOperationSubType_s",
+    "String",
+    ""
+   ],
+   [
+    "JobStartDateTime_s",
+    "String",
+    ""
+   ],
+   [
+    "JobStatus_s",
+    "String",
+    ""
+   ],
+   [
+    "JobUniqueId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "Level",
+    "String",
+    ""
+   ],
+   [
+    "log_bytes_used_d",
+    "Double",
+    ""
+   ],
+   [
+    "logical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "logical_io_writes_d",
+    "Double",
+    ""
+   ],
+   [
+    "LogicalServerName_s",
+    "String",
+    ""
+   ],
+   [
+    "macAddress_s",
+    "String",
+    ""
+   ],
+   [
+    "matchedConnections_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_cpu_time_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_dop_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_duration_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_log_bytes_used_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_logical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_logical_io_writes_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_num_physical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_physical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_query_max_used_memory_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_rowcount_d",
+    "Double",
+    ""
+   ],
+   [
+    "max_time_s",
+    "String",
+    ""
+   ],
+   [
+    "mean_time_s",
+    "String",
+    ""
+   ],
+   [
+    "Message",
+    "String",
+    ""
+   ],
+   [
+    "min_time_s",
+    "String",
+    ""
+   ],
+   [
+    "msg_s",
+    "String",
+    ""
+   ],
+   [
+    "num_physical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "object_id_d",
+    "Double",
+    ""
+   ],
+   [
+    "object_name_s",
+    "String",
+    ""
+   ],
+   [
+    "OperationName",
+    "String",
+    ""
+   ],
+   [
+    "OperationVersion",
+    "String",
+    ""
+   ],
+   [
+    "partitionKey_s",
+    "String",
+    ""
+   ],
+   [
+    "physical_io_reads_d",
+    "Double",
+    ""
+   ],
+   [
+    "plan_id_d",
+    "Double",
+    ""
+   ],
+   [
+    "policy_s",
+    "String",
+    ""
+   ],
+   [
+    "policyMode_s",
+    "String",
+    ""
+   ],
+   [
+    "primaryIPv4Address_s",
+    "String",
+    ""
+   ],
+   [
+    "priority_d",
+    "Double",
+    ""
+   ],
+   [
+    "properties_enabledForDeployment_b",
+    "Bool",
+    ""
+   ],
+   [
+    "properties_enabledForDiskEncryption_b",
+    "Bool",
+    ""
+   ],
+   [
+    "properties_enabledForTemplateDeployment_b",
+    "Bool",
+    ""
+   ],
+   [
+    "properties_s",
+    "String",
+    ""
+   ],
+   [
+    "properties_sku_Family_s",
+    "String",
+    ""
+   ],
+   [
+    "properties_sku_Name_s",
+    "String",
+    ""
+   ],
+   [
+    "properties_tenantId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "query_hash_s",
+    "String",
+    ""
+   ],
+   [
+    "query_id_d",
+    "Double",
+    ""
+   ],
+   [
+    "query_max_used_memory_d",
+    "Double",
+    ""
+   ],
+   [
+    "query_plan_hash_s",
+    "String",
+    ""
+   ],
+   [
+    "query_time_d",
+    "Double",
+    ""
+   ],
+   [
+    "querytext_s",
+    "String",
+    ""
+   ],
+   [
+    "receivedBytes_d",
+    "Double",
+    ""
+   ],
+   [
+    "Region_s",
+    "String",
+    ""
+   ],
+   [
+    "requestCharge_s",
+    "String",
+    ""
+   ],
+   [
+    "requestQuery_s",
+    "String",
+    ""
+   ],
+   [
+    "requestResourceId_s",
+    "String",
+    ""
+   ],
+   [
+    "requestResourceType_s",
+    "String",
+    ""
+   ],
+   [
+    "requestUri_s",
+    "String",
+    ""
+   ],
+   [
+    "reserved_storage_mb_s",
+    "String",
+    ""
+   ],
+   [
+    "Resource",
+    "String",
+    ""
+   ],
+   [
+    "resource_actionName_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_location_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_originRunId_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_resourceGroupName_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_runId_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_subscriptionId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "resource_triggerName_s",
+    "String",
+    ""
+   ],
+   [
+    "resource_workflowId_g",
+    "Guid",
+    ""
+   ],
+   [
+    "resource_workflowName_s",
+    "String",
+    ""
+   ],
+   [
+    "ResourceGroup",
+    "String",
+    ""
+   ],
+   [
+    "_ResourceId",
+    "String",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "ResourceProvider",
+    "String",
+    ""
+   ],
+   [
+    "ResourceProvider",
+    "String",
+    ""
+   ],
+   [
+    "ResourceType",
+    "String",
+    ""
+   ],
+   [
+    "ResourceType",
+    "String",
+    ""
+   ],
+   [
+    "response_rows_d",
+    "Double",
+    ""
+   ],
+   [
+    "resultCode_s",
+    "String",
+    ""
+   ],
+   [
+    "ResultDescription",
+    "String",
+    ""
+   ],
+   [
+    "ResultDescription",
+    "String",
+    ""
+   ],
+   [
+    "resultDescription_ChildJobs_s",
+    "String",
+    ""
+   ],
+   [
+    "resultDescription_ErrorJobs_s",
+    "String",
+    ""
+   ],
+   [
+    "resultMessage_s",
+    "String",
+    ""
+   ],
+   [
+    "ResultSignature",
+    "String",
+    ""
+   ],
+   [
+    "ResultType",
+    "String",
+    ""
+   ],
+   [
+    "ResultType",
+    "String",
+    ""
+   ],
+   [
+    "rootCauseAnalysis_s",
+    "String",
+    ""
+   ],
+   [
+    "routingRuleName_s",
+    "String",
+    ""
+   ],
+   [
+    "rowcount_d",
+    "Double",
+    ""
+   ],
+   [
+    "ruleName_s",
+    "String",
+    ""
+   ],
+   [
+    "RunbookName_s",
+    "String",
+    ""
+   ],
+   [
+    "RunOn_s",
+    "String",
+    ""
+   ],
+   [
+    "schema_name_s",
+    "String",
+    ""
+   ],
+   [
+    "sentBytes_d",
+    "Double",
+    ""
+   ],
+   [
+    "sequence_group_id_g",
+    "Guid",
+    ""
+   ],
+   [
+    "sequence_number_d",
+    "Double",
+    ""
+   ],
+   [
+    "server_principal_sid_s",
+    "String",
+    ""
+   ],
+   [
+    "session_id_d",
+    "Double",
+    ""
+   ]
+  ]
+ },
+ "AGWFirewallLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/agwfirewalllogs",
+  "title": "Azure Monitor Logs reference - AGWFirewallLogs - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Azure Resources, Net",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "Action",
+    "string",
+    "Action taken on the request. Available values are Blocked and Allowed (for custom rules), Matched (when a rule matches a part of the request), and Detected and "
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ClientIp",
+    "string",
+    "Originating IP for the request."
+   ],
+   [
+    "ClientPort",
+    "int",
+    "Originating port for the request."
+   ],
+   [
+    "DetailedData",
+    "string",
+    "Specific data found in request that matched the rule for the triggered event."
+   ],
+   [
+    "DetailedMessage",
+    "string",
+    "Description of the rule for the triggered event."
+   ],
+   [
+    "FileDetails",
+    "string",
+    "Configuration file that contained the rule for the triggered event."
+   ],
+   [
+    "Hostname",
+    "string",
+    "Hostname or IP address of the Application Gateway."
+   ],
+   [
+    "InstanceId",
+    "string",
+    "Application Gateway instance for which firewall data is being generated. For a multiple-instance application gateway, there is one row per instance."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "LineDetails",
+    "string",
+    "Line number in the configuration file that triggered the event."
+   ],
+   [
+    "Message",
+    "string",
+    "User-friendly message for the triggering event. More details are provided in the details section."
+   ],
+   [
+    "OperationName",
+    "string",
+    "Name of the operation."
+   ],
+   [
+    "ParanoiaLevel",
+    "string",
+    "The OWASP CRS paranoia level (1-4) of the rule that triggered. Empty for non-CRS rules (e.g., anomaly scoring, bot protection)."
+   ],
+   [
+    "PolicyId",
+    "string",
+    "The ID of the firewall policy applied to the request."
+   ],
+   [
+    "PolicyScope",
+    "string",
+    "The scope of the policy. Values can be Global, Listener, or Location (for path-based rules)."
+   ],
+   [
+    "PolicyScopeName",
+    "string",
+    "The name of the policy scope applied."
+   ],
+   [
+    "RequestUri",
+    "string",
+    "URL of the received request."
+   ],
+   [
+    "_ResourceId",
+    "string",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "RuleId",
+    "string",
+    "Rule ID of the triggering event."
+   ],
+   [
+    "RuleSetType",
+    "string",
+    "Rule set type. The available value is OWASP."
+   ],
+   [
+    "RuleSetVersion",
+    "string",
+    "Rule set version used. Available values are 2.2.9 and 3.0."
+   ],
+   [
+    "Site",
+    "string",
+    "Site for which the log was generated. Currently, only Global is listed because rules are global."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "_SubscriptionId",
+    "string",
+    "A unique identifier for the subscription that the record is associated with"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "Time (UTC) when the log was created."
+   ],
+   [
+    "TransactionId",
+    "string",
+    "Unique ID for a given transaction which helps group multiple rule violations that occurred within the same request."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ]
+  ]
+ },
+ "CopilotActivity": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/copilotactivity",
+  "title": "Azure Monitor Logs reference - CopilotActivity - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Security, Audit",
+    ""
+   ],
+   [
+    "Solutions",
+    "SecurityInsights",
+    ""
+   ],
+   [
+    "ActorName",
+    "string",
+    "User principal name or email address."
+   ],
+   [
+    "ActorUserId",
+    "string",
+    "Internal user key or GUID."
+   ],
+   [
+    "ActorUserType",
+    "string",
+    "Type of user (e.g., Regular, Admin, System)."
+   ],
+   [
+    "AgentId",
+    "string",
+    "The version number or version ID of the agent involved."
+   ],
+   [
+    "AgentName",
+    "string",
+    "A friendly readable name of the agent."
+   ],
+   [
+    "AIModelName",
+    "string",
+    "Name of the AI model used (for extensibility)."
+   ],
+   [
+    "AIModelVersion",
+    "string",
+    "Version of the AI model used."
+   ],
+   [
+    "AppHost",
+    "string",
+    "Application that hosts copilot."
+   ],
+   [
+    "AppIdentity",
+    "string",
+    "Identity of the application hosting the copilot interaction."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ClientRegion",
+    "string",
+    "Region of the client."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "LLMEventData",
+    "dynamic",
+    "Parsed LLM event data (for copilot different RecordTypes)."
+   ],
+   [
+    "LogVersion",
+    "string",
+    "Version of the LLM log format."
+   ],
+   [
+    "OrganizationId",
+    "string",
+    "Organization GUID."
+   ],
+   [
+    "RecordId",
+    "string",
+    "Unique identifier for the audit record."
+   ],
+   [
+    "RecordType",
+    "string",
+    "Normalized record type name (e.g., CopilotInteraction, UpdateCopilotSettings)."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "SrcIpAddr",
+    "string",
+    "IP address of the client."
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "Timestamp of the audit event."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "Version",
+    "string",
+    "Version of the audit schema or event."
+   ],
+   [
+    "Workload",
+    "string",
+    "The workload or product (e.g., Copilot, AzureOpenAI)."
+   ]
+  ]
+ },
+ "SigninLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/signinlogs",
+  "cols": [
+   [
+    "Categories",
+    "Azure Resources, Sec",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AADTenantId",
+    "string",
+    ""
+   ],
+   [
+    "Agent",
+    "dynamic",
+    "The agentic property for sign in logs. Includes the agentType and the parentAppId when the type is AgenticInstance."
+   ],
+   [
+    "AlternateSignInName",
+    "string",
+    "The identification that the user provided to sign in. It may be the userPrincipalName but it's also populated when a user signs in using other identifiers."
+   ],
+   [
+    "AppDisplayName",
+    "string",
+    "The application name displayed in the Azure Portal."
+   ],
+   [
+    "AppId",
+    "string",
+    "The application identifier in Microsoft Entra ID."
+   ],
+   [
+    "AppliedConditionalAccessPolicies",
+    "string",
+    ""
+   ],
+   [
+    "AppliedEventListeners",
+    "dynamic",
+    "Detailed information about the listeners, such as Azure Logic Apps and Azure Functions, that were triggered by the corresponding events in the sign-in event."
+   ],
+   [
+    "AppOwnerTenantId",
+    "string",
+    "The tenant identifier of the owenr of the application in Microsoft Entra ID."
+   ],
+   [
+    "AuthenticationAppDeviceDetails",
+    "string",
+    "Details of the app and device state used during the most recent authentication step using an authentication app."
+   ],
+   [
+    "AuthenticationAppPolicyEvaluationDetails",
+    "string",
+    "The details of the policies applied and enforced related to the authentication app during the latest signIn step."
+   ],
+   [
+    "AuthenticationContextClassReferences",
+    "string",
+    "Contains a collection of values that represent the conditional access authentication contexts applied to the sign-in."
+   ],
+   [
+    "AuthenticationDetails",
+    "string",
+    "The result of the authentication attempt and additional details on the authentication method."
+   ],
+   [
+    "AuthenticationMethodsUsed",
+    "string",
+    "The authentication methods used. Possible values: SMS, Authenticator App, App Verification code, Password, FIDO, PTA, or PHS."
+   ],
+   [
+    "AuthenticationProcessingDetails",
+    "string",
+    "Additional authentication processing details, such as the agent name in case of PTA/PHS or Server/farm name in case of federated authentication."
+   ],
+   [
+    "AuthenticationProtocol",
+    "string",
+    "Lists the protocol type or grant type used in the authentication. The possible values are: none, oAuth2, ropc, wsFederation, saml20, deviceCode. For authenticat"
+   ],
+   [
+    "AuthenticationRequirement",
+    "string",
+    "This holds the highest level of authentication needed through all the sign-in steps, for sign-in to succeed."
+   ],
+   [
+    "AuthenticationRequirementPolicies",
+    "string",
+    "Sources of authentication requirement, such as conditional access, per-user MFA, identity protection, and security defaults."
+   ],
+   [
+    "AuthenticatorAppLocation",
+    "string",
+    "The location of the authenticator app."
+   ],
+   [
+    "AutonomousSystemNumber",
+    "string",
+    "The Autonomous System Number (ASN) of the network used by the actor."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "Category",
+    "string",
+    ""
+   ],
+   [
+    "ClientAppUsed",
+    "string",
+    "The legacy client used for sign-in activity. For example: Browser, Exchange ActiveSync, Modern clients, IMAP, MAPI, SMTP, or POP."
+   ],
+   [
+    "ClientCredentialType",
+    "string",
+    "The type of client credential used. Examples include client assertion, client secret, etc."
+   ],
+   [
+    "ClientSessionId",
+    "string",
+    "ID of the client session associated with the signIn."
+   ],
+   [
+    "ConditionalAccessAudiences",
+    "string",
+    "The audiences targeted by the conditional access policy."
+   ],
+   [
+    "ConditionalAccessPolicies",
+    "dynamic",
+    "A list of conditional access policies that are triggered by the corresponding sign-in activity."
+   ],
+   [
+    "ConditionalAccessStatus",
+    "string",
+    "The status of the conditional access policy triggered. Possible values: success, failure, or notApplied."
+   ],
+   [
+    "CorrelationId",
+    "string",
+    "The identifier that's sent from the client when sign-in is initiated. This is used for troubleshooting the corresponding sign-in activity when calling for suppo"
+   ],
+   [
+    "CreatedDateTime",
+    "datetime",
+    "The date and time the sign-in was initiated. The Timestamp type is always in UTC time. For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z."
+   ],
+   [
+    "CrossTenantAccessType",
+    "string",
+    "Describes the type of cross-tenant access used by the actor to access the resource."
+   ],
+   [
+    "DeviceDetail",
+    "dynamic",
+    "The device information from where the sign-in occurred. Includes information such as deviceId, OS, and browser."
+   ],
+   [
+    "DurationMs",
+    "long",
+    ""
+   ],
+   [
+    "FederatedCredentialId",
+    "string",
+    "Federated Credential Id."
+   ],
+   [
+    "FlaggedForReview",
+    "bool",
+    "During a failed sign in, a user may click a button in the Azure portal to mark the failed event for tenant admins. If a user clicked the button to flag the fail"
+   ],
+   [
+    "GlobalSecureAccessIpAddress",
+    "string",
+    "Global secure IP address that user signed in from."
+   ],
+   [
+    "HomeTenantId",
+    "string",
+    "The tenant identifier of the user initiating the sign in. Not applicable in Managed Identity or service principal sign ins."
+   ],
+   [
+    "HomeTenantName",
+    "string",
+    "The tenant name of the external tenant who homes the entitity taking action in the customer's tenant."
+   ],
+   [
+    "Id",
+    "string",
+    "The identifier representing the sign-in activity."
+   ],
+   [
+    "Identity",
+    "string",
+    "The display name of the actor identified in the signin."
+   ],
+   [
+    "IncomingTokenType",
+    "string",
+    "The type of token utilized to signIn (examples: primary refresh token, saml assertion)."
+   ],
+   [
+    "IPAddress",
+    "string",
+    "The IP address of the client from where the sign-in occurred."
+   ],
+   [
+    "IPAddressFromResourceProvider",
+    "string",
+    "The IP address a user used to reach a resource provider, used to determine Conditional Access compliance for some policies. For example, when a user interacts w"
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "IsInteractive",
+    "bool",
+    "Indicates whether a user sign in is interactive. In interactive sign in, the user provides an authentication factor to Azure AD. These factors include passwords"
+   ],
+   [
+    "IsRisky",
+    "bool",
+    ""
+   ],
+   [
+    "IsTenantRestricted",
+    "bool",
+    "Indicates if a signIn is under a tenant restrictions policy or not."
+   ],
+   [
+    "IsThroughGlobalSecureAccess",
+    "bool",
+    "Displays whether or not a user came through Global Secure Access service or not."
+   ],
+   [
+    "Level",
+    "string",
+    ""
+   ],
+   [
+    "Location",
+    "string",
+    "The 2 letter country code from where the sign-in occurred. Depending on IP address provided, this value may not always resolve to a city or region level of deta"
+   ],
+   [
+    "LocationDetails",
+    "dynamic",
+    "Provides the city, state, country/region and latitude and longitude from where the sign-in happened."
+   ],
+   [
+    "MfaDetail",
+    "dynamic",
+    "This property is deprecated."
+   ],
+   [
+    "NetworkLocationDetails",
+    "string",
+    "The network location details including the type of network used and its names."
+   ],
+   [
+    "OperationName",
+    "string",
+    ""
+   ],
+   [
+    "OperationVersion",
+    "string",
+    ""
+   ],
+   [
+    "OriginalRequestId",
+    "string",
+    "The request identifier of the first request in the authentication sequence."
+   ],
+   [
+    "OriginalTransferMethod",
+    "string",
+    "Transfer method used to initiate a session throughout all subsequent requests."
+   ],
+   [
+    "ProcessingTimeInMilliseconds",
+    "string",
+    ""
+   ],
+   [
+    "Resource",
+    "string",
+    ""
+   ],
+   [
+    "ResourceDisplayName",
+    "string",
+    "The name of the resource that the user signed in to."
+   ],
+   [
+    "ResourceGroup",
+    "string",
+    ""
+   ],
+   [
+    "ResourceId",
+    "string",
+    "The identifier of the resource that the user signed in to."
+   ],
+   [
+    "ResourceIdentity",
+    "string",
+    "The resource that the user signed in to."
+   ],
+   [
+    "ResourceOwnerTenantId",
+    "string",
+    "The tenant identifier of the owner of the resource referenced in the sign in."
+   ],
+   [
+    "ResourceProvider",
+    "string",
+    ""
+   ],
+   [
+    "ResourceServicePrincipalId",
+    "string",
+    "The identifier of the service principal representing the target resource in the sign-in event."
+   ],
+   [
+    "ResourceTenantId",
+    "string",
+    "The tenant identifier of the resource referenced in the sign in."
+   ],
+   [
+    "ResultDescription",
+    "string",
+    "Provides the error message or the reason for failure for the corresponding sign-in activity."
+   ],
+   [
+    "ResultSignature",
+    "string",
+    ""
+   ],
+   [
+    "ResultType",
+    "string",
+    "Provides the 5-6 digit error code that's generated during a sign-in event. 0 indicates success; other values are failures. You can find more information using t"
+   ],
+   [
+    "RiskDetail",
+    "string",
+    "The reason behind a specific state of a risky user, sign-in, or a risk event. Possible values: none, adminGeneratedTemporaryPassword, userPerformedSecuredPasswo"
+   ],
+   [
+    "RiskEventTypes",
+    "string",
+    "This property is deprecated."
+   ],
+   [
+    "RiskEventTypes_V2",
+    "string",
+    "The list of risk event types associated with the sign-in. Possible values: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareI"
+   ],
+   [
+    "RiskLevel",
+    "string",
+    ""
+   ],
+   [
+    "RiskLevelAggregated",
+    "string",
+    "The aggregated risk level. Possible values: none, low, medium, high, or hidden. The value hidden means the user or sign-in was not enabled for Azure AD Identity"
+   ],
+   [
+    "RiskLevelDuringSignIn",
+    "string",
+    "The risk level during sign-in. Possible values: none, low, medium, high, or hidden. The value hidden means the user or sign-in was not enabled for Azure AD Iden"
+   ],
+   [
+    "RiskState",
+    "string",
+    "The risk state of a risky user, sign-in, or a risk event. Possible values: none, confirmedSafe, remediated, dismissed, atRisk, or confirmedCompromised."
+   ],
+   [
+    "RootActorID",
+    "string",
+    "The root actor virtual ID associated with the sign-in."
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "The application identifier used for sign-in. This field is populated when you are signing in using an application."
+   ],
+   [
+    "ServicePrincipalName",
+    "string",
+    "The application name used for sign-in. This field is populated when you are signing in using an application."
+   ],
+   [
+    "SessionId",
+    "string",
+    "Id of the session that was generated during the signIn."
+   ],
+   [
+    "SessionLifetimePolicies",
+    "string",
+    "Any conditional access session management policies that were applied during the sign-in event."
+   ],
+   [
+    "SignInIdentifier",
+    "string",
+    "The identification that the user provided to sign in. It may be the userPrincipalName but it's also populated when a user signs in using other identifiers."
+   ],
+   [
+    "SignInIdentifierType",
+    "string",
+    "The type of sign in identifier. Possible values are: userPrincipalName, phoneNumber, proxyAddress, qrCode, onPremisesUserPrincipalName."
+   ],
+   [
+    "SourceAppClientId",
+    "string",
+    "The Source App's Client ID for Target Identities."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "Status",
+    "dynamic",
+    "The sign-in status. Includes the error code and description of the error (in case of a sign-in failure)."
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    ""
+   ],
+   [
+    "TokenIssuerName",
+    "string",
+    "The name of the identity provider. For example, sts.microsoft.com."
+   ],
+   [
+    "TokenIssuerType",
+    "string",
+    "The type of identity provider. The possible values are: AzureAD, or ADFederationServices, AzureADBackupAuth, ADFederationServicesMFAAdapter, NPSExtension."
+   ],
+   [
+    "TokenProtectionStatusDetails",
+    "dynamic",
+    "Token protection creates a cryptographically secure tie between the token and the device it's issued to. This field indicates whether the signin token was bound"
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueTokenIdentifier",
+    "string",
+    "A unique base64 encoded request identifier used to track tokens issued by Azure AD as they are redeemed at resource providers."
+   ],
+   [
+    "UserAgent",
+    "string",
+    "The user agent information related to sign-in."
+   ],
+   [
+    "UserDisplayName",
+    "string",
+    "The display name of the user."
+   ],
+   [
+    "UserId",
+    "string",
+    "The identifier of the user."
+   ],
+   [
+    "UserPrincipalName",
+    "string",
+    "The UPN of the user."
+   ],
+   [
+    "UserType",
+    "string",
+    "Identifies whether the user is a member or guest in the tenant. Possible values are: member and guest."
+   ]
+  ]
+ },
+ "ThreatIntelIndicators": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/threatintelindicators",
+  "title": "Azure Monitor Logs reference - ThreatIntelIndicators - Azure Monitor | Microsoft Learn",
+  "cols": [
+   [
+    "Categories",
+    "Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "SecurityInsights",
+    ""
+   ],
+   [
+    "AdditionalFields",
+    "dynamic",
+    "The type specifc fields that Sentinel adds. Contains the TLPLevel: white, green, amber, or red."
+   ],
+   [
+    "AzureTenantId",
+    "string",
+    "The tenant that submitted the indicator."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "Confidence",
+    "int",
+    "The confidence that the creator has in the correctness of their data. The value must be a number in the range of 0-100."
+   ],
+   [
+    "Created",
+    "datetime",
+    "The date when the indicator was created."
+   ],
+   [
+    "Data",
+    "dynamic",
+    "All object properties, formatted according to the STIX specification (https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.pdf)."
+   ],
+   [
+    "Id",
+    "string",
+    "A value that uniquely identifies the indicator STIX object. This value is usable with Sentinel APIs."
+   ],
+   [
+    "IsActive",
+    "bool",
+    "A value that specifies if an indicator is active and valid for detections."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "IsDeleted",
+    "bool",
+    "A value that indicates whether the data was deleted from Sentinel or not."
+   ],
+   [
+    "LastUpdateMethod",
+    "string",
+    "The component that last updated the indicator."
+   ],
+   [
+    "Modified",
+    "datetime",
+    "The date when the indicator was modified."
+   ],
+   [
+    "ObservableKey",
+    "string",
+    "The entire left-hand side of an equality comparison from the pattern."
+   ],
+   [
+    "ObservableValue",
+    "string",
+    "The entire right-hand side of an equality comparison from the pattern."
+   ],
+   [
+    "Pattern",
+    "string",
+    "The detection pattern for this indicator MAY be expressed as a STIX pattern."
+   ],
+   [
+    "_ResourceId",
+    "string",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "Revoked",
+    "bool",
+    "A value that specifies whether the indicator was revoked."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "_SubscriptionId",
+    "string",
+    "A unique identifier for the subscription that the record is associated with"
+   ],
+   [
+    "Tags",
+    "string",
+    "Sentinel defined tags for the indicator."
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The time of indicator ingestion."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "ValidFrom",
+    "datetime",
+    "The time from which this indicator is considered a valid indicator of the behaviors it is related or represents."
+   ],
+   [
+    "ValidUntil",
+    "datetime",
+    "The time at which this indicator should no longer be considered a valid indicator of the bahviors it is related to or represents."
+   ],
+   [
+    "WorkspaceId",
+    "string",
+    "The workspace that submitted the indicator."
+   ]
+  ]
+ },
+ "CloudAppEvents": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-cloudappevents-table",
+  "title": "CloudAppEvents table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the event was recorded"
+   ],
+   [
+    "ActionType",
+    "string",
+    "Type of activity that triggered the event"
+   ],
+   [
+    "Application",
+    "string",
+    "Application that performed the recorded action"
+   ],
+   [
+    "ApplicationId",
+    "int",
+    "Unique identifier for the application"
+   ],
+   [
+    "AppInstanceId",
+    "int",
+    "Unique identifier for the instance of an application. To convert this to Microsoft Defender for Cloud Apps App-connector-ID, use CloudAppEvents| distinct Applic"
+   ],
+   [
+    "AccountObjectId",
+    "string",
+    "Unique identifier for the account in Microsoft Entra ID"
+   ],
+   [
+    "AccountId",
+    "string",
+    "An identifier for the account as found by Microsoft Defender for Cloud Apps. Could be Microsoft Entra ID, user principal name, or other identifiers."
+   ],
+   [
+    "AccountDisplayName",
+    "string",
+    "Name displayed in the address book entry for the account user. This is usually a combination of the given name, middle initial, and surname of the user."
+   ],
+   [
+    "IsAdminOperation",
+    "bool",
+    "Indicates whether the activity was performed by an administrator"
+   ],
+   [
+    "DeviceType",
+    "string",
+    "Type of device based on purpose and functionality, such as network device, workstation, server, mobile, gaming console, or printer"
+   ],
+   [
+    "OSPlatform",
+    "string",
+    "Platform of the operating system running on the device. This column indicates specific operating systems, including variations within the same family, such as W"
+   ],
+   [
+    "IPAddress",
+    "string",
+    "IP address assigned to the device during communication"
+   ],
+   [
+    "IsAnonymousProxy",
+    "boolean",
+    "Indicates whether the IP address belongs to a known anonymous proxy"
+   ],
+   [
+    "CountryCode",
+    "string",
+    "Two-letter code indicating the country where the client IP address is geolocated"
+   ],
+   [
+    "City",
+    "string",
+    "City where the client IP address is geolocated"
+   ],
+   [
+    "Isp",
+    "string",
+    "Internet service provider associated with the IP address"
+   ],
+   [
+    "UserAgent",
+    "string",
+    "User agent information from the web browser or other client application"
+   ],
+   [
+    "ActivityType",
+    "string",
+    "Type of activity that triggered the event"
+   ],
+   [
+    "ActivityObjects",
+    "dynamic",
+    "List of objects, such as files or folders, that were involved in the recorded activity"
+   ],
+   [
+    "ObjectName",
+    "string",
+    "Name of the object that the recorded action was applied to"
+   ],
+   [
+    "ObjectType",
+    "string",
+    "Type of object, such as a file or a folder, that the recorded action was applied to"
+   ],
+   [
+    "ObjectId",
+    "string",
+    "Unique identifier of the object that the recorded action was applied to"
+   ],
+   [
+    "ReportId",
+    "string",
+    "Unique identifier for the event"
+   ],
+   [
+    "AccountType",
+    "string",
+    "Type of user account, indicating its general role and access levels, such as Regular, System, Admin, Application"
+   ],
+   [
+    "IsExternalUser",
+    "boolean",
+    "Indicates whether a user inside the network doesn't belong to the organization's domain"
+   ],
+   [
+    "IsImpersonated",
+    "boolean",
+    "Indicates whether the activity was performed by one user for another (impersonated) user"
+   ],
+   [
+    "IPTags",
+    "dynamic",
+    "Customer-defined information applied to specific IP addresses and IP address ranges"
+   ],
+   [
+    "IPCategory",
+    "string",
+    "Additional information about the IP address"
+   ],
+   [
+    "UserAgentTags",
+    "dynamic",
+    "More information provided by Microsoft Defender for Cloud Apps in a tag in the user agent field. Can have any of the following values: Native client, Outdated b"
+   ],
+   [
+    "RawEventData",
+    "dynamic",
+    "Raw event information from the source application or service in JSON format"
+   ],
+   [
+    "AdditionalFields",
+    "dynamic",
+    "Additional information about the entity or event"
+   ],
+   [
+    "LastSeenForUser",
+    "dynamic",
+    "Indicates the number of days since a specific attribute was last seen for the user. A value of 0 means the attribute was seen today, a negative value indicates "
+   ],
+   [
+    "UncommonForUser",
+    "dynamic",
+    "Lists the attributes in the event that are uncommon for the user, helping to rule out false positives and find anomalies. For example: [\"ActivityType\",\"ActionTy"
+   ],
+   [
+    "AuditSource",
+    "string",
+    "Audit data source. Possible values are one of the following: - Defender for Cloud Apps access control - Defender for Cloud Apps session control  - Defender for "
+   ],
+   [
+    "SessionData",
+    "dynamic",
+    "The Defender for Cloud Apps session ID for access or session control. For example: {InLineSessionId:\"232342\"}"
+   ],
+   [
+    "OAuthAppId",
+    "string",
+    "A unique identifier that is assigned to an application when it's registered to Microsoft Entra with OAuth 2.0 protocol."
+   ]
+  ]
+ },
+ "DeviceNetworkEvents": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table",
+  "title": "DeviceNetworkEvents table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the event was recorded"
+   ],
+   [
+    "DeviceId",
+    "string",
+    "Unique identifier for the device in the service"
+   ],
+   [
+    "DeviceName",
+    "string",
+    "Fully qualified domain name (FQDN) of the device"
+   ],
+   [
+    "ActionType",
+    "string",
+    "Type of activity that triggered the event. See the in-portal schema reference for details."
+   ],
+   [
+    "RemoteIP",
+    "string",
+    "IP address that was being connected to"
+   ],
+   [
+    "RemotePort",
+    "int",
+    "TCP port on the remote device that was being connected to"
+   ],
+   [
+    "RemoteUrl",
+    "string",
+    "URL or fully qualified domain name (FQDN) that was being connected to"
+   ],
+   [
+    "LocalIP",
+    "string",
+    "Source IP, or the IP address where the communication came from"
+   ],
+   [
+    "LocalPort",
+    "int",
+    "TCP port on the local device used during communication"
+   ],
+   [
+    "Protocol",
+    "string",
+    "Protocol used during the communication"
+   ],
+   [
+    "LocalIPType",
+    "string",
+    "Type of IP address, for example Public, Private, Reserved, Loopback, Teredo, FourToSixMapping, and Broadcast"
+   ],
+   [
+    "RemoteIPType",
+    "string",
+    "Type of IP address, for example Public, Private, Reserved, Loopback, Teredo, FourToSixMapping, and Broadcast"
+   ],
+   [
+    "InitiatingProcessSHA1",
+    "string",
+    "SHA-1 of the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessSHA256",
+    "string",
+    "SHA-256 of the process (image file) that initiated the event. This field is usually not populated \u2014 use the SHA1 column when available."
+   ],
+   [
+    "InitiatingProcessMD5",
+    "string",
+    "MD5 hash of the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessFileName",
+    "string",
+    "Name of the process file that initiated the event; if unavailable, the name of the process that initiated the event might be shown instead"
+   ],
+   [
+    "InitiatingProcessFileSize",
+    "long",
+    "Size of the file that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoCompanyName",
+    "string",
+    "Company name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoProductName",
+    "string",
+    "Product name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoProductVersion",
+    "string",
+    "Product version from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoInternalFileName",
+    "string",
+    "Internal file name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoOriginalFileName",
+    "string",
+    "Original file name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoFileDescription",
+    "string",
+    "Description from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessId",
+    "long",
+    "Process ID (PID) of the process that initiated the event"
+   ],
+   [
+    "InitiatingProcessCommandLine",
+    "string",
+    "Command line used to run the process that initiated the event"
+   ],
+   [
+    "InitiatingProcessCreationTime",
+    "datetime",
+    "Date and time when the process that initiated the event was started"
+   ],
+   [
+    "InitiatingProcessFolderPath",
+    "string",
+    "Folder containing the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessParentFileName",
+    "string",
+    "Name of the parent process that spawned the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessParentId",
+    "long",
+    "Process ID (PID) of the parent process that spawned the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessParentCreationTime",
+    "datetime",
+    "Date and time when the parent of the process responsible for the event was started"
+   ],
+   [
+    "InitiatingProcessAccountDomain",
+    "string",
+    "Domain of the account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessAccountName",
+    "string",
+    "User name of the account that ran the process responsible for the event; if the device is registered in Microsoft Entra ID, the Entra ID user name of the accoun"
+   ],
+   [
+    "InitiatingProcessAccountSid",
+    "string",
+    "Security Identifier (SID) of the account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessAccountUpn",
+    "string",
+    "User principal name (UPN) of the account that ran the process responsible for the event; if the device is registered in Microsoft Entra ID, the Entra ID UPN of "
+   ],
+   [
+    "InitiatingProcessAccountObjectId",
+    "string",
+    "Microsoft Entra object ID of the user account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessIntegrityLevel",
+    "string",
+    "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were la"
+   ],
+   [
+    "InitiatingProcessTokenElevation",
+    "string",
+    "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event"
+   ],
+   [
+    "ReportId",
+    "long",
+    "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the DeviceName and Timestamp columns."
+   ],
+   [
+    "AppGuardContainerId",
+    "string",
+    "Identifier for the virtualized container used by Application Guard to isolate browser activity"
+   ],
+   [
+    "AdditionalFields",
+    "string",
+    "Additional information about the event in JSON array format"
+   ],
+   [
+    "InitiatingProcessSessionId",
+    "long",
+    "Windows session ID of the initiating process"
+   ],
+   [
+    "IsInitiatingProcessRemoteSession",
+    "bool",
+    "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false)"
+   ],
+   [
+    "InitiatingProcessRemoteSessionDeviceName",
+    "string",
+    "Device name of the remote device from which the initiating process's RDP session was initiated"
+   ],
+   [
+    "InitiatingProcessRemoteSessionIP",
+    "string",
+    "IP address of the remote device from which the initiating process's RDP session was initiated"
+   ],
+   [
+    "InitiatingProcessUniqueId",
+    "string",
+    "Unique identifier of the initiating process; this is equal to the Process Start Key in Windows devices"
+   ],
+   [
+    "LogonID",
+    "long",
+    "A unique identifier for the user initiating the event, enabling attribution of network activity to the originating interactive user across privilege escalation "
+   ]
+  ]
+ },
+ "DeviceProcessEvents": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceprocessevents-table",
+  "title": "DeviceProcessEvents table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the event was recorded"
+   ],
+   [
+    "DeviceId",
+    "string",
+    "Unique identifier for the device in the service"
+   ],
+   [
+    "DeviceName",
+    "string",
+    "Fully qualified domain name (FQDN) of the device"
+   ],
+   [
+    "ActionType",
+    "string",
+    "Type of activity that triggered the event. See the in-portal schema reference for details."
+   ],
+   [
+    "FileName",
+    "string",
+    "Name of the file that the recorded action was applied to"
+   ],
+   [
+    "FolderPath",
+    "string",
+    "Folder containing the file that the recorded action was applied to"
+   ],
+   [
+    "SHA1",
+    "string",
+    "SHA-1 of the file that the recorded action was applied to"
+   ],
+   [
+    "SHA256",
+    "string",
+    "SHA-256 of the file that the recorded action was applied to. This field is usually not populated \u2014 use the SHA1 column when available."
+   ],
+   [
+    "MD5",
+    "string",
+    "MD5 hash of the file that the recorded action was applied to"
+   ],
+   [
+    "FileSize",
+    "long",
+    "Size of the file in bytes"
+   ],
+   [
+    "ProcessVersionInfoCompanyName",
+    "string",
+    "Company name from the version information of the newly created process"
+   ],
+   [
+    "ProcessVersionInfoProductName",
+    "string",
+    "Product name from the version information of the newly created process"
+   ],
+   [
+    "ProcessVersionInfoProductVersion",
+    "string",
+    "Product version from the version information of the newly created process"
+   ],
+   [
+    "ProcessVersionInfoInternalFileName",
+    "string",
+    "Internal file name from the version information of the newly created process"
+   ],
+   [
+    "ProcessVersionInfoOriginalFileName",
+    "string",
+    "Original file name from the version information of the newly created process"
+   ],
+   [
+    "ProcessVersionInfoFileDescription",
+    "string",
+    "Description from the version information of the newly created process"
+   ],
+   [
+    "ProcessId",
+    "long",
+    "Process ID (PID) of the newly created process"
+   ],
+   [
+    "ProcessCommandLine",
+    "string",
+    "Command line used to create the new process"
+   ],
+   [
+    "ProcessIntegrityLevel",
+    "string",
+    "Integrity level of the newly created process. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from"
+   ],
+   [
+    "ProcessTokenElevation",
+    "string",
+    "Indicates the type of token elevation applied to the newly created process. Possible values: TokenElevationTypeLimited (restricted), TokenElevationTypeDefault ("
+   ],
+   [
+    "ProcessCreationTime",
+    "datetime",
+    "Date and time the process was created"
+   ],
+   [
+    "AccountDomain",
+    "string",
+    "Domain of the account"
+   ],
+   [
+    "AccountName",
+    "string",
+    "User name of the account; if the device is registered in Microsoft Entra ID, the Entra ID user name of the account might be shown instead"
+   ],
+   [
+    "AccountSid",
+    "string",
+    "Security Identifier (SID) of the account"
+   ],
+   [
+    "AccountUpn",
+    "string",
+    "User principal name (UPN) of the account; if the device is registered in Microsoft Entra ID, the Entra ID UPN of the account might be shown instead"
+   ],
+   [
+    "AccountObjectId",
+    "string",
+    "Unique identifier for the account in Microsoft Entra ID"
+   ],
+   [
+    "LogonId",
+    "long",
+    "Identifier for a logon session. This identifier is unique on the same device only between restarts."
+   ],
+   [
+    "InitiatingProcessAccountDomain",
+    "string",
+    "Domain of the account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessAccountName",
+    "string",
+    "User name of the account that ran the process responsible for the event; if the device is registered in Microsoft Entra ID, the Entra ID user name of the accoun"
+   ],
+   [
+    "InitiatingProcessAccountSid",
+    "string",
+    "Security Identifier (SID) of the account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessAccountUpn",
+    "string",
+    "User principal name (UPN) of the account that ran the process responsible for the event; if the device is registered in Microsoft Entra ID, the Entra ID UPN of "
+   ],
+   [
+    "InitiatingProcessAccountObjectId",
+    "string",
+    "Microsoft Entra object ID of the user account that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessLogonId",
+    "long",
+    "Identifier for a logon session of the process that initiated the event. This identifier is unique on the same device only between restarts."
+   ],
+   [
+    "InitiatingProcessIntegrityLevel",
+    "string",
+    "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were la"
+   ],
+   [
+    "InitiatingProcessTokenElevation",
+    "string",
+    "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event"
+   ],
+   [
+    "InitiatingProcessSHA1",
+    "string",
+    "SHA-1 hash of the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessSHA256",
+    "string",
+    "SHA-256 of the process (image file) that initiated the event. This field is usually not populated \u2014 use the SHA1 column when available."
+   ],
+   [
+    "InitiatingProcessMD5",
+    "string",
+    "MD5 hash of the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessFileName",
+    "string",
+    "Name of the process file that initiated the event; if unavailable, the name of the process that initiated the event might be shown instead"
+   ],
+   [
+    "InitiatingProcessFileSize",
+    "long",
+    "Size of the file that ran the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoCompanyName",
+    "string",
+    "Company name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoProductName",
+    "string",
+    "Product name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoProductVersion",
+    "string",
+    "Product version from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoInternalFileName",
+    "string",
+    "Internal file name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoOriginalFileName",
+    "string",
+    "Original file name from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessVersionInfoFileDescription",
+    "string",
+    "Description from the version information of the process (image file) responsible for the event"
+   ],
+   [
+    "InitiatingProcessId",
+    "long",
+    "Process ID (PID) of the process that initiated the event"
+   ],
+   [
+    "InitiatingProcessCommandLine",
+    "string",
+    "Command line used to run the process that initiated the event"
+   ],
+   [
+    "InitiatingProcessCreationTime",
+    "datetime",
+    "Date and time when the process that initiated the event was started"
+   ],
+   [
+    "InitiatingProcessFolderPath",
+    "string",
+    "Folder containing the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessParentId",
+    "long",
+    "Process ID (PID) of the parent process that spawned the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessParentFileName",
+    "string",
+    "Name of the parent process that spawned the process responsible for the event"
+   ],
+   [
+    "InitiatingProcessParentCreationTime",
+    "datetime",
+    "Date and time when the parent of the process responsible for the event was started"
+   ],
+   [
+    "InitiatingProcessSignerType",
+    "string",
+    "Type of file signer of the process (image file) that initiated the event"
+   ],
+   [
+    "InitiatingProcessSignatureStatus",
+    "string",
+    "Information about the signature status of the process (image file) that initiated the event"
+   ],
+   [
+    "ReportId",
+    "long",
+    "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the DeviceName and Timestamp columns."
+   ],
+   [
+    "AppGuardContainerId",
+    "string",
+    "Identifier for the virtualized container used by Application Guard to isolate browser activity"
+   ],
+   [
+    "AdditionalFields",
+    "string",
+    "Additional information about the event in JSON array format"
+   ],
+   [
+    "InitiatingProcessSessionId",
+    "long",
+    "Windows session ID of the initiating process"
+   ],
+   [
+    "IsInitiatingProcessRemoteSession",
+    "bool",
+    "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false)"
+   ],
+   [
+    "InitiatingProcessRemoteSessionDeviceName",
+    "string",
+    "Device name of the remote device from which the initiating process's RDP session was initiated"
+   ],
+   [
+    "InitiatingProcessRemoteSessionIP",
+    "string",
+    "IP address of the remote device from which the initiating process's RDP session was initiated"
+   ],
+   [
+    "CreatedProcessSessionId",
+    "long",
+    "Windows session ID of the created process"
+   ],
+   [
+    "IsProcessRemoteSession",
+    "bool",
+    "Indicates whether the created process was run under a remote desktop protocol (RDP) session (true) or locally (false)"
+   ],
+   [
+    "ProcessRemoteSessionDeviceName",
+    "string",
+    "Device name of the remote device from which the created process's RDP session was initiated"
+   ],
+   [
+    "ProcessRemoteSessionIP",
+    "string",
+    "IP address of the remote device from which the created process's RDP session was initiated"
+   ],
+   [
+    "ProcessUniqueId",
+    "string",
+    "Unique identifier of the process; this is equal to the Process Start Key in Windows devices"
+   ],
+   [
+    "InitiatingProcessUniqueId",
+    "string",
+    "Unique identifier of the initiating process; this is equal to the Process Start Key in Windows devices"
+   ],
+   [
+    "LogonID",
+    "long",
+    "A unique identifier for the user initiating the event, enabling attribution of process activity to the originating interactive user across privilege escalation "
+   ]
+  ]
+ },
+ "AgentsInfo": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-agentsinfo-table",
+  "title": "AgentsInfo table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time the agent information was recorded"
+   ],
+   [
+    "AgentId",
+    "string",
+    "Unique identifier for the agent"
+   ],
+   [
+    "AgentName",
+    "string",
+    "Display name of the agent"
+   ],
+   [
+    "Platform",
+    "string",
+    "The platform that provided the information about the agent"
+   ],
+   [
+    "AgentDescription",
+    "string",
+    "Description of the agent as displayed in the agent's source"
+   ],
+   [
+    "Version",
+    "string",
+    "Version of the agent"
+   ],
+   [
+    "SourceAgentId",
+    "string",
+    "Native identifier assigned by the platform where the agent originated"
+   ],
+   [
+    "EntraAgentId",
+    "string",
+    "The agent's unique enterprise application object identifier by Microsoft Entra ID"
+   ],
+   [
+    "EntraBlueprintId",
+    "string",
+    "The unique identifier by Microsoft Entra ID for the agent identity blueprint, which serves as the template from which the agent's identity was created"
+   ],
+   [
+    "ToolsAuthenticationType",
+    "dynamic",
+    "Structured summary of agent identity, authentication, and authorization model"
+   ],
+   [
+    "Permissions",
+    "dynamic",
+    "Permissions record of the agent, including those that have been requested and granted, their approval state, and consent enumeration"
+   ],
+   [
+    "PublishedStatus",
+    "string",
+    "The agent's publication status; possible values: Draft, Published"
+   ],
+   [
+    "LifecycleStatus",
+    "string",
+    "The agent's current operational state in the tenant; possible values: Active, Blocked, Uninstalled, Deleted"
+   ],
+   [
+    "Availability",
+    "string",
+    "The deployment scope of the agent (that is, whether deployed to all users, specific groups, or individual users)"
+   ],
+   [
+    "CreatedDateTime",
+    "datetime",
+    "Date and time when the agent was created"
+   ],
+   [
+    "LastPublishedDateTime",
+    "datetime",
+    "Date and time when the agent was last published or deployed"
+   ],
+   [
+    "LastUpdatedDateTime",
+    "datetime",
+    "Date and time when the agent's metadata was last modified"
+   ],
+   [
+    "Owners",
+    "dynamic",
+    "Primary owners of the agent"
+   ],
+   [
+    "SharedWith",
+    "dynamic",
+    "The users and security groups the agent has been shared with"
+   ],
+   [
+    "InstanceCount",
+    "int",
+    "Number of agent instances created from the same Microsoft Entra ID agent identity blueprint"
+   ],
+   [
+    "Instructions",
+    "string",
+    "The agent's system prompt that defines its default behavior, persona, and operating boundaries"
+   ],
+   [
+    "Model",
+    "string",
+    "The AI model powering the agent"
+   ],
+   [
+    "Channels",
+    "dynamic",
+    "The channels or surfaces where the agent can operate, such as Microsoft 365 applications or APIs"
+   ],
+   [
+    "Capabilities",
+    "dynamic",
+    "The intents, actions, skills, and orchestrations of the agent"
+   ],
+   [
+    "DeclaredDataSources",
+    "dynamic",
+    "The data repositories and knowledge sources the agent can access"
+   ],
+   [
+    "DeclaredTools",
+    "dynamic",
+    "Functional tools the agent can invoke at runtime"
+   ],
+   [
+    "McpServers",
+    "dynamic",
+    "The Model Context Protocol (MCP) servers connected to the agent, including server URLs and credential configuration"
+   ],
+   [
+    "Skills",
+    "dynamic",
+    "Skills attached to the agent"
+   ],
+   [
+    "ConnectedAgents",
+    "dynamic",
+    "List of other agents connected to the agent for multi-agent orchestration"
+   ],
+   [
+    "Memory",
+    "dynamic",
+    "The agent's declarative memory store configuration"
+   ],
+   [
+    "Triggers",
+    "dynamic",
+    "List of the agent's triggers"
+   ],
+   [
+    "Guardrails",
+    "dynamic",
+    "Guardrails attached to the agent and their coverage"
+   ],
+   [
+    "Endpoints",
+    "dynamic",
+    "List of agent runtime endpoints, including URL, transport type, and external connectivity flag"
+   ],
+   [
+    "ObservabilityId",
+    "dynamic",
+    "Unique identifier used to correlate the agent with its usage and activity data in Microsoft Agent 365"
+   ],
+   [
+    "RawAgentInfo",
+    "dynamic",
+    "Additional information about the agent, in JSON format"
+   ]
+  ]
+ },
+ "OAuthAppInfo": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-oauthappinfo-table",
+  "title": "OAuthAppInfo table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "ReportId",
+    "string",
+    "Unique identifier for the record"
+   ],
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the record was created"
+   ],
+   [
+    "OAuthAppId",
+    "string",
+    "The unique  identifier for the app as assigned by Microsoft Entra ID"
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "The unique identifier for the service principal instance of the application in the tenant"
+   ],
+   [
+    "AppName",
+    "string",
+    "The application's display name as exposed by the associated service principal"
+   ],
+   [
+    "AddedOnTime",
+    "datetime",
+    "Date and time when the application was registered"
+   ],
+   [
+    "LastModifiedTime",
+    "datetime",
+    "Timestamp when the app was last modified"
+   ],
+   [
+    "AppStatus",
+    "string",
+    "Status of the app; can be: Enabled, DisabledByMicrosoft, DisabledByAppGovernancePolicy, DisabledByUser, Deleted (information for apps with Deleted status is onl"
+   ],
+   [
+    "VerifiedPublisher",
+    "dynamic",
+    "Specifies details about the verified publisher of the application which this service principal represents. It includes information such as: DisplayName, Verifie"
+   ],
+   [
+    "PrivilegeLevel",
+    "string",
+    "The privilege level of the app based on the highest classified permission granted to the app"
+   ],
+   [
+    "Permissions",
+    "dynamic",
+    "Contains an array of permission objects; each permission object includes PermissionName, TargetAppId, TargetAppDisplayName, PermissionType, PrivilegeLevel, Usag"
+   ],
+   [
+    "ConsentedUsersCount",
+    "integer",
+    "Count of users who have consented to the app; this information is only available when the app isn't admin consented"
+   ],
+   [
+    "IsAdminConsented",
+    "boolean",
+    "Value is True if a user has provided admin consent to the app on behalf of all the users in the org, otherwise the value is False"
+   ],
+   [
+    "AppOrigin",
+    "string",
+    "Specifies whether the app is internal to the organization or registered in an external tenant"
+   ],
+   [
+    "LastUsedTime",
+    "datetime",
+    "Date and time when the app last signed in. Tracking of this data goes back to June, 2022"
+   ],
+   [
+    "AppOwnerTenantId",
+    "string",
+    "Specifies the ID of the tenant where the app was registered"
+   ],
+   [
+    "RiskScore",
+    "integer",
+    "The risk score of the app as calculated by Microsoft Defender"
+   ],
+   [
+    "AssignedRoles",
+    "dynamic",
+    "Active roles assigned to the service principal. This currently covers only Entra roles."
+   ]
+  ]
+ },
+ "GraphApiAuditEvents": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-graphapiauditevents-table",
+  "title": "GraphAPIAuditEvents table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "IdentityProvider",
+    "string",
+    "Identity provider that authenticated the subject of the token"
+   ],
+   [
+    "ApiVersion",
+    "string",
+    "The API version of the event"
+   ],
+   [
+    "ApplicationId",
+    "string",
+    "Unique identifier for the application"
+   ],
+   [
+    "ClientRequestId",
+    "string",
+    "Identifier for the client request sent; if none is available, the operation identifier is used instead"
+   ],
+   [
+    "OperationId",
+    "string",
+    "Identifier for a batch of requests; the same identifier is used for all requests in a batch but if requests are non-batched, the identifier is unique per reques"
+   ],
+   [
+    "AccountObjectId",
+    "string",
+    "Unique identifier for the account making the request"
+   ],
+   [
+    "Location",
+    "string",
+    "Name of the region that served the request"
+   ],
+   [
+    "RequestDuration",
+    "string",
+    "Duration of the request in milliseconds"
+   ],
+   [
+    "RequestMethod",
+    "string",
+    "HTTP method of the request"
+   ],
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the request was recorded"
+   ],
+   [
+    "ResponseStatusCode",
+    "string",
+    "HTTP response status code for the request"
+   ],
+   [
+    "Scopes",
+    "string",
+    "Scopes in token claims"
+   ],
+   [
+    "EntityType",
+    "string",
+    "Type of object, such as a file, a process, a device, or a user"
+   ],
+   [
+    "ReportId",
+    "string",
+    "Unique identifier for the event"
+   ],
+   [
+    "RequestUri",
+    "string",
+    "Uniform resource identifier (URI) of the request"
+   ],
+   [
+    "UniqueTokenIdentifier",
+    "string",
+    "Unique identifier embedded in every access token and ID token that were issued"
+   ],
+   [
+    "RequestId",
+    "string",
+    "Unique identifier of the request"
+   ],
+   [
+    "IpAddress",
+    "string",
+    "IP address from which the request was made"
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "Unique identifier of the service principal that performed the action"
+   ],
+   [
+    "TargetWorkload",
+    "string",
+    "Target workload, such as Microsoft Exchange or Microsoft SharePoint, to which the API call was made"
+   ],
+   [
+    "ResponseSize",
+    "long",
+    "Size of the response in bytes"
+   ],
+   [
+    "TenantId",
+    "string",
+    "Unique identifier representing the organization's instance of Microsoft Entra ID"
+   ],
+   [
+    "Type",
+    "string",
+    "Name of the table"
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "Source system for the record"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "Date and time when the record was generated"
+   ]
+  ]
+ },
+ "AIAgentsInfo": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-aiagentsinfo-table",
+  "title": "AIAgentsInfo table in the advanced hunting schema - Microsoft Defender XDR | Microsoft Learn",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Last date and time recorded for the agent info"
+   ],
+   [
+    "RegistrySource",
+    "string",
+    "Registry that provided the agent's metadata"
+   ],
+   [
+    "AIAgentId",
+    "guid",
+    "Unique identifier for the agent as assigned to it in Microsoft Copilot or Copilot Studio"
+   ],
+   [
+    "AIAgentName",
+    "string",
+    "Display name of the agent"
+   ],
+   [
+    "AgentCreationTime",
+    "datetime",
+    "Date and time when the agent was created"
+   ],
+   [
+    "CreatorAccountUpn",
+    "string",
+    "User principal name (UPN) of the account that created the agent"
+   ],
+   [
+    "OwnerAccountUpns",
+    "string",
+    "User principal names (UPN) of all the owners of the agent"
+   ],
+   [
+    "LastModifiedByUpn",
+    "string",
+    "User principal name (UPN) of the account that last modified that agent"
+   ],
+   [
+    "LastModifiedTime",
+    "datetime",
+    "Date and time when the agent was last modified"
+   ],
+   [
+    "LastPublishedTime",
+    "datetime",
+    "Date and time when the agent was last published"
+   ],
+   [
+    "LastPublishedByUpn",
+    "string",
+    "User principal name (UPN) of the account that last published the agent"
+   ],
+   [
+    "AgentDescription",
+    "string",
+    "Description of the agent as displayed in the agent's source"
+   ],
+   [
+    "AgentStatus",
+    "string",
+    "Status of the agent; possible values: Created, Published, Deleted"
+   ],
+   [
+    "UserAuthenticationType",
+    "string",
+    "The agent\u2019s configured authentication type for users interacting with the agent; possible values: None, Microsoft, Custom"
+   ],
+   [
+    "AgentUsers",
+    "string",
+    "List of user principal names (UPNs) or group IDs that can use the agent"
+   ],
+   [
+    "KnowledgeDetails",
+    "string",
+    "Details about the knowledge sources added to the agent"
+   ],
+   [
+    "AgentActionTriggers",
+    "string",
+    "List of triggers that makes an autonomous agent take action"
+   ],
+   [
+    "RawAgentInfo",
+    "string",
+    "Contents of the raw JSON that describes the agent and contains configuration details, as received from the provider"
+   ],
+   [
+    "AuthenticationTrigger",
+    "string",
+    "Indicates when authentication is triggered for the agent; possible values: As Needed, Always"
+   ],
+   [
+    "AccessControlPolicy",
+    "string",
+    "Users that can interact with the agent; possible values: Any, Copilot readers, Group membership, Any (multitenant)"
+   ],
+   [
+    "AuthorizedSecurityGroupIds",
+    "dynamic",
+    "List of Azure Active Directory Group IDs that are allowed to interact with the agent"
+   ],
+   [
+    "AgentTopicsDetails",
+    "dynamic",
+    "Specifications of the topics that the agent can perform"
+   ],
+   [
+    "AgentToolsDetails",
+    "dynamic",
+    "Specifications of the tools that the agent can access and perform actions on"
+   ],
+   [
+    "EnvironmentId",
+    "string",
+    "The identifier of the Microsoft Power Platform environment the agent resides in"
+   ],
+   [
+    "Platform",
+    "string",
+    "The platform that provided the information about the agents; possible values: Copilot Studio"
+   ],
+   [
+    "IsGenerativeOrchestrationEnabled",
+    "boolean",
+    "Indicates whether the agent uses generative orchestration (that is, dynamically chooses tools, knowledge, and actions based on context) to operate"
+   ],
+   [
+    "AgentAppId",
+    "string",
+    "The unique app identifier registered for the agent in Microsoft Entra"
+   ],
+   [
+    "ConnectedAgentsSchemaNames",
+    "dynamic",
+    "Lists the schema names of connected agents, which are independently managed agents that are linked to the main one for orchestration"
+   ],
+   [
+    "ChildAgentsSchemaNames",
+    "dynamic",
+    "Lists the schema names of the child agents that exist within the main agent"
+   ],
+   [
+    "Version",
+    "string",
+    "Version of the agent"
+   ],
+   [
+    "IsBlocked",
+    "boolean",
+    "Indicates whether the agent has been blocked by an administrator"
+   ],
+   [
+    "Instructions",
+    "string",
+    "The agent's system prompt that defines its default behavior, persona, and operating boundaries"
+   ],
+   [
+    "EntraObjectId",
+    "string",
+    "The agent's unique enterprise application object identifier by Microsoft Entra ID"
+   ],
+   [
+    "EntraBlueprintId",
+    "string",
+    "The agent's identity blueprint principal identifier by Microsoft Entra Agent ID"
+   ],
+   [
+    "AIModel",
+    "string",
+    "The AI model powering the agent"
+   ],
+   [
+    "AccessCapabilities",
+    "dynamic",
+    "Data access capabilities granted to the agent"
+   ],
+   [
+    "ElementTypes",
+    "dynamic",
+    "Technical component types that make up the agent"
+   ],
+   [
+    "SourceAgentId",
+    "string",
+    "The platform-native identifier of the agent, such as the Azure Resource Manager (ARM) identifier for Microsoft Foundry agents or the environment-scoped agent id"
+   ]
+  ]
+ },
+ "AGWAccessLogs": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/agwaccesslogs",
+  "cols": [
+   [
+    "Categories",
+    "Azure Resources, Net",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AdvancedRoutingConditionSetName",
+    "string",
+    "The advanced routing condition set associated with the given request log."
+   ],
+   [
+    "AdvancedRoutingMapName",
+    "string",
+    "The advanced routing map associated with the given request log."
+   ],
+   [
+    "AdvancedRoutingRulePriority",
+    "string",
+    "The priority of the advanced routing rule associated with the given request log."
+   ],
+   [
+    "BackendPoolName",
+    "string",
+    "The backend pool associated with the given request log."
+   ],
+   [
+    "BackendSettingName",
+    "string",
+    "The backend setting name associated with the given request log."
+   ],
+   [
+    "BackendSslCipher",
+    "string",
+    "Cipher suite used for TLS communication with the backend server."
+   ],
+   [
+    "BackendSslProtocol",
+    "string",
+    "SSL/TLS protocol used for communication with the backend server."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "ClientIp",
+    "string",
+    "IP of the immediate client of Application Gateway. If another proxy fronts your application gateway, this displays the IP of that fronting proxy."
+   ],
+   [
+    "ClientPort",
+    "int",
+    "Port of the client that initiated the request."
+   ],
+   [
+    "ClientResponseTime",
+    "real",
+    "Time difference (in seconds) between first byte received from the backend to first byte sent to the client."
+   ],
+   [
+    "ErrorInfo",
+    "string",
+    "Error category of the failing request."
+   ],
+   [
+    "Host",
+    "string",
+    "Address listed in the host header of the request. If rewritten using header rewrite, this field contains the updated host name."
+   ],
+   [
+    "HttpMethod",
+    "string",
+    "HTTP method used by the request."
+   ],
+   [
+    "HttpStatus",
+    "int",
+    "HTTP status code returned to the client from Application Gateway."
+   ],
+   [
+    "HttpVersion",
+    "string",
+    "HTTP version of the request."
+   ],
+   [
+    "InstanceId",
+    "string",
+    "Application Gateway instance that served the request."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "ListenerName",
+    "string",
+    "The listener associated with given request log."
+   ],
+   [
+    "OperationName",
+    "string",
+    "Name of the operation."
+   ],
+   [
+    "OriginalHost",
+    "string",
+    "This field contains the original request host name."
+   ],
+   [
+    "OriginalRequestUriWithArgs",
+    "string",
+    "This field contains the original request URL."
+   ],
+   [
+    "ReceivedBytes",
+    "int",
+    "Size of packet received, in bytes."
+   ],
+   [
+    "RequestQuery",
+    "string",
+    "Query string portion of the request URI."
+   ],
+   [
+    "RequestUri",
+    "string",
+    "URI of the received request."
+   ],
+   [
+    "_ResourceId",
+    "string",
+    "A unique identifier for the resource that the record is associated with"
+   ],
+   [
+    "RuleName",
+    "string",
+    "The rule associated with the given request log."
+   ],
+   [
+    "SentBytes",
+    "int",
+    "Size of packet sent, in bytes."
+   ],
+   [
+    "ServerConnectTime",
+    "real",
+    "Time (in seconds) taken to establish a connection with the backend server."
+   ],
+   [
+    "ServerHeaderTime",
+    "real",
+    "Time (in seconds) taken to receive the response headers from the backend server."
+   ],
+   [
+    "ServerResponseLatency",
+    "real",
+    "Latency of the response (in seconds) from the backend server."
+   ],
+   [
+    "ServerRouted",
+    "string",
+    "The backend server that application gateway routes the request to."
+   ],
+   [
+    "ServerStatus",
+    "int",
+    "HTTP status code of the backend server."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "SslCipher",
+    "string",
+    "Cipher suite being used for TLS communication (if TLS is enabled)."
+   ],
+   [
+    "SslClientCertificateFingerprint",
+    "string",
+    "Fingerprint of the SSL client certificate."
+   ],
+   [
+    "SslClientCertificateIssuerName",
+    "string",
+    "Issuer name of the SSL client certificate."
+   ],
+   [
+    "SslClientVerify",
+    "string",
+    "Status of SSL client certificate verification."
+   ],
+   [
+    "SslEnabled",
+    "string",
+    "Whether communication to the backend pools used TLS. Valid values are on and off."
+   ],
+   [
+    "SslProtocol",
+    "string",
+    "SSL/TLS protocol being used (if TLS is enabled)."
+   ],
+   [
+    "_SubscriptionId",
+    "string",
+    "A unique identifier for the subscription that the record is associated with"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "Time (UTC) when the log was created."
+   ],
+   [
+    "TimeTaken",
+    "real",
+    "Length of time (in seconds) that it takes for the first byte of a client request to be processed and its last-byte sent in the response to the client. It's impo"
+   ],
+   [
+    "TransactionId",
+    "string",
+    "Unique identifier to correlate the request received from the client."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UpstreamSourcePort",
+    "int",
+    "The source port used by Application Gateway when initiating a connection to the backend target."
+   ],
+   [
+    "UserAgent",
+    "string",
+    "User agent from the HTTP request header."
+   ],
+   [
+    "WafEvaluationTime",
+    "real",
+    "Length of time (in seconds) that it takes for the request to be processed by the WAF."
+   ],
+   [
+    "WafMode",
+    "string",
+    "Value can be either Detection or Prevention."
+   ],
+   [
+    "WafPolicyId",
+    "string",
+    "The resource ID of the WAF policy associated with the Application Gateway."
+   ]
+  ]
+ },
+ "NetworkAccessTraffic": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/networkaccesstraffic",
+  "cols": [
+   [
+    "Categories",
+    "Security, Network, I",
+    ""
+   ],
+   [
+    "Solutions",
+    "LogManagement",
+    ""
+   ],
+   [
+    "AccessType",
+    "string",
+    "Type of accessed application. Access type options: QuickAccess, PrivateAccess."
+   ],
+   [
+    "Action",
+    "string",
+    "The action taken on the network session. Allowed, Denied, Redirect."
+   ],
+   [
+    "AgenticSessionId",
+    "string",
+    "The identifier of the agentic session associated with the traffic."
+   ],
+   [
+    "AgentPlatform",
+    "string",
+    "The platform hosting the AI agent that initiated the transaction. Local, BedrockAws, MicrosoftFoundry, MicrosoftCopilotStudio. Populated for agentic traffic onl"
+   ],
+   [
+    "AgentTypeId",
+    "string",
+    "The identifier of the agent type associated with the traffic."
+   ],
+   [
+    "AgentVersion",
+    "string",
+    "The version of the agent connecting."
+   ],
+   [
+    "AgentVirtualId",
+    "string",
+    "The virtual identifier of the agent associated with the traffic."
+   ],
+   [
+    "AIAgentId",
+    "string",
+    "The unique identifier of the AI agent associated with the traffic."
+   ],
+   [
+    "AIAgentName",
+    "string",
+    "The name of the AI agent associated with the traffic."
+   ],
+   [
+    "AIDetectionConfidence",
+    "int",
+    "Confidence level of the AI detection result."
+   ],
+   [
+    "AIDetectionEvidence",
+    "string",
+    "Evidence details for the AI detection result."
+   ],
+   [
+    "AppId",
+    "string",
+    "Destination Application ID accessed in Azure AD during the transaction."
+   ],
+   [
+    "ApplicationObjectId",
+    "string",
+    "Microsoft Entra directory object ID of the Enterprise Application. Distinct from AppId (the application appId/clientId). Applies to Private Access traffic only;"
+   ],
+   [
+    "AppLoginDeviceId",
+    "string",
+    "Identifier of the device associated with the transaction. Applies to Private Access traffic only; null for other transaction types."
+   ],
+   [
+    "AppLoginUserId",
+    "string",
+    "Identifier of the login user associated with the transaction. Applies to Private Access traffic only; null for other transaction types."
+   ],
+   [
+    "AppSegmentId",
+    "string",
+    "Destination Application segment ID from Azure AD accessed during the transaction."
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "CloudAppCatalogId",
+    "string",
+    "The id of the application in the saas application catalog."
+   ],
+   [
+    "CloudAppCategories",
+    "string",
+    "The category list of the cloud application (i.e social media, search, generative AI)."
+   ],
+   [
+    "CloudAppCategory",
+    "string",
+    "The category of the cloud application (i.e social media, search, generative AI)."
+   ],
+   [
+    "CloudAppComplianceScore",
+    "int",
+    "The compliance score of the application."
+   ],
+   [
+    "CloudAppGeneralScore",
+    "int",
+    "The general score of the application."
+   ],
+   [
+    "CloudAppLegalScore",
+    "int",
+    "The legal score of the application."
+   ],
+   [
+    "CloudAppLoginUser",
+    "string",
+    "The username that was used to log into the application."
+   ],
+   [
+    "CloudAppName",
+    "string",
+    "The name of the application (i.e chatGPT, SalesForce, Bing)."
+   ],
+   [
+    "CloudAppRiskScore",
+    "int",
+    "The risk score of the application."
+   ],
+   [
+    "ConnectionId",
+    "string",
+    "Unique identifier representing the connection this traffic log was initiated from."
+   ],
+   [
+    "ConnectionStatus",
+    "string",
+    "Status of a connection. Status options: Open, Active, Closed."
+   ],
+   [
+    "ConnectorGroupId",
+    "string",
+    "Identifier of the connector group that served the Private Access transaction. Applies to Private Access traffic only; null for other transaction types."
+   ],
+   [
+    "ConnectorId",
+    "string",
+    "Private access connector ID."
+   ],
+   [
+    "ConnectorIp",
+    "string",
+    "Private access connector IP."
+   ],
+   [
+    "ConnectorName",
+    "string",
+    "Private access connector name."
+   ],
+   [
+    "CustomHeaders",
+    "dynamic",
+    "The custom HTTP headers applied to the transaction, as a JSON array where each element contains HeaderName, PreviousValue and NewValue."
+   ],
+   [
+    "Description",
+    "string",
+    "Additional details describing the traffic."
+   ],
+   [
+    "DestinationFqdn",
+    "string",
+    "The destination device hostname, including domain information when available."
+   ],
+   [
+    "DestinationIp",
+    "string",
+    "The IP address of the connection or session destination."
+   ],
+   [
+    "DestinationPort",
+    "int",
+    "The destination IP port."
+   ],
+   [
+    "DestinationUrl",
+    "string",
+    "The Url link of the connection or session destination."
+   ],
+   [
+    "DestinationWebCategories",
+    "string",
+    "The destination FQDN's Web Categories."
+   ],
+   [
+    "DeviceCategory",
+    "string",
+    "Device type the transaction originated from. Client, Branch, Secure Enterprise Browser."
+   ],
+   [
+    "DeviceId",
+    "string",
+    "The ID of the source device as reported in the record."
+   ],
+   [
+    "DeviceOperatingSystem",
+    "string",
+    "The client connecting operating system type."
+   ],
+   [
+    "DeviceOperatingSystemVersion",
+    "string",
+    "The client connecting operating system version."
+   ],
+   [
+    "DnsResponseOrigin",
+    "string",
+    "The origin of the DNS response for the traffic. Possible values: Cache, Onprem."
+   ],
+   [
+    "FilteringProfileId",
+    "string",
+    "The ID of the Filtering Profile associated with the action performed on traffic."
+   ],
+   [
+    "FilteringProfileName",
+    "string",
+    "The name of the Filtering Profile associated with the action performed on traffic."
+   ],
+   [
+    "HttpMethod",
+    "string",
+    "The http method used in the request."
+   ],
+   [
+    "HttpRequestContentType",
+    "string",
+    "The content type specified in the HTTP request header."
+   ],
+   [
+    "HttpResponseContentType",
+    "string",
+    "The content type specified in the HTTP response header."
+   ],
+   [
+    "HttpUserAgent",
+    "string",
+    "The user agent string from the HTTP request header."
+   ],
+   [
+    "InitiatingProcessName",
+    "string",
+    "The process initiating the traffic transaction."
+   ],
+   [
+    "IsAgentic",
+    "bool",
+    "Indicates whether the traffic was detected as agentic."
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "IsTokenAgentic",
+    "bool",
+    "Indicates whether the token used in the traffic was issued to an AI agent."
+   ],
+   [
+    "KerberosClientName",
+    "string",
+    "Name associated with client during authentication."
+   ],
+   [
+    "KerberosErrorCode",
+    "int",
+    "Kerberos error code (0-81). See KerberosErrorCodeName for corresponding error name."
+   ],
+   [
+    "KerberosErrorCodeName",
+    "string",
+    "Kerberos error code name. Possible values: KDC_ERR_NONE (0), KDC_ERR_NAME_EXP (1), KDC_ERR_SERVICE_EXP (2), KDC_ERR_BAD_PVNO (3), KDC_ERR_C_OLD_MAST_KVNO (4), K"
+   ],
+   [
+    "KerberosErrorText",
+    "string",
+    "Kerberos error text description."
+   ],
+   [
+    "KerberosMsgType",
+    "string",
+    "Kerberos message type number (AS/TGS). Possible values: 10 (AS_REQ), 11 (AS_REP), 12 (TGS_REQ), 13 (TGS_REP)."
+   ],
+   [
+    "KerberosNonce",
+    "int",
+    "Random number for request/reply matching."
+   ],
+   [
+    "McpPrimitiveName",
+    "string",
+    "The name of the MCP tool, resource, or prompt invoked (for example, delete_file)."
+   ],
+   [
+    "McpProtocolVersion",
+    "string",
+    "The negotiated MCP protocol version (for example, 2025-06-18)."
+   ],
+   [
+    "NetworkProtocol",
+    "string",
+    "The network protocol, IPv6 or IPv4."
+   ],
+   [
+    "OnPremAccount",
+    "string",
+    "Client principal name requesting the ticket."
+   ],
+   [
+    "OriginHeader",
+    "string",
+    "The origin header value."
+   ],
+   [
+    "PolicyId",
+    "string",
+    "The ID of the policy for which the request was denied by its rule."
+   ],
+   [
+    "PolicyName",
+    "string",
+    "The name of the filtering policy associated with the action performed on traffic."
+   ],
+   [
+    "PolicyRuleId",
+    "string",
+    "The ID of the rule for which the request was denied by."
+   ],
+   [
+    "PolicyType",
+    "string",
+    "The type of policy that evaluated the traffic. Possible values: mcpFirewall, promptProtection, threatIntelligence, webContentFiltering."
+   ],
+   [
+    "ProcessArgs",
+    "string",
+    "The process arguments associated with the network request."
+   ],
+   [
+    "ProcessingRegion",
+    "string",
+    "Region where the request was processed by the backend service."
+   ],
+   [
+    "ProcessTree",
+    "string",
+    "The process tree associated with the network request."
+   ],
+   [
+    "Realm",
+    "string",
+    "Kerberos realm of the target service."
+   ],
+   [
+    "ReceivedBytes",
+    "long",
+    "The number of bytes received."
+   ],
+   [
+    "RedirectDestination",
+    "string",
+    "The destination the transaction was redirected to. Populated when the action taken on the network session is Redirect; null otherwise."
+   ],
+   [
+    "ReferrerHeader",
+    "string",
+    "The Referer header value."
+   ],
+   [
+    "RemoteNetworkId",
+    "string",
+    "The ID from which traffic was sent or received, providing visibility into the origin of the traffic."
+   ],
+   [
+    "ResourceTenantId",
+    "string",
+    "Tenant ID that owns the resource."
+   ],
+   [
+    "ResponseCode",
+    "int",
+    "The response code returned from the server."
+   ],
+   [
+    "RuleName",
+    "string",
+    "The name of the rule associated with the action performed on traffic."
+   ],
+   [
+    "SecurityPrincipalType",
+    "string",
+    "The type of the security principal that initiated the transaction. User, Device."
+   ],
+   [
+    "SentBytes",
+    "long",
+    "The number of bytes sent."
+   ],
+   [
+    "ServicePrincipalName",
+    "string",
+    "Target service the client is trying to access."
+   ],
+   [
+    "SessionId",
+    "string",
+    "Unique identifier representing the session."
+   ],
+   [
+    "SourceIp",
+    "string",
+    "The IP address from which the connection or session originated."
+   ],
+   [
+    "SourcePort",
+    "int",
+    "The IP port from which the connection originated."
+   ],
+   [
+    "SourceSystem",
+    "string",
+    "The type of agent the event was collected by. For example, OpsManager for Windows agent, either direct connect or Operations Manager, Linux for all Linux agents"
+   ],
+   [
+    "TenantId",
+    "string",
+    "The Log Analytics workspace ID"
+   ],
+   [
+    "ThreatType",
+    "string",
+    "The identified threat type associated with the traffic."
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    "The date and time (UTC) that the event was generated."
+   ],
+   [
+    "TlsAction",
+    "string",
+    "The TLS action taken on the traffic."
+   ],
+   [
+    "TlsPolicyId",
+    "string",
+    "The unique token identifier of the TLS policy applied to the traffic."
+   ],
+   [
+    "TlsPolicyName",
+    "string",
+    "The name for the TLS policy applied to the traffic."
+   ],
+   [
+    "TlsRuleId",
+    "string",
+    "The unique identifier of the TLS rule applied to the traffic."
+   ],
+   [
+    "TlsRuleName",
+    "string",
+    "The name of the TLS rule applied to the traffic."
+   ],
+   [
+    "TlsStatus",
+    "string",
+    "The status of the Tls option."
+   ],
+   [
+    "Token3PExpiry",
+    "datetime",
+    "The expiry date of the access token used to access the private access application."
+   ],
+   [
+    "Token3PIssuedAt",
+    "datetime",
+    "The issued date of the access token used to access the private access application."
+   ],
+   [
+    "Token3PUniqueId",
+    "string",
+    "The unique token identifier of the access token used to access the private access application."
+   ],
+   [
+    "Token3PValidFrom",
+    "datetime",
+    "The validity date of the access token used to access the private access application."
+   ],
+   [
+    "TrafficType",
+    "string",
+    "The type of the target destination traffic."
+   ],
+   [
+    "TransactionId",
+    "string",
+    "Unique identifier that representing a roundtrip of request response."
+   ],
+   [
+    "TransportProtocol",
+    "string",
+    "The IP protocol used by the connection or session as listed in IANA protocol assignment."
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "UniqueTokenId",
+    "string",
+    "The unique token identifier."
+   ],
+   [
+    "UserId",
+    "string",
+    "A machine-readable, alphanumeric, unique representation of the source user."
+   ],
+   [
+    "UserPrincipalName",
+    "string",
+    "The source username, including domain information when available."
+   ],
+   [
+    "VendorNames",
+    "string",
+    "The name of the vendors who detected the threat."
+   ],
+   [
+    "XForwardedFor",
+    "string",
+    "X-Forwarded-For header of the HTTP request."
+   ]
+  ]
+ },
+ "SecurityAlert": {
+  "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/securityalert",
+  "cols": [
+   [
+    "Categories",
+    "Security",
+    ""
+   ],
+   [
+    "Solutions",
+    "AzureSecurityOfThing",
+    ""
+   ],
+   [
+    "AlertLink",
+    "string",
+    ""
+   ],
+   [
+    "AlertName",
+    "string",
+    ""
+   ],
+   [
+    "AlertSeverity",
+    "string",
+    ""
+   ],
+   [
+    "AlertType",
+    "string",
+    ""
+   ],
+   [
+    "_BilledSize",
+    "real",
+    "The record size in bytes"
+   ],
+   [
+    "CompromisedEntity",
+    "string",
+    ""
+   ],
+   [
+    "ConfidenceLevel",
+    "string",
+    ""
+   ],
+   [
+    "ConfidenceScore",
+    "real",
+    ""
+   ],
+   [
+    "Description",
+    "string",
+    ""
+   ],
+   [
+    "DisplayName",
+    "string",
+    ""
+   ],
+   [
+    "EndTime",
+    "datetime",
+    ""
+   ],
+   [
+    "Entities",
+    "string",
+    ""
+   ],
+   [
+    "ExtendedLinks",
+    "string",
+    ""
+   ],
+   [
+    "ExtendedProperties",
+    "string",
+    ""
+   ],
+   [
+    "_IsBillable",
+    "string",
+    "Specifies whether ingesting the data is billable. When _IsBillable is false ingestion isn't billed to your Azure account"
+   ],
+   [
+    "IsIncident",
+    "bool",
+    ""
+   ],
+   [
+    "ProcessingEndTime",
+    "datetime",
+    ""
+   ],
+   [
+    "ProductComponentName",
+    "string",
+    ""
+   ],
+   [
+    "ProductName",
+    "string",
+    ""
+   ],
+   [
+    "ProviderName",
+    "string",
+    ""
+   ],
+   [
+    "RemediationSteps",
+    "string",
+    ""
+   ],
+   [
+    "ResourceId",
+    "string",
+    ""
+   ],
+   [
+    "SourceComputerId",
+    "string",
+    ""
+   ],
+   [
+    "StartTime",
+    "datetime",
+    ""
+   ],
+   [
+    "Status",
+    "string",
+    ""
+   ],
+   [
+    "SubTechniques",
+    "string",
+    ""
+   ],
+   [
+    "SystemAlertId",
+    "string",
+    ""
+   ],
+   [
+    "Tactics",
+    "string",
+    ""
+   ],
+   [
+    "Techniques",
+    "string",
+    ""
+   ],
+   [
+    "TimeGenerated",
+    "datetime",
+    ""
+   ],
+   [
+    "Type",
+    "string",
+    "The name of the table"
+   ],
+   [
+    "VendorName",
+    "string",
+    ""
+   ],
+   [
+    "VendorOriginalId",
+    "string",
+    ""
+   ],
+   [
+    "WorkspaceResourceGroup",
+    "string",
+    ""
+   ],
+   [
+    "WorkspaceSubscriptionId",
+    "string",
+    ""
+   ]
+  ]
+ },
+ "AlertInfo": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-alertinfo-table",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the record was generated"
+   ],
+   [
+    "AlertId",
+    "string",
+    "Unique identifier for the alert"
+   ],
+   [
+    "Title",
+    "string",
+    "Title of the alert"
+   ],
+   [
+    "Category",
+    "string",
+    "Type of threat indicator or breach activity identified by the alert"
+   ],
+   [
+    "Severity",
+    "string",
+    "Indicates the potential impact (high, medium, or low) of the threat indicator or breach activity identified by the alert"
+   ],
+   [
+    "ServiceSource",
+    "string",
+    "Product or service that provided the alert information"
+   ],
+   [
+    "DetectionSource",
+    "string",
+    "Detection technology or sensor that identified the notable component or activity"
+   ],
+   [
+    "AttackTechniques",
+    "string",
+    "MITRE ATT&CK techniques associated with the activity that triggered the alert"
+   ]
+  ]
+ },
+ "AlertEvidence": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-alertevidence-table",
+  "cols": [
+   [
+    "Timestamp",
+    "datetime",
+    "Date and time when the event was recorded"
+   ],
+   [
+    "AlertId",
+    "string",
+    "Unique identifier for the alert"
+   ],
+   [
+    "Title",
+    "string",
+    "Title of the alert"
+   ],
+   [
+    "Categories",
+    "string",
+    "List of categories that the information belongs to, in JSON array format"
+   ],
+   [
+    "AttackTechniques",
+    "string",
+    "MITRE ATT&CK techniques associated with the activity that triggered the alert"
+   ],
+   [
+    "ServiceSource",
+    "string",
+    "Product or service that provided the alert information"
+   ],
+   [
+    "DetectionSource",
+    "string",
+    "Detection technology or sensor that identified the notable component or activity"
+   ],
+   [
+    "EntityType",
+    "string",
+    "Type of object, such as a file, a process, a device, or a user"
+   ],
+   [
+    "EvidenceRole",
+    "string",
+    "How the entity is involved in an alert, indicating whether it is impacted or is merely related"
+   ],
+   [
+    "EvidenceDirection",
+    "string",
+    "Indicates whether the entity is the source or the destination of a network connection"
+   ],
+   [
+    "FileName",
+    "string",
+    "Name of the file that the recorded action was applied to"
+   ],
+   [
+    "FolderPath",
+    "string",
+    "Folder containing the file that the recorded action was applied to"
+   ],
+   [
+    "SHA1",
+    "string",
+    "SHA-1 of the file that the recorded action was applied to"
+   ],
+   [
+    "SHA256",
+    "string",
+    "SHA-256 of the file that the recorded action was applied to. This field is usually not populated\u2014use the SHA1 column when available."
+   ],
+   [
+    "FileSize",
+    "long",
+    "Size of the file in bytes"
+   ],
+   [
+    "ThreatFamily",
+    "string",
+    "Malware family that the suspicious or malicious file or process has been classified under"
+   ],
+   [
+    "RemoteIP",
+    "string",
+    "IP address that was being connected to"
+   ],
+   [
+    "RemoteUrl",
+    "string",
+    "URL or fully qualified domain name (FQDN) that was being connected to"
+   ],
+   [
+    "AccountName",
+    "string",
+    "User name of the account"
+   ],
+   [
+    "AccountDomain",
+    "string",
+    "Domain of the account"
+   ],
+   [
+    "AccountSid",
+    "string",
+    "Security Identifier (SID) of the account"
+   ],
+   [
+    "AccountObjectId",
+    "string",
+    "Unique identifier for the account in Microsoft Entra ID"
+   ],
+   [
+    "AccountUpn",
+    "string",
+    "User principal name (UPN) of the account"
+   ],
+   [
+    "DeviceId",
+    "string",
+    "Unique identifier for the device in the service"
+   ],
+   [
+    "DeviceName",
+    "string",
+    "Fully qualified domain name (FQDN) of the device"
+   ],
+   [
+    "LocalIP",
+    "string",
+    "IP address assigned to the local device used during communication"
+   ],
+   [
+    "NetworkMessageId",
+    "string",
+    "Unique identifier for the email, generated by Office 365"
+   ],
+   [
+    "EmailSubject",
+    "string",
+    "Subject of the email"
+   ],
+   [
+    "Application",
+    "string",
+    "Application that performed the recorded action"
+   ],
+   [
+    "ApplicationId",
+    "int",
+    "Unique identifier for the application"
+   ],
+   [
+    "OAuthApplicationId",
+    "string",
+    "Unique identifier of the third-party OAuth application"
+   ],
+   [
+    "ProcessCommandLine",
+    "string",
+    "Command line used to create the new process"
+   ],
+   [
+    "RegistryKey",
+    "string",
+    "Registry key that the recorded action was applied to"
+   ],
+   [
+    "RegistryValueName",
+    "string",
+    "Name of the registry value that the recorded action was applied to"
+   ],
+   [
+    "RegistryValueData",
+    "string",
+    "Data of the registry value that the recorded action was applied to"
+   ],
+   [
+    "AdditionalFields",
+    "string",
+    "Additional information about the entity or event"
+   ],
+   [
+    "Severity",
+    "string",
+    "Indicates the potential impact (high, medium, or low) of the threat indicator or breach activity identified by the alert"
+   ],
+   [
+    "CloudResource",
+    "string",
+    "Cloud resource name"
+   ],
+   [
+    "CloudPlatform",
+    "string",
+    "The cloud platform that the resource belongs to, can be Azure, Amazon Web Services, or Google Cloud Platform"
+   ],
+   [
+    "ResourceType",
+    "string",
+    "Type of cloud resource"
+   ],
+   [
+    "ResourceID",
+    "string",
+    "Unique identifier of the cloud resource accessed"
+   ],
+   [
+    "SubscriptionId",
+    "string",
+    "Unique identifier of the cloud service subscription"
+   ]
+  ]
+ },
+ "IdentityInfo": {
+  "url": "https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-identityinfo-table",
+  "cols": [
+   [
+    "AccountObjectId",
+    "string",
+    "Unique identifier for the account in Microsoft Entra ID"
+   ],
+   [
+    "AccountUpn",
+    "string",
+    "User principal name (UPN) of the account"
+   ],
+   [
+    "OnPremSid",
+    "string",
+    "On-premises security identifier (SID) of the account"
+   ],
+   [
+    "AccountDisplayName",
+    "string",
+    "Name of the account user displayed in the address book. Typically a combination of a given or first name, a middle initial, and a last name or surname."
+   ],
+   [
+    "AccountName",
+    "string",
+    "User name of the account"
+   ],
+   [
+    "CriticalityLevel",
+    "int",
+    "The criticality score of the account"
+   ],
+   [
+    "CloudSid",
+    "string",
+    "Cloud security identifier of the account"
+   ],
+   [
+    "GivenName",
+    "string",
+    "Given name or first name of the account user"
+   ],
+   [
+    "Surname",
+    "string",
+    "Surname, family name, or last name of the account user"
+   ],
+   [
+    "Department",
+    "string",
+    "Name of the department that the account user belongs to"
+   ],
+   [
+    "JobTitle",
+    "string",
+    "Job title of the account user"
+   ],
+   [
+    "EmailAddress",
+    "string",
+    "SMTP address of the account"
+   ],
+   [
+    "SipProxyAddress",
+    "string",
+    "Voice over IP (VOIP) session initiation protocol (SIP) address of the account"
+   ],
+   [
+    "Address",
+    "string",
+    "Address of the account user"
+   ],
+   [
+    "City",
+    "string",
+    "City where the account user is located"
+   ],
+   [
+    "Country",
+    "string",
+    "Country/Region where the account user is located"
+   ],
+   [
+    "IsAccountEnabled",
+    "boolean",
+    "Indicates whether the account is enabled or not"
+   ],
+   [
+    "RiskLevel",
+    "string",
+    "Microsoft Entra ID risk level of the user account; possible values: Low, Medium, High"
+   ],
+   [
+    "RiskLevelDetails",
+    "string",
+    "Details regarding the Microsoft Entra ID risk level"
+   ],
+   [
+    "TenantId",
+    "string",
+    "Unique identifier representing your organization's instance of Microsoft Entra ID"
+   ],
+   [
+    "OnPremObjectId",
+    "string",
+    "Active Directory object ID of the user"
+   ],
+   [
+    "TenantMembershipType",
+    "string",
+    "User type in Microsoft Entra ID; possible values: Guest, Member"
+   ],
+   [
+    "UserAccountControl",
+    "string",
+    "Security attributes of the user account in the Active Directory domain"
+   ],
+   [
+    "IdentityEnvironment",
+    "string",
+    "Environment where the identity is used; possible values: CloudOnly, Hybrid, On-premises"
+   ],
+   [
+    "SourceProviders",
+    "dynamic",
+    "Source providers of the accounts for the identity; possible values: ActiveDirectory, EntraID, Okta"
+   ]
+  ]
+ },
+ "AIAgentRegister_CL": {
+  "url": "deploy/register/AIAgentRegister_CL.columns.json (Yuma custom table)",
+  "cols": [
+   [
+    "TimeGenerated",
+    "datetime",
+    "When the record was written"
+   ],
+   [
+    "RecordType",
+    "string",
+    "RegisterSnapshot | ConsentDecision | ReviewCompleted | Retired"
+   ],
+   [
+    "AgentKey",
+    "string",
+    "Stable key: AgentsInfo AgentId, or the Entra service principal object ID for consented apps"
+   ],
+   [
+    "AgentName",
+    "string",
+    "Display name of the agent or AI app"
+   ],
+   [
+    "Source",
+    "string",
+    "AgentsInfo | EntraConsent | Manual"
+   ],
+   [
+    "Platform",
+    "string",
+    "Agent platform from AgentsInfo, or EntraApp"
+   ],
+   [
+    "AppId",
+    "string",
+    "Entra application (client) ID"
+   ],
+   [
+    "ServicePrincipalId",
+    "string",
+    "Entra service principal object ID"
+   ],
+   [
+    "EntraAgentId",
+    "string",
+    "Entra Agent ID agent identity, if any (ISM-2133)"
+   ],
+   [
+    "EntraBlueprintId",
+    "string",
+    "Entra Agent ID blueprint, if any"
+   ],
+   [
+    "Owners",
+    "dynamic",
+    "Owner list (ISM-2135 owner)"
+   ],
+   [
+    "BusinessPurpose",
+    "string",
+    "Business purpose (ISM-2135)"
+   ],
+   [
+    "Identities",
+    "dynamic",
+    "Identities assigned to the agent (ISM-2135)"
+   ],
+   [
+    "Permissions",
+    "dynamic",
+    "Granted permissions or scopes"
+   ],
+   [
+    "DeclaredTools",
+    "dynamic",
+    "Tools the agent can call"
+   ],
+   [
+    "McpServers",
+    "dynamic",
+    "MCP servers the agent uses"
+   ],
+   [
+    "DataSources",
+    "dynamic",
+    "Declared data sources"
+   ],
+   [
+    "SharedWith",
+    "dynamic",
+    "Sharing scope"
+   ],
+   [
+    "LifecycleStatus",
+    "string",
+    "Lifecycle status from the source"
+   ],
+   [
+    "ConsentType",
+    "string",
+    "AllPrincipals (admin) or Principal (user)"
+   ],
+   [
+    "IsAdminConsent",
+    "boolean",
+    "True if an administrator consented"
+   ],
+   [
+    "ConsentedBy",
+    "string",
+    "UPN of the consenting user"
+   ],
+   [
+    "ConsentDate",
+    "datetime",
+    "When consent was granted"
+   ],
+   [
+    "Decision",
+    "string",
+    "Approved | Revoked | Investigate | Pending"
+   ],
+   [
+    "DecisionBy",
+    "string",
+    "UPN of the person who decided (ISM-2113 human approval)"
+   ],
+   [
+    "DecisionReason",
+    "string",
+    "Free-text reason"
+   ],
+   [
+    "LastReviewDate",
+    "datetime",
+    "Date of the last ISM-2138 review"
+   ],
+   [
+    "RiskRating",
+    "string",
+    "Low | Medium | High"
+   ],
+   [
+    "IncidentArmId",
+    "string",
+    "Sentinel incident that produced the record"
+   ],
+   [
+    "Notes",
+    "string",
+    "Notes"
+   ]
+  ]
+ }
+}

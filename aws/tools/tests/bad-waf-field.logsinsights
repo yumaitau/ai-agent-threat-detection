@@ -1,0 +1,4 @@
+# negative control: WAF logs have httpRequest.clientIp, not httpRequest.sourceIp; "summarize" is KQL, not Logs Insights
+# Source doc: https://docs.aws.amazon.com/waf/latest/developerguide/logging-fields.html
+fields httpRequest.sourceIp as ip
+| summarize count() by ip

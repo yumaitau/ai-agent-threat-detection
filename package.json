@@ -1,0 +1,9 @@
+{
+  "name": "ai-agent-threat-detection",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline validation tools for AI and agent threat detections",
+  "license": "MIT",
+  "scripts": {"validate": "bash tools/validate_all.sh"},
+  "devDependencies": {"@kusto/language-service-next": "12.4.1", "asl-validator": "4.0.0"}
+}

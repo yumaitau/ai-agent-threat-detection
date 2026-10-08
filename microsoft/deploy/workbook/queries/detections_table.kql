@@ -1,0 +1,6 @@
+SecurityAlert
+| where TimeGenerated > ago(30d)
+| where AlertName startswith "Yuma AIA-"
+| extend DetectionId = extract(@"Yuma AIA-(D\d+)", 1, AlertName)
+| project TimeGenerated, DetectionId, AlertName, AlertSeverity, CompromisedEntity, SystemAlertId
+| order by TimeGenerated desc

@@ -1,0 +1,9 @@
+// Defender XDR advanced hunting query run by PB4 through Microsoft Graph runHuntingQuery (ThreatHunting.Read.All).
+//   https://learn.microsoft.com/en-us/graph/api/security-security-runhuntingquery
+// Table: AgentsInfo (preview). https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-agentsinfo-table
+// Returns the latest state of every agent, including deleted ones (PB4 writes those as RecordType "Retired").
+AgentsInfo
+| summarize arg_max(Timestamp, *) by AgentId
+| project AgentId, AgentName, Platform, AgentDescription, EntraAgentId, EntraBlueprintId, Owners, Permissions,
+          ToolsAuthenticationType, DeclaredTools, McpServers, DeclaredDataSources, SharedWith, LifecycleStatus,
+          PublishedStatus, LastUpdatedDateTime

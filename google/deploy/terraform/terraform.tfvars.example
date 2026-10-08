@@ -1,0 +1,7 @@
+project_id               = "my-sec-tooling-project"
+org_id                   = "000000000000"
+logs_table               = "my-sec-tooling-project.org_logs_linked._AllLogs"
+workspace_activity_table = "my-sec-tooling-project.workspace_logs.activity"
+evidence_bucket_name     = "my-org-ism-ai-evidence"
+security_policy_name     = "public-app-waf"
+workspace_admin_subject  = "<SVC_OAUTH_REVOKE_EMAIL>"

@@ -1,0 +1,365 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "title": "Yuma-PB1-Agent-Permission-Containment",
+    "author": "Yuma IT",
+    "description": "Sentinel incident trigger. Enriches the service principal from Graph, asks the SOC in Teams, and disables the service principal only on human approval.",
+    "comments": "UNVALIDATED skeleton. After deploy: authorise the Teams connection, grant the Logic App managed identity Graph Application.Read.All plus Application.ReadWrite.OwnedBy or Application.ReadWrite.All, and give it Microsoft Sentinel Responder on the workspace."
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "Yuma-PB1-Agent-Permission-Containment"
+    },
+    "TeamsGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Team (group) ID for the SOC channel"
+      }
+    },
+    "TeamsChannelId": {
+      "type": "string",
+      "metadata": {
+        "description": "SOC channel ID"
+      }
+    }
+  },
+  "variables": {
+    "SentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "TeamsConnectionName": "[concat('teams-', parameters('PlaybookName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('SentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('SentinelConnectionName')]",
+        "customParameterValues": {},
+        "parameterValueType": "Alternative",
+        "api": {
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('TeamsConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "displayName": "[variables('TeamsConnectionName')]",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "Yuma-PB1-Agent-Permission-Containment",
+        "hidden-SentinelTemplateVersion": "0.1"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
+      ],
+      "properties": {
+        "state": "Disabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "TeamsGroupId": {
+              "type": "String",
+              "defaultValue": "[parameters('TeamsGroupId')]"
+            },
+            "TeamsChannelId": {
+              "type": "String",
+              "defaultValue": "[parameters('TeamsChannelId')]"
+            }
+          },
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "path": "/incident-creation",
+                "body": {
+                  "callback_url": "@{listCallbackUrl()}"
+                }
+              }
+            }
+          },
+          "actions": {
+            "Init_SpId": {
+              "type": "InitializeVariable",
+              "runAfter": {},
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "SpId",
+                    "type": "string",
+                    "value": "@{first(json(first(triggerBody()?['object']?['properties']?['Alerts'])?['properties']?['additionalData']?['Custom Details'])?['ClientSpId'])}"
+                  }
+                ]
+              }
+            },
+            "Get_service_principal": {
+              "type": "Http",
+              "runAfter": {
+                "Init_SpId": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "GET",
+                "uri": "https://graph.microsoft.com/v1.0/servicePrincipals/@{variables('SpId')}?$select=id,appId,displayName,accountEnabled,verifiedPublisher,appOwnerOrganizationId,servicePrincipalType,tags",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://graph.microsoft.com"
+                }
+              }
+            },
+            "Get_owners": {
+              "type": "Http",
+              "runAfter": {
+                "Get_service_principal": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "GET",
+                "uri": "https://graph.microsoft.com/v1.0/servicePrincipals/@{variables('SpId')}/owners?$select=id,displayName,userPrincipalName",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://graph.microsoft.com"
+                }
+              }
+            },
+            "Select_owner_upns": {
+              "type": "Select",
+              "runAfter": {
+                "Get_owners": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "from": "@body('Get_owners')?['value']",
+                "select": "@coalesce(item()?['userPrincipalName'], item()?['displayName'])"
+              }
+            },
+            "Get_app_role_assignments": {
+              "type": "Http",
+              "runAfter": {
+                "Select_owner_upns": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "method": "GET",
+                "uri": "https://graph.microsoft.com/v1.0/servicePrincipals/@{variables('SpId')}/appRoleAssignments",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://graph.microsoft.com"
+                }
+              }
+            },
+            "Comment_enrichment": {
+              "type": "ApiConnection",
+              "runAfter": {
+                "Get_app_role_assignments": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/Incidents/Comment",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p>Yuma PB1 enrichment. App: @{body('Get_service_principal')?['displayName']} (appId @{body('Get_service_principal')?['appId']}). Enabled: @{body('Get_service_principal')?['accountEnabled']}. Owners: @{join(body('Select_owner_upns'), ', ')}. App role assignments: @{length(body('Get_app_role_assignments')?['value'])}. Awaiting human decision (ISM-2113).</p>"
+                }
+              }
+            },
+            "Post_adaptive_card_and_wait_for_a_response": {
+              "type": "ApiConnectionWebhook",
+              "runAfter": {
+                "Comment_enrichment": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['teams']['connectionId']"
+                  }
+                },
+                "path": "/v1.0/teams/conversation/gatherinput/poster/Flow bot/location/@{encodeURIComponent('Channel')}/$subscriptions",
+                "body": {
+                  "notificationUrl": "@{listCallbackUrl()}",
+                  "body": {
+                    "messageBody": "{\"$schema\": \"http://adaptivecards.io/schemas/adaptive-card.json\", \"type\": \"AdaptiveCard\", \"version\": \"1.4\", \"body\": [{\"type\": \"TextBlock\", \"size\": \"Large\", \"weight\": \"Bolder\", \"wrap\": true, \"text\": \"AI agent permission alert\"}, {\"type\": \"TextBlock\", \"wrap\": true, \"text\": \"Incident @{triggerBody()?['object']?['properties']?['incidentNumber']}: @{triggerBody()?['object']?['properties']?['title']}\"}, {\"type\": \"FactSet\", \"facts\": [{\"title\": \"App\", \"value\": \"@{body('Get_service_principal')?['displayName']}\"}, {\"title\": \"App ID\", \"value\": \"@{body('Get_service_principal')?['appId']}\"}, {\"title\": \"Publisher verified\", \"value\": \"@{body('Get_service_principal')?['verifiedPublisher']?['displayName']}\"}, {\"title\": \"Owners\", \"value\": \"@{join(body('Select_owner_upns'), ', ')}\"}, {\"title\": \"App role assignments\", \"value\": \"@{length(body('Get_app_role_assignments')?['value'])}\"}]}, {\"type\": \"TextBlock\", \"wrap\": true, \"text\": \"[Open incident](@{triggerBody()?['object']?['properties']?['incidentUrl']})\"}, {\"type\": \"Input.ChoiceSet\", \"id\": \"decision\", \"style\": \"expanded\", \"value\": \"keep\", \"choices\": [{\"title\": \"Disable the service principal (stops new tokens)\", \"value\": \"disable\"}, {\"title\": \"Keep enabled and monitor\", \"value\": \"keep\"}, {\"title\": \"Expected, close as benign\", \"value\": \"benign\"}]}], \"actions\": [{\"type\": \"Action.Submit\", \"title\": \"Submit\"}]}",
+                    "updateMessage": "Thanks, decision recorded in Sentinel.",
+                    "recipient": {
+                      "groupId": "@parameters('TeamsGroupId')",
+                      "channelId": "@parameters('TeamsChannelId')"
+                    }
+                  }
+                }
+              }
+            },
+            "Switch_on_decision": {
+              "type": "Switch",
+              "runAfter": {
+                "Post_adaptive_card_and_wait_for_a_response": [
+                  "Succeeded"
+                ]
+              },
+              "expression": "@body('Post_adaptive_card_and_wait_for_a_response')?['data']?['decision']",
+              "cases": {
+                "Disable": {
+                  "case": "disable",
+                  "actions": {
+                    "Disable_service_principal": {
+                      "type": "Http",
+                      "runAfter": {},
+                      "inputs": {
+                        "method": "PATCH",
+                        "uri": "https://graph.microsoft.com/v1.0/servicePrincipals/@{variables('SpId')}",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "accountEnabled": false
+                        },
+                        "authentication": {
+                          "type": "ManagedServiceIdentity",
+                          "audience": "https://graph.microsoft.com"
+                        }
+                      }
+                    },
+                    "Comment_disabled": {
+                      "type": "ApiConnection",
+                      "runAfter": {
+                        "Disable_service_principal": [
+                          "Succeeded"
+                        ]
+                      },
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/Incidents/Comment",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p>Service principal @{variables('SpId')} disabled by @{body('Post_adaptive_card_and_wait_for_a_response')?['responder']?['userPrincipalName']}. Existing access tokens stay valid until expiry; revoke grants and rotate credentials as follow-up (ISM-2146, ISM-2148).</p>"
+                        }
+                      }
+                    }
+                  }
+                },
+                "Benign": {
+                  "case": "benign",
+                  "actions": {
+                    "Comment_benign": {
+                      "type": "ApiConnection",
+                      "runAfter": {},
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/Incidents/Comment",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p>Marked expected by @{body('Post_adaptive_card_and_wait_for_a_response')?['responder']?['userPrincipalName']}. Add the service principal to the D04 AllowedAppIds list and the AI agent register (ISM-2135).</p>"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "default": {
+                "actions": {
+                  "Comment_keep": {
+                    "type": "ApiConnection",
+                    "runAfter": {},
+                    "inputs": {
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                        }
+                      },
+                      "method": "post",
+                      "path": "/Incidents/Comment",
+                      "body": {
+                        "incidentArmId": "@triggerBody()?['object']?['id']",
+                        "message": "<p>Kept enabled for monitoring by @{body('Post_adaptive_card_and_wait_for_a_response')?['responder']?['userPrincipalName']}. Review permissions at the next ISM-2138 consent review.</p>"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
+                "connectionName": "[variables('SentinelConnectionName')]",
+                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              },
+              "teams": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
+                "connectionName": "[variables('TeamsConnectionName')]",
+                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "playbookPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+    }
+  }
+}

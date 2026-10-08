@@ -1,0 +1,178 @@
+[
+ {
+  "name": "record_time",
+  "type": "TIMESTAMP",
+  "mode": "REQUIRED",
+  "description": "When the record was written"
+ },
+ {
+  "name": "record_type",
+  "type": "STRING",
+  "mode": "REQUIRED",
+  "description": "RegisterSnapshot | ConsentDecision | ContainmentDecision | ReviewCompleted | Retired"
+ },
+ {
+  "name": "agent_key",
+  "type": "STRING",
+  "mode": "REQUIRED",
+  "description": "Stable key: Agent Runtime / Gemini Enterprise / Agent Registry resource name, or 'oauth:<client_id>' / 'dwd:<client_id>' for Workspace apps"
+ },
+ {
+  "name": "agent_name",
+  "type": "STRING",
+  "description": "Display name"
+ },
+ {
+  "name": "source",
+  "type": "STRING",
+  "description": "AgentRuntime | GeminiEnterprise | AgentRegistry | CloudAsset | WorkspaceOAuth | WorkspaceDWD | Manual"
+ },
+ {
+  "name": "platform",
+  "type": "STRING",
+  "description": "agentFramework (google-adk, langchain, ...) or WorkspaceApp"
+ },
+ {
+  "name": "project_id",
+  "type": "STRING",
+  "description": "Google Cloud project, if any"
+ },
+ {
+  "name": "location",
+  "type": "STRING",
+  "description": "Region, if any"
+ },
+ {
+  "name": "oauth_client_id",
+  "type": "STRING",
+  "description": "Workspace OAuth client ID, if any"
+ },
+ {
+  "name": "identity_type",
+  "type": "STRING",
+  "description": "ReasoningEngine spec.identityType: SERVICE_ACCOUNT | AGENT_IDENTITY | IDENTITY_TYPE_UNSPECIFIED (ISM-2133)"
+ },
+ {
+  "name": "effective_identity",
+  "type": "STRING",
+  "description": "ReasoningEngine spec.effectiveIdentity (service agent, service account or agents.global principal)"
+ },
+ {
+  "name": "service_account",
+  "type": "STRING",
+  "description": "Service account the agent runs as, if any"
+ },
+ {
+  "name": "service_account_unique_id",
+  "type": "STRING",
+  "description": "Numeric unique ID of that service account (audit resourceName can carry this instead of the email)"
+ },
+ {
+  "name": "owners",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "Owners (ISM-2135)"
+ },
+ {
+  "name": "business_purpose",
+  "type": "STRING",
+  "description": "Business purpose (ISM-2135)"
+ },
+ {
+  "name": "identities",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "Identities assigned to the agent (ISM-2135)"
+ },
+ {
+  "name": "user_accounts_and_credentials",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "User accounts, delegated users, keys or auth providers the agent uses (ISM-2135)"
+ },
+ {
+  "name": "permissions",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "IAM roles and OAuth scopes granted"
+ },
+ {
+  "name": "declared_tools",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "Tools the agent can call (classMethods, enabledTools, Agent Registry skills)"
+ },
+ {
+  "name": "mcp_servers",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "MCP servers the agent uses (Agent Registry)"
+ },
+ {
+  "name": "data_sources",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "Data repositories it can access"
+ },
+ {
+  "name": "shared_with",
+  "type": "STRING",
+  "mode": "REPEATED",
+  "description": "Sharing scope (Gemini Enterprise sharingConfig, OAuth users)"
+ },
+ {
+  "name": "lifecycle_status",
+  "type": "STRING",
+  "description": "State from source (e.g. Gemini Enterprise agent state)"
+ },
+ {
+  "name": "consent_type",
+  "type": "STRING",
+  "description": "UserConsent | AdminTrusted | DomainWideDelegation"
+ },
+ {
+  "name": "consented_by",
+  "type": "STRING",
+  "description": "Who consented"
+ },
+ {
+  "name": "consent_time",
+  "type": "TIMESTAMP",
+  "description": "When consent was granted"
+ },
+ {
+  "name": "decision",
+  "type": "STRING",
+  "description": "Approved | Revoked | Contained | Investigate | Pending"
+ },
+ {
+  "name": "decision_by",
+  "type": "STRING",
+  "description": "Identity of the human who decided (ISM-2113)"
+ },
+ {
+  "name": "decision_reason",
+  "type": "STRING",
+  "description": "Free-text reason"
+ },
+ {
+  "name": "last_review_time",
+  "type": "TIMESTAMP",
+  "description": "Last ISM-2138 review"
+ },
+ {
+  "name": "risk_rating",
+  "type": "STRING",
+  "description": "Low | Medium | High"
+ },
+ {
+  "name": "case_ref",
+  "type": "STRING",
+  "description": "SecOps case ID or workflow execution ID"
+ },
+ {
+  "name": "notes",
+  "type": "STRING",
+  "description": "Notes"
+ }
+]

@@ -1,0 +1,8 @@
+let Reg = YumaAIRegister();
+union
+    (Reg | where Gap_NoOwner | summarize Agents = count() | extend Gap = "No owner (ISM-2135)"),
+    (Reg | where Gap_NoPurpose | summarize Agents = count() | extend Gap = "No business purpose (ISM-2135)"),
+    (Reg | where Gap_NoUniqueIdentity | summarize Agents = count() | extend Gap = "No unique identity (ISM-2133)"),
+    (Reg | where Gap_NoPermissionsRecorded | summarize Agents = count() | extend Gap = "No permissions recorded (ISM-2135)"),
+    (Reg | where Flag_HighRiskPermissions | summarize Agents = count() | extend Gap = "High-risk permissions (ISM-2156)")
+| project Gap, Agents

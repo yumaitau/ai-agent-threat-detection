@@ -1,0 +1,26 @@
+// YUMA-AIA-D09  (DRAFT HUNT) AI agent register review in Defender XDR with ISM-2133/2135 gap flags.
+// The same AgentsInfo data is synced daily into the Sentinel register table AIAgentRegister_CL by PB4
+//   (functions/PB4-AgentsInfoRegisterSync.kql); use the YumaAIRegister() function in Sentinel.
+// Table: AgentsInfo (preview; replaces the deprecated AIAgentsInfo). Defender XDR advanced hunting.
+//   https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-agentsinfo-table
+// Licence: per the AgentsInfo page (Defender XDR with AI agent inventory); confirm before selling.
+// Maps: ISM-2133 (unique identity), ISM-2134/2135 (register and fields), ISM-2156 (least-privilege tools)
+//   ATLAS AML.T0084 | OWASP ASI04, ASI10
+AgentsInfo
+| summarize arg_max(Timestamp, *) by AgentId
+| where LifecycleStatus !~ "Deleted"
+| extend OwnerCount = array_length(Owners),
+         ToolCount = array_length(DeclaredTools),
+         McpServerCount = array_length(McpServers),
+         DataSourceCount = array_length(DeclaredDataSources)
+| extend Gap_NoOwner = coalesce(OwnerCount, 0) == 0,
+         Gap_NoPurpose = isempty(AgentDescription),
+         Gap_NoEntraIdentity = isempty(EntraAgentId),                       // ISM-2133
+         Gap_NoInstructions = isempty(Instructions),
+         Flag_SharedWide = tostring(SharedWith) has_any ("Organization", "Everyone", "Tenant"),   // value set UNVALIDATED
+         Flag_HasMcp = coalesce(McpServerCount, 0) > 0
+| project AgentId, AgentName, Platform, PublishedStatus, LifecycleStatus, Availability, AgentDescription, Owners,
+          EntraAgentId, EntraBlueprintId, Model, ToolsAuthenticationType, Permissions, DeclaredTools, McpServers,
+          DeclaredDataSources, SharedWith, InstanceCount, CreatedDateTime, LastPublishedDateTime, LastUpdatedDateTime,
+          Gap_NoOwner, Gap_NoPurpose, Gap_NoEntraIdentity, Gap_NoInstructions, Flag_SharedWide, Flag_HasMcp
+| order by Gap_NoOwner desc, Gap_NoEntraIdentity desc, Flag_HasMcp desc

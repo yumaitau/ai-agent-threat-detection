@@ -1,0 +1,35 @@
+// YUMA-GAI-G09  AI agent created or changed on Agent Runtime (Reasoning Engine) or Gemini Enterprise, and not in the register
+// Status: DRAFT HUNT. Method names follow the aiplatform v1 ReasoningEngineService RPCs (CreateReasoningEngine, UpdateReasoningEngine,
+//   DeleteReasoningEngine) in googleapis; they are NOT listed on Google's audited-operations page, so confirm they appear in Admin
+//   Activity logs in a lab. Gemini Enterprise agent method names are matched loosely for the same reason.
+//   https://github.com/googleapis/googleapis/blob/master/google/cloud/aiplatform/v1/reasoning_engine_service.proto
+//   https://docs.cloud.google.com/vertex-ai/docs/general/audit-logging
+// Reference list: %yuma_ai_registered_agents (REGEX list of resource names already in the register; PB4 maintains it)
+// Maps: ISM-2134, ISM-2135, ISM-2133 | ATT&CK T1578 | ATLAS AML.T0081 | OWASP ASI04, ASI10
+rule yuma_gai_g09_agent_deployed_or_changed_outside_register {
+  meta:
+    author = "Yuma IT"
+    description = "Agent Runtime or Gemini Enterprise agent created or updated, not yet in the AI agent register"
+    severity = "MEDIUM"
+    yuma_id = "G09"
+    ism = "ISM-2134, ISM-2135, ISM-2133"
+
+  events:
+    $c.metadata.log_type = "GCP_CLOUDAUDIT"
+    $c.metadata.product_event_type = /ReasoningEngineService\.(CreateReasoningEngine|UpdateReasoningEngine)|discoveryengine\..*\.(CreateAgent|UpdateAgent|CreateEngine|CreateAssistant|UpdateAssistant)/ nocase
+    $c.security_result.action = "ALLOW"
+    not $c.target.resource.name in regex %yuma_ai_registered_agents
+    $c.target.cloud.project.name = $project
+
+  match:
+    $project over 1h
+
+  outcome:
+    $risk_score = max(50)
+    $methods = array_distinct($c.metadata.product_event_type)
+    $resources = array_distinct($c.target.resource.name)
+    $actors = array_distinct($c.principal.user.userid)
+
+  condition:
+    $c
+}

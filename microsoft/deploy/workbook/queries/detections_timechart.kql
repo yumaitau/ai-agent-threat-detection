@@ -1,0 +1,5 @@
+SecurityAlert
+| where TimeGenerated > ago(30d)
+| where AlertName startswith "Yuma AIA-"
+| extend DetectionId = extract(@"Yuma AIA-(D\d+)", 1, AlertName)
+| summarize Alerts = count() by bin(TimeGenerated, 1d), DetectionId

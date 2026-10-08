@@ -1,0 +1,9 @@
+{
+  "source": ["aws.iam"],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["iam.amazonaws.com"],
+    "eventName": ["AttachRolePolicy", "PutRolePolicy", "UpdateAssumeRolePolicy", "CreatePolicyVersion", "PutRolePermissionsBoundary", "DeleteRolePermissionsBoundary"],
+    "errorCode": [{"exists": false}]
+  }
+}

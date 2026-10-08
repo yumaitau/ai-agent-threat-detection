@@ -1,0 +1,39 @@
+[
+ {
+  "name": "hit_time",
+  "type": "TIMESTAMP",
+  "mode": "REQUIRED",
+  "description": "When the scheduled query ran"
+ },
+ {
+  "name": "detection_id",
+  "type": "STRING",
+  "mode": "REQUIRED",
+  "description": "G01..G15"
+ },
+ {
+  "name": "severity",
+  "type": "STRING",
+  "description": "HIGH | MEDIUM | LOW"
+ },
+ {
+  "name": "entity",
+  "type": "STRING",
+  "description": "Primary entity (oauth:<client>, service account, IP, project)"
+ },
+ {
+  "name": "summary",
+  "type": "STRING",
+  "description": "One-line summary"
+ },
+ {
+  "name": "details",
+  "type": "JSON",
+  "description": "Full result row"
+ },
+ {
+  "name": "case_ref",
+  "type": "STRING",
+  "description": "Workflow execution / SecOps case, filled by playbooks"
+ }
+]

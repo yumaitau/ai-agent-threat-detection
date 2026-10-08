@@ -1,0 +1,19 @@
+{
+  "source": [{"prefix": "aws."}],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["bedrock.amazonaws.com"],
+    "eventName": ["ApplyGuardrail"],
+    "responseElements": {
+      "action": ["GUARDRAIL_INTERVENED"],
+      "assessments": {
+        "contentPolicy": {
+          "filters": {
+            "type": ["PROMPT_ATTACK"],
+            "detected": [true]
+          }
+        }
+      }
+    }
+  }
+}

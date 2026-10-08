@@ -1,0 +1,162 @@
+{
+ "widgets": [
+  {
+   "type": "text",
+   "x": 0,
+   "y": 0,
+   "width": 24,
+   "height": 2,
+   "properties": {
+    "markdown": "## Yuma AI agent register and ISM evidence\nRegister metrics come from PB4 (daily). Evidence exports land in the evidence bucket under evidence/YYYY-MM-DD/ (PB5, monthly). Replace log group names before importing."
+   }
+  },
+  {
+   "type": "metric",
+   "x": 0,
+   "y": 2,
+   "width": 6,
+   "height": 6,
+   "properties": {
+    "title": "Register",
+    "region": "ap-southeast-2",
+    "view": "singleValue",
+    "stat": "Maximum",
+    "period": 86400,
+    "metrics": [
+     [
+      "Yuma/AIA",
+      "InventoryItems"
+     ],
+     [
+      "Yuma/AIA",
+      "PendingReview"
+     ]
+    ]
+   }
+  },
+  {
+   "type": "metric",
+   "x": 6,
+   "y": 2,
+   "width": 6,
+   "height": 6,
+   "properties": {
+    "title": "Gaps",
+    "region": "ap-southeast-2",
+    "view": "singleValue",
+    "stat": "Maximum",
+    "period": 86400,
+    "metrics": [
+     [
+      "Yuma/AIA",
+      "RegisterIncomplete"
+     ],
+     [
+      "Yuma/AIA",
+      "ReviewsOverdue"
+     ]
+    ]
+   }
+  },
+  {
+   "type": "metric",
+   "x": 12,
+   "y": 2,
+   "width": 6,
+   "height": 6,
+   "properties": {
+    "title": "New this run",
+    "region": "ap-southeast-2",
+    "view": "singleValue",
+    "stat": "Maximum",
+    "period": 86400,
+    "metrics": [
+     [
+      "Yuma/AIA",
+      "NewlyDiscovered"
+     ]
+    ]
+   }
+  },
+  {
+   "type": "metric",
+   "x": 18,
+   "y": 2,
+   "width": 6,
+   "height": 6,
+   "properties": {
+    "title": "Register trend (30 days)",
+    "region": "ap-southeast-2",
+    "view": "timeSeries",
+    "stat": "Maximum",
+    "period": 86400,
+    "metrics": [
+     [
+      "Yuma/AIA",
+      "PendingReview"
+     ],
+     [
+      "Yuma/AIA",
+      "ReviewsOverdue"
+     ],
+     [
+      "Yuma/AIA",
+      "RegisterIncomplete"
+     ]
+    ]
+   }
+  },
+  {
+   "type": "log",
+   "x": 0,
+   "y": 8,
+   "width": 12,
+   "height": 6,
+   "properties": {
+    "title": "A02 model use outside the register (last 24h)",
+    "region": "ap-southeast-2",
+    "view": "table",
+    "query": "SOURCE '/yuma/bedrock/model-invocations' | fields identity.arn as principal, modelId | parse principal /assumed-role\\/(?<role_name>[^\\/]+)\\// | lookup yuma_aia_register role_name OUTPUT agent_id | filter isempty(agent_id) | stats count(*) as calls by principal, modelId | sort calls desc | limit 20"
+   }
+  },
+  {
+   "type": "log",
+   "x": 12,
+   "y": 8,
+   "width": 12,
+   "height": 6,
+   "properties": {
+    "title": "A01 shadow AI DNS (last 24h)",
+    "region": "ap-southeast-2",
+    "view": "table",
+    "query": "SOURCE '/yuma/route53/resolver' | fields query_name, srcids.instance as instance | filter query_name like /(?i)(api\\.openai\\.com|api\\.anthropic\\.com|generativelanguage\\.googleapis\\.com|api\\.mistral\\.ai|api\\.deepseek\\.com|openrouter\\.ai)\\.?$/ | stats count(*) as queries by instance, query_name | sort queries desc | limit 20"
+   }
+  },
+  {
+   "type": "log",
+   "x": 0,
+   "y": 14,
+   "width": 12,
+   "height": 6,
+   "properties": {
+    "title": "A11 MCP gateway tool calls by caller (last 24h)",
+    "region": "ap-southeast-2",
+    "view": "table",
+    "query": "SOURCE '/yuma/cloudtrail' | fields additionalEventData.jwt.claims.sub as caller, requestParameters.body.params.name as tool | filter eventSource = \"bedrock-agentcore.amazonaws.com\" and eventName = \"InvokeGateway\" and requestParameters.body.method = \"tools/call\" | stats count(*) as calls, countDistinct(tool) as tools by caller | sort calls desc | limit 20"
+   }
+  },
+  {
+   "type": "log",
+   "x": 12,
+   "y": 14,
+   "width": 12,
+   "height": 6,
+   "properties": {
+    "title": "A13 AI bots and MCP probes on public apps (last 24h)",
+    "region": "ap-southeast-2",
+    "view": "table",
+    "query": "SOURCE 'aws-waf-logs-app' | fields httpRequest.clientIp as ip, httpRequest.uri as uri | filter @message like /bot:category:ai/ or uri like /(?i)^\\/(mcp|sse|\\.well-known\\/(agent\\.json|agent-card\\.json|ai-plugin\\.json))/ | stats count(*) as requests by ip | sort requests desc | limit 20"
+   }
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+YumaAIRegister()
+| project AgentName, Source, Platform, Owners, BusinessPurpose, EntraAgentId, ServicePrincipalId, AppId,
+          HighRiskPermissions, McpServers, Decision, ReviewStatus, NextReviewDue, GapCount, Gap_NoOwner, Gap_NoPurpose,
+          Gap_NoUniqueIdentity, Gap_NoPermissionsRecorded, LastSnapshotAt
+| order by GapCount desc, AgentName asc

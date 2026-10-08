@@ -1,0 +1,268 @@
+# PB1 - Contain a rogue AI agent / AI service account / OAuth app, after a human approves.
+# Status: SKELETON. YAML-parsed offline; NOT deployed or executed. Google Workflows syntax.
+# Triggers:
+#   (a) Eventarc (Pub/Sub messagePublished) from the org log sink for G06/G07 - message.data is a LogEntry.
+#   (b) Direct execution (SecOps, PB2, or an analyst) with a normalised request:
+#       {"detection_id":"G01","action":"revoke_oauth","user_emails":["a@x"],"client_id":"123.apps.googleusercontent.com","summary":"..."}
+#       actions: disable_sa | disable_sa_key | remove_project_binding | revoke_oauth
+# Approval: Workflows callback (events.create_callback_endpoint / events.await_callback). The link goes to the approval service
+#   (functions/approval, behind IAP); it records the approver's identity (ISM-2113) and POSTs the decision to the callback.
+#   https://docs.cloud.google.com/workflows/docs/creating-callback-endpoints
+# APIs used (verified in discovery docs): iam v1 projects.serviceAccounts.disable, projects.serviceAccounts.keys.disable;
+#   cloudresourcemanager v3 projects.getIamPolicy/setIamPolicy; bigquery v2 jobs.query, tabledata.insertAll.
+# Env (user_env_vars from Terraform): REGISTER_DATASET, APPROVAL_URL, CHAT_WEBHOOK_SECRET, REVOKE_FN_URL, APPROVAL_TIMEOUT_S
+main:
+  params: [event]
+  steps:
+    - init:
+        assign:
+          - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - execution_id: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+          - register_dataset: ${sys.get_env("REGISTER_DATASET")}
+          - timeout_s: ${int(default(sys.get_env("APPROVAL_TIMEOUT_S"), "3600"))}
+          - req: null
+    - normalise:
+        switch:
+          - condition: ${"data" in event and "message" in event.data}
+            steps:
+              - decode_log_entry:
+                  assign:
+                    - entry: ${json.decode(base64.decode(event.data.message.data))}
+                    - method: ${entry.protoPayload.methodName}
+              - route_log_entry:
+                  switch:
+                    - condition: ${text.match_regex(method, "CreateServiceAccountKey|UploadServiceAccountKey")}
+                      assign:
+                        - req:
+                            detection_id: "G07"
+                            action: "disable_sa_key"
+                            key_name: ${entry.protoPayload.response.name}
+                            sa_ref: ${text.split(entry.protoPayload.resourceName, "/")[3]}
+                            actor: ${entry.protoPayload.authenticationInfo.principalEmail}
+                            summary: ${"User-managed key created for " + entry.protoPayload.resourceName + " by " + entry.protoPayload.authenticationInfo.principalEmail}
+                    - condition: ${text.match_regex(method, "(?i)SetIamPolicy$")}
+                      assign:
+                        - req:
+                            detection_id: "G06"
+                            action: "remove_project_binding"
+                            project_id: ${entry.resource.labels.project_id}
+                            resource_type: ${entry.resource.type}
+                            deltas: ${entry.protoPayload.serviceData.policyDelta.bindingDeltas}
+                            actor: ${entry.protoPayload.authenticationInfo.principalEmail}
+                            summary: ${"IAM grant to AI identity on " + entry.protoPayload.resourceName + " by " + entry.protoPayload.authenticationInfo.principalEmail}
+          - condition: true
+            assign:
+              - req: ${event}
+    - stop_if_unknown:
+        switch:
+          - condition: ${req == null}
+            return: "ignored: event not recognised"
+    - g07_register_check:
+        # Only act on keys for service accounts recorded as AI identities.
+        switch:
+          - condition: ${req.action == "disable_sa_key"}
+            steps:
+              - query_register:
+                  call: googleapis.bigquery.v2.jobs.query
+                  args:
+                    projectId: ${project}
+                    body:
+                      useLegacySql: false
+                      query: ${"SELECT COUNT(*) FROM `" + register_dataset + ".v_ai_service_accounts` WHERE LOWER(service_account_email) = LOWER(@sa) OR service_account_unique_id = @sa"}
+                      queryParameters:
+                        - name: sa
+                          parameterType:
+                            type: STRING
+                          parameterValue:
+                            value: ${req.sa_ref}
+                  result: reg
+              - not_ai_sa:
+                  switch:
+                    - condition: ${int(reg.rows[0].f[0].v) == 0}
+                      return: "ignored: service account is not a registered AI identity"
+    - create_callback:
+        call: events.create_callback_endpoint
+        args:
+          http_callback_method: "POST"
+        result: callback_details
+    - get_webhook:
+        call: googleapis.secretmanager.v1.projects.secrets.versions.accessString
+        args:
+          secret_id: ${sys.get_env("CHAT_WEBHOOK_SECRET")}
+          project_id: ${project}
+        result: chat_webhook
+    - ask_for_approval:
+        call: http.post
+        args:
+          url: ${chat_webhook}
+          body:
+            text: '${"*AI containment approval needed* (" + req.detection_id + ")\n" + req.summary + "\nProposed action: " + req.action + "\nApprove or reject: " + sys.get_env("APPROVAL_URL") + "?exec=" + execution_id + "&cb=" + text.url_encode(callback_details.url) + "\nTimes out in " + string(timeout_s) + "s with no action."}'
+    - wait_for_human:
+        try:
+          call: events.await_callback
+          args:
+            callback: ${callback_details}
+            timeout: ${timeout_s}
+          result: cb
+        except:
+          as: e
+          steps:
+            - timed_out:
+                assign:
+                  - cb:
+                      http_request:
+                        body:
+                          decision: "Timeout"
+                          approver: "none"
+                          reason: "No decision before timeout"
+    - read_decision:
+        assign:
+          - decision: ${cb.http_request.body.decision}
+          - approver: ${cb.http_request.body.approver}
+          - reason: ${default(map.get(cb.http_request.body, "reason"), "")}
+          - outcome: "not actioned"
+    - act:
+        switch:
+          - condition: ${decision != "Approve"}
+            next: record
+          - condition: ${req.action == "disable_sa"}
+            steps:
+              - disable_sa:
+                  call: http.post
+                  args:
+                    url: ${"https://iam.googleapis.com/v1/projects/-/serviceAccounts/" + req.sa_ref + ":disable"}
+                    auth: {type: OAuth2}
+                  result: r
+              - done_sa:
+                  assign:
+                    - outcome: ${"disabled service account " + req.sa_ref}
+          - condition: ${req.action == "disable_sa_key"}
+            steps:
+              - disable_key:
+                  call: http.post
+                  args:
+                    url: ${"https://iam.googleapis.com/v1/" + req.key_name + ":disable"}
+                    auth: {type: OAuth2}
+                  result: r
+              - done_key:
+                  assign:
+                    - outcome: ${"disabled key " + req.key_name}
+          - condition: ${req.action == "remove_project_binding" and req.resource_type == "project"}
+            steps:
+              - get_policy:
+                  call: http.post
+                  args:
+                    url: ${"https://cloudresourcemanager.googleapis.com/v3/projects/" + req.project_id + ":getIamPolicy"}
+                    auth: {type: OAuth2}
+                    body: {options: {requestedPolicyVersion: 3}}
+                  result: pol
+              - strip_members:
+                  assign:
+                    - policy: ${pol.body}
+                    - new_bindings: []
+              - per_binding:
+                  for:
+                    value: b
+                    in: ${policy.bindings}
+                    steps:
+                      - per_binding_init:
+                          assign:
+                            - kept: []
+                      - per_member:
+                          for:
+                            value: m
+                            in: ${b.members}
+                            steps:
+                              - was_just_added:
+                                  call: contains_delta
+                                  args:
+                                    deltas: ${req.deltas}
+                                    role: ${b.role}
+                                    member: ${m}
+                                  result: just_added
+                              - keep_or_drop:
+                                  switch:
+                                    - condition: ${not(just_added and text.match_regex(m, "agents\\.global\\.|gcp-sa-aiplatform|gcp-sa-discoveryengine"))}
+                                      assign:
+                                        - kept: ${list.concat(kept, m)}
+                      - keep_binding:
+                          switch:
+                            - condition: ${len(kept) > 0}
+                              assign:
+                                - b.members: ${kept}
+                                - new_bindings: ${list.concat(new_bindings, b)}
+              - set_policy:
+                  call: http.post
+                  args:
+                    url: ${"https://cloudresourcemanager.googleapis.com/v3/projects/" + req.project_id + ":setIamPolicy"}
+                    auth: {type: OAuth2}
+                    body:
+                      policy:
+                        version: 3
+                        etag: ${policy.etag}
+                        bindings: ${new_bindings}
+                  result: r
+              - done_binding:
+                  assign:
+                    - outcome: ${"removed added AI-identity bindings on project " + req.project_id}
+          - condition: ${req.action == "revoke_oauth"}
+            steps:
+              - revoke:
+                  call: http.post
+                  args:
+                    url: ${sys.get_env("REVOKE_FN_URL")}
+                    auth: {type: OIDC}
+                    body:
+                      client_id: ${req.client_id}
+                      user_emails: ${req.user_emails}
+                  result: r
+              - done_revoke:
+                  assign:
+                    - outcome: ${"revoked OAuth tokens for " + req.client_id + " on " + string(len(req.user_emails)) + " user(s)"}
+          - condition: true
+            assign:
+              - outcome: "approved, but no automated action for this resource type; handle manually"
+    - record:
+        call: googleapis.bigquery.v2.tabledata.insertAll
+        args:
+          projectId: ${project}
+          datasetId: ${text.split(register_dataset, ".")[1]}
+          tableId: "ai_agent_register"
+          body:
+            rows:
+              - json:
+                  record_time: ${time.format(sys.now())}
+                  record_type: "ContainmentDecision"
+                  agent_key: ${default(map.get(req, "agent_key"), default(map.get(req, "sa_ref"), default(map.get(req, "client_id"), default(map.get(req, "project_id"), "unknown"))))}
+                  decision: ${if(decision == "Approve", "Contained", "Investigate")}
+                  decision_by: ${approver}
+                  decision_reason: ${reason}
+                  case_ref: ${execution_id}
+                  notes: '${req.summary + " | outcome: " + outcome}'
+    - tell_channel:
+        call: http.post
+        args:
+          url: ${chat_webhook}
+          body:
+            text: '${"PB1 " + req.detection_id + ": " + decision + " by " + approver + ". Outcome: " + outcome}'
+    - finish:
+        return:
+          decision: ${decision}
+          approver: ${approver}
+          outcome: ${outcome}
+
+# True when this role/member pair was ADDed in the triggering policy change (so we only roll back what was just granted).
+contains_delta:
+  params: [deltas, role, member]
+  steps:
+    - check:
+        for:
+          value: d
+          in: ${default(deltas, [])}
+          steps:
+            - match:
+                switch:
+                  - condition: ${d.action == "ADD" and d.role == role and d.member == member}
+                    return: true
+    - none:
+        return: false

@@ -1,0 +1,539 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "## Yuma AI Agent Register and ISM Evidence\nAgent register (ISM-2134, ISM-2135), ISM-2133 to 2140 and ISM-2156 to 2159 evidence status, consent history and six-monthly review status. Data comes from `AIAgentRegister_CL`, the `YumaAIRegister()` and `YumaISMControlStatus()` functions, Entra logs and Yuma analytics rules. Statuses are evidence to support an assessment, not a compliance determination."
+      },
+      "name": "header"
+    },
+    {
+      "type": 9,
+      "name": "parameters",
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "parameters": [
+          {
+            "id": "7e6668f4-46ee-595c-9dfb-7c5582429997",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 2592000000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 7776000000
+                },
+                {
+                  "durationMs": 15552000000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": 11,
+      "name": "tabs",
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "498831e3-156e-5164-ad97-609c32b6783f",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Overview",
+            "subTarget": "overview",
+            "style": "link"
+          },
+          {
+            "id": "dc7831f2-39c0-5e2e-b65e-88e48ebe31b0",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Agent register",
+            "subTarget": "register",
+            "style": "link"
+          },
+          {
+            "id": "a49a8a72-1801-5044-933f-0d859a6901e1",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "ISM coverage",
+            "subTarget": "ism",
+            "style": "link"
+          },
+          {
+            "id": "51535367-37a5-5b76-b428-78a8933cc1ea",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Consent history",
+            "subTarget": "consent",
+            "style": "link"
+          },
+          {
+            "id": "16f4882f-481b-5ee5-aac4-69407eb55386",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Review status",
+            "subTarget": "review",
+            "style": "link"
+          },
+          {
+            "id": "36893d7e-ee57-52b6-bf11-bfbf24c08be6",
+            "cellValue": "Tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Detections",
+            "subTarget": "detections",
+            "style": "link"
+          }
+        ]
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Reg = YumaAIRegister();\nunion\n    (Reg | summarize Value = count() | extend Label = \"Active agents and AI apps\", Ord = 1),\n    (Reg | where GapCount > 0 | summarize Value = count() | extend Label = \"Missing ISM-2135 fields\", Ord = 2),\n    (Reg | where ReviewStatus in (\"Overdue\", \"Never reviewed\") | summarize Value = count() | extend Label = \"Review overdue (ISM-2138)\", Ord = 3),\n    (Reg | where Flag_HighRiskPermissions | summarize Value = count() | extend Label = \"High-risk permissions (ISM-2156)\", Ord = 4),\n    (Reg | where Flag_HasMcp | summarize Value = count() | extend Label = \"Agents using MCP servers\", Ord = 5)\n| order by Ord asc\n| project Label, Value",
+        "size": 0,
+        "title": "Register at a glance",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "tiles",
+        "tileSettings": {
+          "titleContent": {
+            "columnMatch": "Label"
+          },
+          "leftContent": {
+            "columnMatch": "Value",
+            "formatter": 12
+          },
+          "showBorder": true
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      },
+      "name": "overview_tiles"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaISMControlStatus()\n| summarize Controls = count() by Status",
+        "size": 0,
+        "title": "ISM control evidence status",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      },
+      "name": "overview_status_pie",
+      "customWidth": "40"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaISMControlStatus()\n| project ControlId, Theme, Status, Metric",
+        "size": 0,
+        "title": "Controls",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Status",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Evidence present",
+                    "representation": "success",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Gap",
+                    "representation": "2",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "No data",
+                    "representation": "unknown",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "info",
+                    "text": "{0}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      },
+      "name": "overview_status_table",
+      "customWidth": "60"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaAIRegister()\n| project AgentName, Source, Platform, Owners, BusinessPurpose, EntraAgentId, ServicePrincipalId, AppId,\n          HighRiskPermissions, McpServers, Decision, ReviewStatus, NextReviewDue, GapCount, Gap_NoOwner, Gap_NoPurpose,\n          Gap_NoUniqueIdentity, Gap_NoPermissionsRecorded, LastSnapshotAt\n| order by GapCount desc, AgentName asc",
+        "size": 0,
+        "title": "AI agent register (ISM-2135 fields and gaps)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "ReviewStatus",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Current",
+                    "representation": "success",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Due within 30 days",
+                    "representation": "warning",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "2",
+                    "text": "{0}"
+                  }
+                ]
+              }
+            }
+          ],
+          "filter": true
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "register"
+      },
+      "name": "register_table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Reg = YumaAIRegister();\nunion\n    (Reg | where Gap_NoOwner | summarize Agents = count() | extend Gap = \"No owner (ISM-2135)\"),\n    (Reg | where Gap_NoPurpose | summarize Agents = count() | extend Gap = \"No business purpose (ISM-2135)\"),\n    (Reg | where Gap_NoUniqueIdentity | summarize Agents = count() | extend Gap = \"No unique identity (ISM-2133)\"),\n    (Reg | where Gap_NoPermissionsRecorded | summarize Agents = count() | extend Gap = \"No permissions recorded (ISM-2135)\"),\n    (Reg | where Flag_HighRiskPermissions | summarize Agents = count() | extend Gap = \"High-risk permissions (ISM-2156)\")\n| project Gap, Agents",
+        "size": 0,
+        "title": "Register gaps",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "register"
+      },
+      "name": "register_gaps_bar"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Status meanings: **Evidence present** means the data shows the expected state. **Gap** means the data shows a problem. **No data** means the source is not connected. **Attestation required** means the metric needs a written statement from the control owner."
+      },
+      "name": "ism_note",
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "ism"
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaISMControlStatus()\n| project ControlId, Theme, Status, Metric, AlertsLookback, PackEvidence, EvidenceMethod, Control, CheckedAtUtc",
+        "size": 0,
+        "title": "ISM-2133 to 2140 and ISM-2156 to 2159",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Status",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Evidence present",
+                    "representation": "success",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Gap",
+                    "representation": "2",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "No data",
+                    "representation": "unknown",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "info",
+                    "text": "{0}"
+                  }
+                ]
+              }
+            }
+          ],
+          "filter": true
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "ism"
+      },
+      "name": "ism_table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName =~ \"Consent to application\" and Result =~ \"success\"\n| mv-apply TargetResource = TargetResources on (\n      where tostring(TargetResource.type) =~ \"ServicePrincipal\" | extend Props = TargetResource.modifiedProperties | take 1)\n| mv-apply Prop = Props on (\n      where tostring(Prop.displayName) == \"ConsentContext.IsAdminConsent\" | extend IsAdmin = tostring(Prop.newValue) has \"True\")\n| extend ConsentKind = iff(IsAdmin, \"Admin consent\", \"User consent (ISM-2137 gap)\")\n| summarize Consents = count() by bin(TimeGenerated, 1d), ConsentKind",
+        "size": 0,
+        "title": "App consents per day",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "timechart",
+        "timeContextFromParameter": "TimeRange"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "consent"
+      },
+      "name": "consent_timechart"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName =~ \"Consent to application\" and Result =~ \"success\"\n| mv-apply TargetResource = TargetResources on (\n      where tostring(TargetResource.type) =~ \"ServicePrincipal\"\n      | extend AppName = tostring(TargetResource.displayName), AppSpId = tostring(TargetResource.id),\n               AgentType = tostring(TargetResource.agentType), Props = TargetResource.modifiedProperties\n      | take 1)\n| mv-apply Prop = Props on (\n      summarize Bag = make_bag(bag_pack(tostring(Prop.displayName), trim(@'[\\\"\\s]+', tostring(Prop.newValue))), 100))\n| extend IsAdminConsent = tostring(Bag[\"ConsentContext.IsAdminConsent\"]), Permissions = tostring(Bag[\"ConsentAction.Permissions\"])\n| extend ConsentedBy = tostring(InitiatedBy.user.userPrincipalName)\n| join kind=leftouter (YumaAIRegister() | project AppSpId = ServicePrincipalId, InRegister = true, RegisterDecision = Decision) on AppSpId\n| project TimeGenerated, AppName, AppSpId, AgentType, IsAdminConsent, ConsentedBy, Permissions,\n          InRegister = coalesce(InRegister, false), RegisterDecision\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Consent events (Entra audit) and register match",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "timeContextFromParameter": "TimeRange",
+        "gridSettings": {
+          "filter": true
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "consent"
+      },
+      "name": "consent_events_table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AIAgentRegister_CL\n| where TimeGenerated {TimeRange}\n| where RecordType == \"ConsentDecision\"\n| project TimeGenerated, AgentName, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,\n          Permissions, IncidentArmId\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Consent decisions recorded by PB2",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "timeContextFromParameter": "TimeRange"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "consent"
+      },
+      "name": "consent_decisions_table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaAIRegister()\n| summarize Agents = count() by ReviewStatus",
+        "size": 0,
+        "title": "Review status (six-monthly, ISM-2138)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "review"
+      },
+      "name": "review_bar",
+      "customWidth": "40"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "YumaAIRegister()\n| where ReviewStatus != \"Current\"\n| project AgentName, Owners, Decision, LastReview, NextReviewDue, ReviewStatus, HighRiskPermissions\n| order by NextReviewDue asc",
+        "size": 0,
+        "title": "Reviews due or overdue",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "ReviewStatus",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Current",
+                    "representation": "success",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Due within 30 days",
+                    "representation": "warning",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "2",
+                    "text": "{0}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "review"
+      },
+      "name": "review_due_table",
+      "customWidth": "60"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AIAgentRegister_CL\n| where TimeGenerated {TimeRange}\n| where RecordType in (\"ReviewCompleted\", \"Retired\")\n| project TimeGenerated, RecordType, AgentName, Decision, DecisionBy, DecisionReason, Notes\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Completed reviews and retirements",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "timeContextFromParameter": "TimeRange"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "review"
+      },
+      "name": "review_history_table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityAlert\n| where TimeGenerated {TimeRange}\n| where AlertName startswith \"Yuma AIA-\"\n| extend DetectionId = extract(@\"Yuma AIA-(D\\d+)\", 1, AlertName)\n| summarize Alerts = count() by bin(TimeGenerated, 1d), DetectionId",
+        "size": 0,
+        "title": "Yuma AI detections",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "timechart",
+        "timeContextFromParameter": "TimeRange"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "detections"
+      },
+      "name": "detections_timechart"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityAlert\n| where TimeGenerated {TimeRange}\n| where AlertName startswith \"Yuma AIA-\"\n| extend DetectionId = extract(@\"Yuma AIA-(D\\d+)\", 1, AlertName)\n| project TimeGenerated, DetectionId, AlertName, AlertSeverity, CompromisedEntity, SystemAlertId\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Recent Yuma AI alerts",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "timeContextFromParameter": "TimeRange"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Tab",
+        "comparison": "isEqualTo",
+        "value": "detections"
+      },
+      "name": "detections_table"
+    }
+  ],
+  "fallbackResourceIds": [
+    "__WORKSPACE_RESOURCE_ID__"
+  ],
+  "fromTemplateId": "yuma-ai-agent-register",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

@@ -1,0 +1,53 @@
+// YUMA-GAI-G08  Model Armor flagged prompt injection or jailbreak, then a high-impact action happened in the same project within 2 hours
+// Status: RULE-GRADE LOGIC, DRAFT FIELD BINDING. The BigQuery version is the reference implementation.
+// Log types:
+//   GCP_MODEL_ARMOR (log_id modelarmor.googleapis.com/sanitize_operations; must be added to the SecOps export filter)
+//     https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/ingest-gcp-logs
+//     Parser change log (2026-04-20): jsonPayload.sanitizationResult.sanitizationVerdictReason -> security_result.description;
+//     sanitizationVerdict -> security_result.detection_fields; client_name label -> principal.application.
+//     https://docs.cloud.google.com/chronicle/docs/ingestion/parser-list/gcp-model-armor-changelog
+//   GCP_CLOUDAUDIT for the follow-on action.
+// UNVALIDATED: the verdict-reason wording matched below, and that GCP_MODEL_ARMOR fills target.cloud.project.name.
+//   Check one real Model Armor event in UDM search and adjust both lines before enabling.
+// Model Armor itself blocks or flags the prompt; this rule adds "and then what happened".
+// Maps: ISM-2158, ISM-1924, ISM-2113 | ATT&CK T1567, T1098 | ATLAS AML.T0051.001, AML.T0054, AML.T0086
+//   OWASP LLM01, ASI01, ASI02
+rule yuma_gai_g08_model_armor_injection_then_high_impact_action {
+  meta:
+    author = "Yuma IT"
+    description = "Prompt injection or jailbreak flagged by Model Armor, followed within 2h by an IAM, credential or data-egress action in the same project"
+    severity = "HIGH"
+    priority = "HIGH"
+    yuma_id = "G08"
+    ism = "ISM-2158, ISM-1924, ISM-2113"
+    mitre_attack_technique_id = "T1567, T1098"
+    atlas = "AML.T0051.001, AML.T0054, AML.T0086"
+    owasp = "LLM01, ASI01, ASI02"
+
+  events:
+    $ma.metadata.log_type = "GCP_MODEL_ARMOR"
+    $ma.security_result.description = /prompt.?injection|jailbreak/ nocase
+    $ma.target.cloud.project.name = $project
+
+    $f.metadata.log_type = "GCP_CLOUDAUDIT"
+    $f.target.cloud.project.name = $project
+    $f.security_result.action = "ALLOW"
+    $f.metadata.product_event_type = /SetIamPolicy$|CreateServiceAccountKey|GenerateAccessToken|SignJwt|SignBlob|storage\.setIamPermissions|JobService\.InsertJob|UpdateReasoningEngine/ nocase
+
+    $ma.metadata.event_timestamp.seconds <= $f.metadata.event_timestamp.seconds
+
+  match:
+    $project over 2h
+
+  outcome:
+    $risk_score = max(85)
+    $model_armor_client = array_distinct($ma.principal.application)
+    $model_armor_correlation_id = array_distinct($ma.principal.user.product_object_id)
+    $verdict_reason = array_distinct($ma.security_result.description)
+    $follow_on_methods = array_distinct($f.metadata.product_event_type)
+    $follow_on_principals = array_distinct($f.principal.user.userid)
+    $follow_on_resources = array_distinct($f.target.resource.name)
+
+  condition:
+    $ma and $f
+}

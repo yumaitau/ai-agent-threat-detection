@@ -1,0 +1,22 @@
+name: New detection
+description: Propose a detection or improve coverage.
+title: "[Detection] "
+body:
+  - type: input
+    id: platform
+    attributes:
+      label: Platform and log sources
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Threat behaviour and detection logic
+      description: Describe the signal, time window, prerequisites and expected false positives.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sources, mapping IDs and validation
+      description: Link public sources. Distinguish offline checks from live testing and use sanitised examples.

@@ -1,0 +1,144 @@
+# PB4 - Daily AI agent inventory sync into the register (ISM-2134, ISM-2135)
+# Status: SKELETON. YAML-parsed offline; NOT deployed or executed.
+# Sources:
+#   Cloud Asset Inventory searchAllResources (org scope) for asset types aiplatform.googleapis.com/ReasoningEngine,
+#     discoveryengine.googleapis.com/Engine, discoveryengine.googleapis.com/Assistant
+#     https://docs.cloud.google.com/asset-inventory/docs/asset-types
+#   aiplatform v1 reasoningEngines.get for spec.identityType / effectiveIdentity / serviceAccount / agentFramework / classMethods
+#   Workspace OAuth apps via the BigQuery stored procedure sp_workspace_oauth_snapshot (register/sql/sp_workspace_oauth_snapshot.sql)
+# Not yet included (UNVALIDATED, add when confirmed in a lab): Agent Registry agents/mcpServers list per project,
+#   Gemini Enterprise v1alpha assistants/{a}/agents, pushing v_ai_service_accounts to the SecOps reference list.
+# Calls: Cloud Asset v1 searchAllResources over HTTP (Workflows has no Cloud Asset connector),
+#   connectors googleapis.bigquery.v2.tabledata.insertAll and googleapis.bigquery.v2.jobs.query.
+# Env: ORG_ID, REGISTER_DATASET
+main:
+  params: [args]
+  steps:
+    - init:
+        assign:
+          - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - register_dataset: ${sys.get_env("REGISTER_DATASET")}
+          - now: ${time.format(sys.now())}
+          - rows: []
+          - page_token: ""
+    - asset_types:
+        assign:
+          - types: ["aiplatform.googleapis.com/ReasoningEngine", "discoveryengine.googleapis.com/Engine", "discoveryengine.googleapis.com/Assistant"]
+          - type_index: 0
+    - search_page:
+        # One call per asset type (Workflows has no Cloud Asset connector, so plain HTTP with OAuth2).
+        call: http.get
+        args:
+          url: ${"https://cloudasset.googleapis.com/v1/organizations/" + sys.get_env("ORG_ID") + ":searchAllResources"}
+          auth:
+            type: OAuth2
+          query:
+            assetTypes: ${types[type_index]}
+            pageSize: 500
+            pageToken: ${page_token}
+        result: resp
+    - unwrap:
+        assign:
+          - page: ${resp.body}
+    - each_result:
+        for:
+          value: res
+          in: ${default(map.get(page, "results"), [])}
+          steps:
+            - build_row:
+                switch:
+                  - condition: ${res.assetType == "aiplatform.googleapis.com/ReasoningEngine"}
+                    steps:
+                      - get_engine:
+                          call: http.get
+                          args:
+                            url: ${"https://" + res.location + "-aiplatform.googleapis.com/v1/" + text.replace_all(res.name, "//aiplatform.googleapis.com/", "")}
+                            auth:
+                              type: OAuth2
+                          result: eng
+                      - engine_spec:
+                          assign:
+                            - spec: ${default(map.get(eng.body, "spec"), {})}
+                            - tools: []
+                      - engine_tools:
+                          for:
+                            value: cm
+                            in: ${default(map.get(spec, "classMethods"), [])}
+                            steps:
+                              - add_tool:
+                                  assign:
+                                    - tools: ${list.concat(tools, default(map.get(cm, "name"), "unnamed"))}
+                      - engine_row:
+                          assign:
+                            - row:
+                                json:
+                                  record_time: ${now}
+                                  record_type: "RegisterSnapshot"
+                                  agent_key: ${text.replace_all(res.name, "//aiplatform.googleapis.com/", "")}
+                                  agent_name: ${default(map.get(res, "displayName"), "")}
+                                  source: "AgentRuntime"
+                                  platform: ${default(map.get(spec, "agentFramework"), "unknown")}
+                                  project_id: ${res.project}
+                                  location: ${res.location}
+                                  identity_type: ${default(map.get(spec, "identityType"), "IDENTITY_TYPE_UNSPECIFIED")}
+                                  effective_identity: ${default(map.get(spec, "effectiveIdentity"), "")}
+                                  service_account: ${map.get(spec, "serviceAccount")}
+                                  declared_tools: ${tools}
+                                  owners: []
+                                  permissions: []
+                                  data_sources: []
+                                  notes: "PB4 Cloud Asset + reasoningEngines.get"
+                            - rows: ${list.concat(rows, row)}
+                  - condition: true
+                    assign:
+                      - row:
+                          json:
+                            record_time: ${now}
+                            record_type: "RegisterSnapshot"
+                            agent_key: ${text.replace_all(res.name, "//discoveryengine.googleapis.com/", "")}
+                            agent_name: ${default(map.get(res, "displayName"), "")}
+                            source: "GeminiEnterprise"
+                            platform: ${res.assetType}
+                            project_id: ${res.project}
+                            location: ${res.location}
+                            owners: []
+                            permissions: []
+                            declared_tools: []
+                            data_sources: []
+                            notes: "PB4 Cloud Asset"
+                      - rows: ${list.concat(rows, row)}
+    - next_page:
+        switch:
+          - condition: ${"nextPageToken" in page and page.nextPageToken != ""}
+            assign:
+              - page_token: ${page.nextPageToken}
+            next: search_page
+          - condition: ${type_index + 1 < len(types)}
+            assign:
+              - type_index: ${type_index + 1}
+              - page_token: ""
+            next: search_page
+    - write_rows:
+        switch:
+          - condition: ${len(rows) > 0}
+            steps:
+              - insert_rows:
+                  call: googleapis.bigquery.v2.tabledata.insertAll
+                  args:
+                    projectId: ${project}
+                    datasetId: ${text.split(register_dataset, ".")[1]}
+                    tableId: "ai_agent_register"
+                    body:
+                      rows: ${rows}
+                  result: ins
+    - workspace_oauth_snapshot:
+        call: googleapis.bigquery.v2.jobs.query
+        args:
+          projectId: ${project}
+          body:
+            useLegacySql: false
+            query: ${"CALL `" + register_dataset + ".sp_workspace_oauth_snapshot`()"}
+        result: sp
+    - done:
+        return:
+          cloud_agents_written: ${len(rows)}

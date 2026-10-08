@@ -1,0 +1,115 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "author": "Yuma IT",
+    "comments": "UNVALIDATED skeleton. Test in a non-production workspace first."
+  },
+  "parameters": {
+    "workspace": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace name with Microsoft Sentinel enabled"
+      }
+    },
+    "ruleId": {
+      "type": "string",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "Rule GUID; set a fixed value to make redeploys idempotent"
+      }
+    },
+    "enabled": {
+      "type": "bool",
+      "defaultValue": false
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', parameters('ruleId'))]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "Yuma AIA-D04 High-risk Graph permission granted to AI agent or AI app",
+        "description": "A high-risk Microsoft Graph application or delegated permission was granted to a service principal that is an Entra agent identity, has an AI vendor name, or granted itself the permission. Maps to ISM-2156, ISM-2137, ISM-2138, ISM-2139.",
+        "severity": "Medium",
+        "enabled": "[parameters('enabled')]",
+        "query": "let lookback = 1h;\nlet AllowedAppIds = _GetWatchlist(\"YumaAIRegisterApproved\") | project SearchKey;   // approved in the AI register\nlet HighRiskPermissions = dynamic([\n    \"Application.ReadWrite.All\", \"AppRoleAssignment.ReadWrite.All\", \"Directory.ReadWrite.All\",\n    \"AgentIdentity.ReadWrite.All\", \"DelegatedPermissionGrant.ReadWrite.All\",\n    \"RoleManagement.ReadWrite.Directory\", \"User.ReadWrite.All\", \"Group.ReadWrite.All\",\n    \"Policy.ReadWrite.ConditionalAccess\", \"Mail.Read\", \"Mail.ReadWrite\", \"Mail.Send\",\n    \"MailboxSettings.ReadWrite\", \"full_access_as_app\", \"EWS.AccessAsUser.All\",\n    \"Files.Read.All\", \"Files.ReadWrite.All\", \"Sites.Read.All\", \"Sites.ReadWrite.All\",\n    \"Sites.FullControl.All\", \"Chat.Read.All\", \"Chat.ReadWrite.All\", \"ChannelMessage.Read.All\"]);\nlet AIKeywords = dynamic([\"openai\", \"chatgpt\", \"anthropic\", \"claude\", \"copilot\", \"gemini\", \"perplexity\",\n    \"deepseek\", \"mistral\", \"grok\", \"otter\", \"fireflies\", \"n8n\", \"zapier\", \"langchain\", \"cursor\"]);\nAuditLogs\n| where TimeGenerated > ago(lookback)\n| where LoggedByService =~ \"Core Directory\" and Category =~ \"ApplicationManagement\"\n| where OperationName in~ (\"Add app role assignment to service principal\", \"Consent to application\",\n                           \"Add delegated permission grant\")\n| where Result =~ \"success\"\n| mv-apply TargetResource = TargetResources on (\n      where tostring(TargetResource.type) =~ \"ServicePrincipal\"\n      | extend TargetSpId = tostring(TargetResource.id),\n               TargetSpName = tostring(TargetResource.displayName),\n               TargetAgentType = tostring(TargetResource.agentType),\n               Props = TargetResource.modifiedProperties\n      | take 1)\n| mv-apply Prop = Props on (\n      summarize Bag = make_bag(bag_pack(tostring(Prop.displayName), trim(@'[\\\"\\s]+', tostring(Prop.newValue))), 100))\n| extend GrantedPermissions = strcat(tostring(Bag[\"AppRole.Value\"]), \" \", tostring(Bag[\"ConsentAction.Permissions\"]),\n                                     \" \", tostring(Bag[\"DelegatedPermissionGrant.Scope\"]))\n// For app role assignments the client app sits in modifiedProperties; for consent it is the target SP.\n| extend ClientAppName = iff(isnotempty(tostring(Bag[\"ServicePrincipal.DisplayName\"])), tostring(Bag[\"ServicePrincipal.DisplayName\"]), TargetSpName),\n         ClientSpId = iff(isnotempty(tostring(Bag[\"ServicePrincipal.ObjectID\"])), tostring(Bag[\"ServicePrincipal.ObjectID\"]), TargetSpId),\n         IsAdminConsent = tostring(Bag[\"ConsentContext.IsAdminConsent\"])\n| extend MatchedPermissions = set_intersect(extract_all(@\"([A-Za-z_]+(?:\\.[A-Za-z]+)+|full_access_as_app)\", GrantedPermissions), HighRiskPermissions)\n| where array_length(MatchedPermissions) > 0\n| where ClientSpId !in (AllowedAppIds)\n| extend InitiatorAgentType = tostring(InitiatedBy.app.agentType)\n| extend IsAgentic = (isnotempty(TargetAgentType) and TargetAgentType !~ \"notAgentic\")\n                     or (isnotempty(InitiatorAgentType) and InitiatorAgentType !~ \"notAgentic\"),\n         IsAINamed = ClientAppName has_any (AIKeywords) or ClientAppName matches regex @\"(?i)\\b(ai|gpt|llm|mcp|agent|bot)\\b\",\n         IsSelfGrantByApp = isnotempty(tostring(InitiatedBy.app.servicePrincipalId))\n| where IsAgentic or IsAINamed or IsSelfGrantByApp\n| extend InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName),\n         InitiatedByApp = tostring(InitiatedBy.app.displayName),\n         InitiatedByIp = iff(isnotempty(tostring(InitiatedBy.user.ipAddress)), tostring(InitiatedBy.user.ipAddress), tostring(InitiatedBy.app.ipAddress))\n| extend Severity = case(MatchedPermissions has_any (\"RoleManagement.ReadWrite.Directory\", \"Application.ReadWrite.All\", \"AppRoleAssignment.ReadWrite.All\", \"Directory.ReadWrite.All\", \"AgentIdentity.ReadWrite.All\"), \"High\",\n                         IsAgentic, \"High\",\n                         \"Medium\")\n| project TimeGenerated, OperationName, ClientAppName, ClientSpId, TargetAgentType, IsAgentic, IsAINamed, IsSelfGrantByApp,\n          MatchedPermissions, GrantedPermissions, IsAdminConsent, InitiatedByUpn, InitiatedByApp, InitiatedByIp,\n          Severity, CorrelationId\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "PrivilegeEscalation",
+          "Persistence"
+        ],
+        "techniques": [
+          "T1098"
+        ],
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "InitiatedByUpn"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "InitiatedByIp"
+              }
+            ]
+          },
+          {
+            "entityType": "CloudApplication",
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "ClientAppName"
+              }
+            ]
+          }
+        ],
+        "customDetails": {
+          "ClientSpId": "ClientSpId",
+          "ClientAppName": "ClientAppName",
+          "Permissions": "GrantedPermissions",
+          "AgentType": "TargetAgentType"
+        },
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Yuma AIA-D04: {{ClientAppName}} granted high-risk Graph permission",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "ruleResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspace'), 'Microsoft.SecurityInsights', parameters('ruleId'))]"
+    }
+  }
+}

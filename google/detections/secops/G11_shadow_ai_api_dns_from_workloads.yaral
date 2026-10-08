@@ -1,0 +1,35 @@
+// YUMA-GAI-G11  Shadow AI: Google Cloud workload resolving third-party AI model API domains, not on the approved list
+// Status: DRAFT HUNT
+// Log type: GCP_DNS (dns.googleapis.com/dns_queries; in the default SecOps export filter).
+//   UDM: queryName -> network.dns.questions.name; sourceIP -> principal.ip; vmInstanceName -> principal.resource.name;
+//   vmProjectId -> principal.cloud.project.name  https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/gcp-dns
+//   Raw fields: https://docs.cloud.google.com/dns/docs/monitoring
+// Reference list: %yuma_ai_approved_workloads (REGEX list of VM / resource names allowed to call external AI APIs)
+// Maps: ISM-2074, ISM-2134 | ATT&CK T1567 | ATLAS AML.T0040, AML.T0024 | OWASP LLM02, ASI04
+rule yuma_gai_g11_shadow_ai_api_dns_from_workloads {
+  meta:
+    author = "Yuma IT"
+    description = "Workload resolved a third-party AI API domain and is not on the approved list"
+    severity = "LOW"
+    yuma_id = "G11"
+    ism = "ISM-2074, ISM-2134"
+
+  events:
+    $q.metadata.log_type = "GCP_DNS"
+    $q.network.dns.questions.name = /(^|\.)(api\.openai\.com|openai\.azure\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|api\.mistral\.ai|api\.deepseek\.com|api\.perplexity\.ai|api\.x\.ai|api\.groq\.com|api\.together\.xyz|openrouter\.ai|api\.cohere\.com|api\.cohere\.ai|api-inference\.huggingface\.co|api\.fireworks\.ai|api\.replicate\.com)$/ nocase
+    not $q.principal.resource.name in regex %yuma_ai_approved_workloads
+    $q.principal.ip = $src
+
+  match:
+    $src over 24h
+
+  outcome:
+    $domains = array_distinct($q.network.dns.questions.name)
+    $vm = array_distinct($q.principal.resource.name)
+    $project = array_distinct($q.principal.cloud.project.name)
+    $queries = count_distinct($q.metadata.id)
+    $risk_score = max(30)
+
+  condition:
+    $q
+}

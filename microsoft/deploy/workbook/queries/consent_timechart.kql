@@ -1,0 +1,9 @@
+AuditLogs
+| where TimeGenerated > ago(30d)
+| where OperationName =~ "Consent to application" and Result =~ "success"
+| mv-apply TargetResource = TargetResources on (
+      where tostring(TargetResource.type) =~ "ServicePrincipal" | extend Props = TargetResource.modifiedProperties | take 1)
+| mv-apply Prop = Props on (
+      where tostring(Prop.displayName) == "ConsentContext.IsAdminConsent" | extend IsAdmin = tostring(Prop.newValue) has "True")
+| extend ConsentKind = iff(IsAdmin, "Admin consent", "User consent (ISM-2137 gap)")
+| summarize Consents = count() by bin(TimeGenerated, 1d), ConsentKind

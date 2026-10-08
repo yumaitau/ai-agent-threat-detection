@@ -1,0 +1,38 @@
+[
+ {
+  "name": "agent_key",
+  "type": "STRING"
+ },
+ {
+  "name": "oauth_client_id",
+  "type": "STRING"
+ },
+ {
+  "name": "service_account",
+  "type": "STRING"
+ },
+ {
+  "name": "display_name",
+  "type": "STRING"
+ },
+ {
+  "name": "owner",
+  "type": "STRING"
+ },
+ {
+  "name": "business_purpose",
+  "type": "STRING"
+ },
+ {
+  "name": "approved_by",
+  "type": "STRING"
+ },
+ {
+  "name": "approved_on",
+  "type": "STRING"
+ },
+ {
+  "name": "notes",
+  "type": "STRING"
+ }
+]

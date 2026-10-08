@@ -1,0 +1,35 @@
+{
+ "version": "0",
+ "id": "00000000-0000-0000-0000-000000000000",
+ "detail-type": "AWS API Call via CloudTrail",
+ "source": "aws.sso",
+ "account": "000000000000",
+ "time": "2026-10-08T01:00:00Z",
+ "region": "ap-southeast-2",
+ "resources": [],
+ "detail": {
+  "eventVersion": "1.09",
+  "eventSource": "sso.amazonaws.com",
+  "eventName": "CreateApplicationAssignment",
+  "awsRegion": "ap-southeast-2",
+  "recipientAccountId": "000000000000",
+  "eventID": "00000000-0000-0000-0000-000000000000",
+  "eventType": "AwsApiCall",
+  "userIdentity": {
+   "type": "AssumedRole",
+   "arn": "arn:aws:sts::000000000000:assumed-role/BuilderRole/alice",
+   "sessionContext": {
+    "sessionIssuer": {
+     "type": "Role",
+     "arn": "arn:aws:iam::000000000000:role/BuilderRole",
+     "userName": "BuilderRole"
+    }
+   }
+  },
+  "requestParameters": {
+   "applicationArn": "arn:aws:sso::000000000000:application/ssoins-1/apl-1",
+   "principalId": "g-1",
+   "principalType": "GROUP"
+  }
+ }
+}

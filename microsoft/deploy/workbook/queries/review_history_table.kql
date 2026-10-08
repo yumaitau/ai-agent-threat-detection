@@ -1,0 +1,5 @@
+AIAgentRegister_CL
+| where TimeGenerated > ago(30d)
+| where RecordType in ("ReviewCompleted", "Retired")
+| project TimeGenerated, RecordType, AgentName, Decision, DecisionBy, DecisionReason, Notes
+| order by TimeGenerated desc

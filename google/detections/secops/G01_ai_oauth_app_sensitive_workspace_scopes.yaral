@@ -1,0 +1,49 @@
+// YUMA-GAI-G01  AI or agent OAuth app granted sensitive Google Workspace scopes (and not in the approved register)
+// Status: RULE-GRADE (offline-linted only; not run against live data)
+// Log type: WORKSPACE_ACTIVITY (Workspace -> Google SecOps export). Application "token", event "authorize".
+//   Events: https://developers.google.com/workspace/admin/reports/v1/appendix/activity/token
+//   UDM mapping (token app): https://docs.cloud.google.com/chronicle/docs/ingestion/default-parsers/workspace-activity
+//     app_name -> target.resource.name, client_id -> target.resource.product_object_id,
+//     scope -> target.resource.attribute.labels["scope"] (one label per scope value), actor.email -> principal.user.email_addresses
+// Reference lists (create before enabling):
+//   %yuma_ai_approved_oauth_clients  (STRING list of OAuth client IDs approved in the register; PB2 maintains it)
+// Maps: ISM-2137, ISM-2138, ISM-2139, ISM-2156 | E8 restrict administrative privileges (supporting)
+//   ATT&CK T1528 | ATLAS AML.T0012 | OWASP LLM06, ASI03
+// UNVALIDATED: that labels["scope"] matches any one of several same-key labels; metadata.product_name value "token".
+rule yuma_gai_g01_ai_oauth_app_sensitive_workspace_scopes {
+  meta:
+    author = "Yuma IT"
+    description = "Third-party OAuth app with an AI or agent-style name was granted sensitive Workspace scopes and is not in the approved AI register"
+    severity = "HIGH"
+    priority = "HIGH"
+    yuma_id = "G01"
+    ism = "ISM-2137, ISM-2138, ISM-2139, ISM-2156"
+    mitre_attack_technique_id = "T1528"
+    atlas = "AML.T0012"
+    owasp = "LLM06, ASI03"
+
+  events:
+    $t.metadata.vendor_name = "Google Workspace"
+    $t.metadata.product_name = "token"
+    $t.metadata.product_event_type = "authorize"
+    $t.target.resource.product_object_id = $client_id
+    $t.target.resource.attribute.labels["scope"] = /mail\.google\.com\/|\/auth\/(gmail|drive|calendar|contacts|admin\.|cloud-platform|script\.|chat\.|documents|spreadsheets|presentations|directory|apps\.|tasks)/ nocase
+    re.regex($t.target.resource.name, `(?i)(openai|chatgpt|anthropic|claude|copilot|gemini|perplexity|deepseek|mistral|grok|otter|fireflies|notetaker|zapier|n8n|make\.com|langchain|cursor|\bai\b|gpt|llm|mcp|agent|assistant|\bbot\b)`)
+    not $t.target.resource.product_object_id in %yuma_ai_approved_oauth_clients
+
+  match:
+    $client_id over 1h
+
+  outcome:
+    $risk_score = max(70)
+    $app_name = array_distinct($t.target.resource.name)
+    $granting_users = array_distinct($t.principal.user.email_addresses)
+    $granting_user_count = count_distinct($t.principal.user.email_addresses)
+    $scopes = array_distinct($t.target.resource.attribute.labels["scope"])
+    $client_type = array_distinct($t.target.resource.attribute.labels["client_type"])
+    $principal_ip = array_distinct($t.principal.ip)
+    $oauth_client_id = array_distinct($t.target.resource.product_object_id)
+
+  condition:
+    $t
+}

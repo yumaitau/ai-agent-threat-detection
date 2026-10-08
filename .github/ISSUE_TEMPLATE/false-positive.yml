@@ -1,0 +1,23 @@
+name: False positive
+description: Report a detection that alerted on expected activity.
+title: "[False positive] "
+body:
+  - type: input
+    id: detection
+    attributes:
+      label: Platform and detection ID
+      placeholder: Microsoft D04, AWS A07 or Google G13
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Expected activity and observed alert
+      description: Include the version, time window and thresholds. Remove private identifiers and log content.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitised example and suggested tuning
+      description: Use synthetic events where possible.

@@ -1,0 +1,10 @@
+// Function alias: YumaEvidenceControlsCsv   (saved function; used by PB5 ISM evidence export)
+// Returns one row, one column (Csv): ISM control evidence status as RFC 4180 CSV.
+let q = (s:string) { strcat('"', replace_string(s, '"', '""'), '"') };
+let Header = "ControlId,Theme,Control,Status,Metric,AlertsLookback30d,PackEvidence,EvidenceMethod,CheckedAtUtc";
+YumaISMControlStatus()
+| order by ControlId asc
+| extend Line = strcat_array(pack_array(q(ControlId), q(Theme), q(Control), q(Status), q(Metric),
+      q(tostring(AlertsLookback)), q(PackEvidence), q(EvidenceMethod), q(format_datetime(CheckedAtUtc, "yyyy-MM-dd HH:mm:ss"))), ",")
+| summarize Lines = make_list(Line, 1000)
+| project Csv = strcat(Header, "\n", strcat_array(Lines, "\n"))

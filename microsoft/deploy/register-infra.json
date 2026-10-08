@@ -1,0 +1,392 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "10103338670355679085"
+    }
+  },
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace name with Microsoft Sentinel enabled"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "retentionInDays": {
+      "type": "int",
+      "defaultValue": 365,
+      "metadata": {
+        "description": "Interactive retention for the register table, in days"
+      }
+    },
+    "totalRetentionInDays": {
+      "type": "int",
+      "defaultValue": 2555,
+      "metadata": {
+        "description": "Total retention (interactive + long-term) for the register table, in days. Set to your records policy."
+      }
+    },
+    "dcrName": {
+      "type": "string",
+      "defaultValue": "dcr-yuma-ai-agent-register"
+    }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "streamColumns",
+        "count": "[length(variables('columns'))]",
+        "input": {
+          "name": "[variables('columns')[copyIndex('streamColumns')].name]",
+          "type": "[variables('columns')[copyIndex('streamColumns')].type]"
+        }
+      }
+    ],
+    "$fxv#0": [
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "description": "When the record was written"
+      },
+      {
+        "name": "RecordType",
+        "type": "string",
+        "description": "RegisterSnapshot | ConsentDecision | ReviewCompleted | Retired"
+      },
+      {
+        "name": "AgentKey",
+        "type": "string",
+        "description": "Stable key: AgentsInfo AgentId, or the Entra service principal object ID for consented apps"
+      },
+      {
+        "name": "AgentName",
+        "type": "string",
+        "description": "Display name of the agent or AI app"
+      },
+      {
+        "name": "Source",
+        "type": "string",
+        "description": "AgentsInfo | EntraConsent | Manual"
+      },
+      {
+        "name": "Platform",
+        "type": "string",
+        "description": "Agent platform from AgentsInfo, or EntraApp"
+      },
+      {
+        "name": "AppId",
+        "type": "string",
+        "description": "Entra application (client) ID"
+      },
+      {
+        "name": "ServicePrincipalId",
+        "type": "string",
+        "description": "Entra service principal object ID"
+      },
+      {
+        "name": "EntraAgentId",
+        "type": "string",
+        "description": "Entra Agent ID agent identity, if any (ISM-2133)"
+      },
+      {
+        "name": "EntraBlueprintId",
+        "type": "string",
+        "description": "Entra Agent ID blueprint, if any"
+      },
+      {
+        "name": "Owners",
+        "type": "dynamic",
+        "description": "Owner list (ISM-2135 owner)"
+      },
+      {
+        "name": "BusinessPurpose",
+        "type": "string",
+        "description": "Business purpose (ISM-2135)"
+      },
+      {
+        "name": "Identities",
+        "type": "dynamic",
+        "description": "Identities assigned to the agent (ISM-2135)"
+      },
+      {
+        "name": "Permissions",
+        "type": "dynamic",
+        "description": "Granted permissions or scopes"
+      },
+      {
+        "name": "DeclaredTools",
+        "type": "dynamic",
+        "description": "Tools the agent can call"
+      },
+      {
+        "name": "McpServers",
+        "type": "dynamic",
+        "description": "MCP servers the agent uses"
+      },
+      {
+        "name": "DataSources",
+        "type": "dynamic",
+        "description": "Declared data sources"
+      },
+      {
+        "name": "SharedWith",
+        "type": "dynamic",
+        "description": "Sharing scope"
+      },
+      {
+        "name": "LifecycleStatus",
+        "type": "string",
+        "description": "Lifecycle status from the source"
+      },
+      {
+        "name": "ConsentType",
+        "type": "string",
+        "description": "AllPrincipals (admin) or Principal (user)"
+      },
+      {
+        "name": "IsAdminConsent",
+        "type": "boolean",
+        "description": "True if an administrator consented"
+      },
+      {
+        "name": "ConsentedBy",
+        "type": "string",
+        "description": "UPN of the consenting user"
+      },
+      {
+        "name": "ConsentDate",
+        "type": "datetime",
+        "description": "When consent was granted"
+      },
+      {
+        "name": "Decision",
+        "type": "string",
+        "description": "Approved | Revoked | Investigate | Pending"
+      },
+      {
+        "name": "DecisionBy",
+        "type": "string",
+        "description": "UPN of the person who decided (ISM-2113 human approval)"
+      },
+      {
+        "name": "DecisionReason",
+        "type": "string",
+        "description": "Free-text reason"
+      },
+      {
+        "name": "LastReviewDate",
+        "type": "datetime",
+        "description": "Date of the last ISM-2138 review"
+      },
+      {
+        "name": "RiskRating",
+        "type": "string",
+        "description": "Low | Medium | High"
+      },
+      {
+        "name": "IncidentArmId",
+        "type": "string",
+        "description": "Sentinel incident that produced the record"
+      },
+      {
+        "name": "Notes",
+        "type": "string",
+        "description": "Notes"
+      }
+    ],
+    "$fxv#1": "ServicePrincipalId,AppId,AgentName,Owner,ApprovedBy,ApprovedOn,NextReviewDue\n00000000-0000-0000-0000-000000000000,00000000-0000-0000-0000-000000000000,PLACEHOLDER-delete-after-first-approval,,,,\n",
+    "$fxv#2": "ControlId,Control,Theme,PackEvidence,EvidenceMethod\nISM-2133,Each AI agent is assigned a unique identity that is distinct from the user accounts of personnel and the identities of other AI agents.,Agent identity,D07; register Gap_NoUniqueIdentity,Automated\nISM-2134,\"An AI agent register is developed, implemented, maintained and regularly verified.\",Agent register,PB2; PB4; register freshness,Automated\nISM-2135,\"An AI agent register contains the following for each AI agent:; its unique identifier; its owner and business purpose; the identities assigned to it; any user accounts and credentials it uses; the tools, permissions and data repositories it can access.\",Agent register,PB4; register field gaps,Automated\nISM-2136,\"Risk-based access decisions, informed by contextual signals, are enforced for access to systems and their resources.\",Agent access,D07; agent sign-in Conditional Access coverage,Partial\nISM-2137,\"Human users are prevented from granting consent to third-party OAuth applications, with such consent granted only by an authorised administrator.\",OAuth consent,D05; user-consent count,Automated\nISM-2138,\"OAuth application consents, including their granted permissions, are reviewed at least every six months, with unused applications and excessive permissions revoked.\",OAuth consent,PB2 review job; register ReviewStatus,Automated\nISM-2139,\"Consent grants, token issuance and token use for third-party OAuth applications are centrally logged.\",OAuth consent,\"Log presence: AuditLogs, service principal sign-ins, Graph activity\",Automated\nISM-2140,\"The OAuth device code authentication flow is disabled unless required, and where required, is restricted to authorised user accounts and managed devices.\",OAuth consent,Device code sign-in count (SigninLogs),Automated\nISM-2156,\"Agentic AI applications are restricted to the minimum set of tools, functions and permissions required for their intended purpose.\",Agent tools,D04; register high-risk permissions,Partial\nISM-2157,\"Tools invoked by agentic AI applications are subject to both the access controls of the invoking user and agent-specific, task-scoped authorisation, with effective permissions limited to the minimum permitted by both.\",Agent tools,D08,Partial\nISM-2158,\"External content retrieved by agentic AI applications is treated as untrusted data throughout processing, is clearly delimited from system instructions, is subject to validation and sanitisation measures applied to other untrusted input, remains untrusted following such processing, and is prevented from modifying or overriding system instructions, security policies, access controls, tool permissions or human approval requirements.\",Agent content,D10; Microsoft prompt-injection alerts,Manual\nISM-2159,\"All tool invocations, external requests and outputs generated by agentic AI applications are centrally logged with sufficient detail to support cyber security incident investigations.\",Agent logging,\"Log presence: Graph activity, GSA agentic traffic, CopilotActivity\",Partial\n",
+    "$fxv#3": "// Function alias: YumaAIRegister   (deployed as a workspace saved function by deploy/register-infra.json)\n// Current AI agent register (ISM-2134, ISM-2135) built from the custom table AIAgentRegister_CL.\n// Writers: PB4 (daily AgentsInfo sync), PB2 (consent decisions), manual entries through the same DCR stream.\n// One row per agent, with ISM-2135 field gaps, ISM-2133 identity gap, high-risk permissions and ISM-2138 review status.\nlet HighRisk = dynamic([\n    \"Application.ReadWrite.All\", \"AppRoleAssignment.ReadWrite.All\", \"Directory.ReadWrite.All\",\n    \"AgentIdentity.ReadWrite.All\", \"DelegatedPermissionGrant.ReadWrite.All\",\n    \"RoleManagement.ReadWrite.Directory\", \"User.ReadWrite.All\", \"Group.ReadWrite.All\",\n    \"Policy.ReadWrite.ConditionalAccess\", \"Mail.Read\", \"Mail.ReadWrite\", \"Mail.Send\",\n    \"MailboxSettings.ReadWrite\", \"full_access_as_app\", \"EWS.AccessAsUser.All\",\n    \"Files.Read.All\", \"Files.ReadWrite.All\", \"Sites.Read.All\", \"Sites.ReadWrite.All\",\n    \"Sites.FullControl.All\", \"Chat.Read.All\", \"Chat.ReadWrite.All\", \"ChannelMessage.Read.All\"]);\nlet ReviewCycle = 182d;   // ISM-2138: at least every six months\nlet Records = AIAgentRegister_CL;\nlet Snapshot = Records\n    | where RecordType == \"RegisterSnapshot\"\n    | summarize arg_max(TimeGenerated, AgentName, Source, Platform, AppId, ServicePrincipalId, EntraAgentId,\n                        EntraBlueprintId, Owners, BusinessPurpose, Identities, Permissions, DeclaredTools, McpServers,\n                        DataSources, SharedWith, LifecycleStatus, RiskRating)\n             by AgentKey\n    | project-rename LastSnapshotAt = TimeGenerated;\nlet Decisions = Records\n    | where RecordType == \"ConsentDecision\"\n    | summarize arg_max(TimeGenerated, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,\n                        ConsentDate, IncidentArmId)\n             by AgentKey\n    | project-rename LastDecisionAt = TimeGenerated;\nlet Lifecycle = Records\n    | extend ReviewTime = iff(RecordType in (\"ReviewCompleted\", \"ConsentDecision\"), coalesce(LastReviewDate, TimeGenerated), datetime(null))\n    | summarize FirstRecorded = min(TimeGenerated),\n                LastReview = max(ReviewTime),\n                RetiredAt = maxif(TimeGenerated, RecordType == \"Retired\"),\n                ConsentEvents = countif(RecordType == \"ConsentDecision\")\n             by AgentKey;\nSnapshot\n| join kind=leftouter Decisions on AgentKey\n| join kind=leftouter Lifecycle on AgentKey\n| project-away AgentKey1, AgentKey2\n| where isnull(RetiredAt) or RetiredAt < LastSnapshotAt\n| extend NextReviewDue = LastReview + ReviewCycle\n| extend ReviewStatus = case(isnull(LastReview), \"Never reviewed\",\n                             NextReviewDue < now(), \"Overdue\",\n                             NextReviewDue < now() + 30d, \"Due within 30 days\",\n                             \"Current\")\n| extend HighRiskPermissions = set_intersect(extract_all(@\"([A-Za-z_]+(?:\\.[A-Za-z]+)+|full_access_as_app)\", tostring(Permissions)), HighRisk)\n| extend Gap_NoOwner = coalesce(array_length(Owners), 0) == 0,\n         Gap_NoPurpose = isempty(BusinessPurpose),\n         Gap_NoUniqueIdentity = isempty(EntraAgentId) and isempty(ServicePrincipalId),\n         Gap_NoPermissionsRecorded = isempty(tostring(Permissions)) or tostring(Permissions) in (\"[]\", \"{}\"),\n         Flag_HighRiskPermissions = array_length(HighRiskPermissions) > 0,\n         Flag_HasMcp = coalesce(array_length(McpServers), 0) > 0\n| extend GapCount = toint(Gap_NoOwner) + toint(Gap_NoPurpose) + toint(Gap_NoUniqueIdentity) + toint(Gap_NoPermissionsRecorded)\n| project AgentKey, AgentName, Source, Platform, AppId, ServicePrincipalId, EntraAgentId, EntraBlueprintId, Owners,\n          BusinessPurpose, Identities, Permissions, HighRiskPermissions, DeclaredTools, McpServers, DataSources, SharedWith,\n          LifecycleStatus, RiskRating, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,\n          ConsentDate, IncidentArmId, ConsentEvents, FirstRecorded, LastSnapshotAt, LastDecisionAt, LastReview,\n          NextReviewDue, ReviewStatus, Gap_NoOwner, Gap_NoPurpose, Gap_NoUniqueIdentity, Gap_NoPermissionsRecorded,\n          Flag_HighRiskPermissions, Flag_HasMcp, GapCount\n",
+    "$fxv#4": "// Function alias: YumaISMControlStatus   (saved function; depends on YumaAIRegister and watchlist YumaISMControlMap)\n// One row per ISM control in scope (ISM-2133 to 2140, ISM-2156 to 2159) with an evidence status computed from data.\n// Status meanings: \"Evidence present\" = the data shows the expected state; \"Gap\" = the data shows a problem;\n//   \"No data\" = the source table is empty or missing; \"Attestation required\" = needs a human statement plus the metric.\n// This is evidence to support an assessment, not a compliance determination.\n// Tables that are not connected are tolerated with union isfuzzy=true and count as \"No data\".\nlet Lookback = 30d;\nlet Reg = YumaAIRegister();\nlet RegTotal = toscalar(Reg | count);\nlet RegNoIdentity = toscalar(Reg | where Gap_NoUniqueIdentity | count);\nlet RegWithGaps = toscalar(Reg | where GapCount > 0 | count);\nlet RegReviewDue = toscalar(Reg | where ReviewStatus in (\"Overdue\", \"Never reviewed\") | count);\nlet RegHighRisk = toscalar(Reg | where Flag_HighRiskPermissions | count);\nlet RegLastWrite = toscalar(union isfuzzy=true (AIAgentRegister_CL | summarize t = max(TimeGenerated)), (print t = datetime(null)) | summarize max(t));\nlet YumaAlerts = union isfuzzy=true\n        (SecurityAlert\n         | where TimeGenerated > ago(Lookback)\n         | where AlertName startswith \"Yuma AIA-\"\n         | extend DetectionId = extract(@\"Yuma AIA-(D\\d+)\", 1, AlertName)\n         | summarize n = count() by DetectionId),\n        (datatable(DetectionId:string, n:long)[]);\nlet AlertsFor = (id:string) { toscalar(YumaAlerts | where DetectionId == id | summarize tolong(sum(n))) };\nlet MsInjectionAlerts = toscalar(union isfuzzy=true\n        (SecurityAlert | where TimeGenerated > ago(Lookback) | where AlertName has_any (\"prompt injection\", \"jailbreak\") | summarize n = count()),\n        (print n = tolong(0)) | summarize sum(n));\nlet UserConsents = toscalar(union isfuzzy=true\n        (AuditLogs\n         | where TimeGenerated > ago(90d)\n         | where OperationName =~ \"Consent to application\" and Result =~ \"success\"\n         | mv-expand TargetResource = TargetResources\n         | mv-expand Prop = TargetResource.modifiedProperties\n         | where tostring(Prop.displayName) == \"ConsentContext.IsAdminConsent\" and tostring(Prop.newValue) has \"False\"\n         | summarize n = dcount(CorrelationId)),\n        (print n = tolong(0)) | summarize sum(n));\nlet AuditRows = toscalar(union isfuzzy=true (AuditLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet SpSignInRows = toscalar(union isfuzzy=true (AADServicePrincipalSignInLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet GraphRows = toscalar(union isfuzzy=true (MicrosoftGraphActivityLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet AgenticNetRows = toscalar(union isfuzzy=true (NetworkAccessTraffic | where TimeGenerated > ago(1d) and IsAgentic == true | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet CopilotRows = toscalar(union isfuzzy=true (CopilotActivity | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet SigninRows = toscalar(union isfuzzy=true (SigninLogs | where TimeGenerated > ago(1d) | summarize n = count()), (print n = tolong(0)) | summarize sum(n));\nlet DeviceCode = toscalar(union isfuzzy=true\n        (SigninLogs | where TimeGenerated > ago(Lookback) and AuthenticationProtocol =~ \"deviceCode\" | summarize n = count()),\n        (print n = tolong(0)) | summarize sum(n));\nlet DeviceCodeUsers = toscalar(union isfuzzy=true\n        (SigninLogs | where TimeGenerated > ago(Lookback) and AuthenticationProtocol =~ \"deviceCode\" | summarize n = dcount(UserPrincipalName)),\n        (print n = tolong(0)) | summarize sum(n));\nlet AgentCA = union isfuzzy=true\n        (AADServicePrincipalSignInLogs\n         | where TimeGenerated > ago(Lookback)\n         | extend AgentType = tostring(parse_json(Agent).agentType)\n         | where isnotempty(AgentType) and AgentType !~ \"notAgentic\"\n         | summarize Total = count(), NotApplied = countif(ConditionalAccessStatus =~ \"notApplied\")),\n        (datatable(Total:long, NotApplied:long)[]);\nlet AgentSignIns = toscalar(AgentCA | summarize tolong(sum(Total)));\nlet AgentNoCA = toscalar(AgentCA | summarize tolong(sum(NotApplied)));\nlet Rows = union\n    (print ControlId = \"ISM-2133\",\n           Status = case(RegTotal == 0, \"No data\", RegNoIdentity == 0, \"Evidence present\", \"Gap\"),\n           Metric = strcat(RegNoIdentity, \" of \", RegTotal, \" registered agents have no unique Entra identity\"),\n           AlertsLookback = coalesce(AlertsFor(\"D07\"), 0)),\n    (print ControlId = \"ISM-2134\",\n           Status = case(isnull(RegLastWrite), \"No data\", RegLastWrite > ago(7d), \"Evidence present\", \"Gap\"),\n           Metric = strcat(\"Register last written \", format_datetime(RegLastWrite, \"yyyy-MM-dd HH:mm\"), \" UTC; \", RegTotal, \" active agents\"),\n           AlertsLookback = tolong(0)),\n    (print ControlId = \"ISM-2135\",\n           Status = case(RegTotal == 0, \"No data\", RegWithGaps == 0, \"Evidence present\", \"Gap\"),\n           Metric = strcat(RegWithGaps, \" of \", RegTotal, \" agents missing owner, purpose, identity or permissions\"),\n           AlertsLookback = tolong(0)),\n    (print ControlId = \"ISM-2136\",\n           Status = case(coalesce(AgentSignIns, 0) == 0, \"No data\", \"Attestation required\"),\n           Metric = strcat(coalesce(AgentNoCA, 0), \" of \", coalesce(AgentSignIns, 0), \" agentic service principal sign-ins had no Conditional Access applied (30d)\"),\n           AlertsLookback = coalesce(AlertsFor(\"D07\"), 0)),\n    (print ControlId = \"ISM-2137\",\n           Status = case(AuditRows == 0, \"No data\", UserConsents == 0, \"Evidence present\", \"Gap\"),\n           Metric = strcat(UserConsents, \" user (non-admin) app consents in 90 days\"),\n           AlertsLookback = coalesce(AlertsFor(\"D05\"), 0)),\n    (print ControlId = \"ISM-2138\",\n           Status = case(RegTotal == 0, \"No data\", RegReviewDue == 0, \"Evidence present\", \"Gap\"),\n           Metric = strcat(RegReviewDue, \" of \", RegTotal, \" agents overdue or never reviewed (6-month cycle)\"),\n           AlertsLookback = tolong(0)),\n    (print ControlId = \"ISM-2139\",\n           Status = case(AuditRows > 0 and SpSignInRows > 0 and GraphRows > 0, \"Evidence present\", AuditRows > 0, \"Gap\", \"No data\"),\n           Metric = strcat(\"Last 24h rows: AuditLogs \", AuditRows, \"; service principal sign-ins \", SpSignInRows, \"; Graph activity \", GraphRows),\n           AlertsLookback = tolong(0)),\n    (print ControlId = \"ISM-2140\",\n           Status = case(SigninRows == 0, \"No data\", DeviceCode == 0, \"Evidence present\", \"Gap\"),\n           Metric = strcat(DeviceCode, \" device code sign-ins by \", DeviceCodeUsers, \" users in 30 days\"),\n           AlertsLookback = tolong(0)),\n    (print ControlId = \"ISM-2156\",\n           Status = case(RegTotal == 0, \"No data\", RegHighRisk == 0, \"Evidence present\", \"Attestation required\"),\n           Metric = strcat(RegHighRisk, \" agents hold high-risk permissions; justify each or reduce\"),\n           AlertsLookback = coalesce(AlertsFor(\"D04\"), 0)),\n    (print ControlId = \"ISM-2157\",\n           Status = \"Attestation required\",\n           Metric = strcat(coalesce(AlertsFor(\"D08\"), 0), \" agent Graph data-burst alerts in 30 days\"),\n           AlertsLookback = coalesce(AlertsFor(\"D08\"), 0)),\n    (print ControlId = \"ISM-2158\",\n           Status = \"Attestation required\",\n           Metric = strcat(MsInjectionAlerts, \" prompt-injection or jailbreak alerts; \", coalesce(AlertsFor(\"D10\"), 0), \" followed by exfil-like activity (30d)\"),\n           AlertsLookback = coalesce(AlertsFor(\"D10\"), 0)),\n    (print ControlId = \"ISM-2159\",\n           Status = case(GraphRows > 0 and (AgenticNetRows > 0 or CopilotRows > 0), \"Evidence present\", GraphRows > 0 or AgenticNetRows > 0 or CopilotRows > 0, \"Gap\", \"No data\"),\n           Metric = strcat(\"Last 24h rows: Graph activity \", GraphRows, \"; GSA agentic traffic \", AgenticNetRows, \"; CopilotActivity \", CopilotRows),\n           AlertsLookback = coalesce(AlertsFor(\"D15\"), 0));\nRows\n| join kind=leftouter (_GetWatchlist(\"YumaISMControlMap\") | project ControlId, Control, Theme, PackEvidence, EvidenceMethod) on ControlId\n| project-away ControlId1\n| extend CheckedAtUtc = now()\n| project ControlId, Theme, Control, Status, Metric, AlertsLookback, PackEvidence, EvidenceMethod, CheckedAtUtc\n| order by ControlId asc\n",
+    "$fxv#5": "// Function alias: YumaEvidenceRegisterCsv   (saved function; used by PB5 ISM evidence export)\n// Returns one row, one column (Csv): the full agent register as RFC 4180 CSV.\nlet q = (s:string) { strcat('\"', replace_string(s, '\"', '\"\"'), '\"') };\nlet Header = \"AgentKey,AgentName,Source,Platform,AppId,ServicePrincipalId,EntraAgentId,Owners,BusinessPurpose,Identities,Permissions,HighRiskPermissions,DeclaredTools,McpServers,DataSources,SharedWith,Decision,DecisionBy,ConsentType,ConsentedBy,ConsentDate,LastReview,NextReviewDue,ReviewStatus,GapCount,Gap_NoOwner,Gap_NoPurpose,Gap_NoUniqueIdentity,Gap_NoPermissionsRecorded\";\nYumaAIRegister()\n| order by AgentName asc\n| extend Line = strcat_array(pack_array(\n      q(AgentKey), q(AgentName), q(Source), q(Platform), q(AppId), q(ServicePrincipalId), q(EntraAgentId),\n      q(tostring(Owners)), q(BusinessPurpose), q(tostring(Identities)), q(tostring(Permissions)),\n      q(tostring(HighRiskPermissions)), q(tostring(DeclaredTools)), q(tostring(McpServers)), q(tostring(DataSources)),\n      q(tostring(SharedWith)), q(Decision), q(DecisionBy), q(ConsentType), q(ConsentedBy),\n      q(format_datetime(ConsentDate, \"yyyy-MM-dd\")), q(format_datetime(LastReview, \"yyyy-MM-dd\")),\n      q(format_datetime(NextReviewDue, \"yyyy-MM-dd\")), q(ReviewStatus), q(tostring(GapCount)),\n      q(tostring(Gap_NoOwner)), q(tostring(Gap_NoPurpose)), q(tostring(Gap_NoUniqueIdentity)),\n      q(tostring(Gap_NoPermissionsRecorded))), \",\")\n| summarize Lines = make_list(Line, 100000)\n| project Csv = strcat(Header, \"\\n\", strcat_array(Lines, \"\\n\"))\n",
+    "$fxv#6": "// Function alias: YumaEvidenceControlsCsv   (saved function; used by PB5 ISM evidence export)\n// Returns one row, one column (Csv): ISM control evidence status as RFC 4180 CSV.\nlet q = (s:string) { strcat('\"', replace_string(s, '\"', '\"\"'), '\"') };\nlet Header = \"ControlId,Theme,Control,Status,Metric,AlertsLookback30d,PackEvidence,EvidenceMethod,CheckedAtUtc\";\nYumaISMControlStatus()\n| order by ControlId asc\n| extend Line = strcat_array(pack_array(q(ControlId), q(Theme), q(Control), q(Status), q(Metric),\n      q(tostring(AlertsLookback)), q(PackEvidence), q(EvidenceMethod), q(format_datetime(CheckedAtUtc, \"yyyy-MM-dd HH:mm:ss\"))), \",\")\n| summarize Lines = make_list(Line, 1000)\n| project Csv = strcat(Header, \"\\n\", strcat_array(Lines, \"\\n\"))\n",
+    "$fxv#7": "// Function alias: YumaEvidenceMarkdown   (saved function; used by PB5 ISM evidence export)\n// Returns one row, one column (Markdown): a dated summary for assessors. Ordering relies on serialize + make_list,\n// which keeps input order in practice; UNVALIDATED at scale.\nlet Generated = format_datetime(now(), \"yyyy-MM-dd HH:mm\");\nlet Reg = YumaAIRegister();\nlet Total = toscalar(Reg | count);\nlet WithGaps = toscalar(Reg | where GapCount > 0 | count);\nlet ReviewDue = toscalar(Reg | where ReviewStatus in (\"Overdue\", \"Never reviewed\") | count);\nlet HighRisk = toscalar(Reg | where Flag_HighRiskPermissions | count);\nlet esc = (s:string) { replace_string(replace_string(s, \"|\", \"/\"), \"\\n\", \" \") };\nlet Head = datatable(Ord:long, Line:string) [\n    0, \"# AI agent register and ISM evidence summary\",\n    1, \"\",\n    3, \"\",\n    4, \"Evidence supports an assessment. It is not a compliance determination. Statuses are computed from Microsoft Sentinel data; see controls.csv for metrics.\",\n    5, \"\",\n    6, \"## Register\",\n    7, \"\"\n];\nlet Gen = print Ord = tolong(2), Line = strcat(\"Generated \", Generated, \" UTC from Microsoft Sentinel workspace data.\");\nlet RegLines = union\n    (print Ord = tolong(8), Line = strcat(\"- Active agents and AI apps: \", Total)),\n    (print Ord = tolong(9), Line = strcat(\"- Missing ISM-2135 fields: \", WithGaps)),\n    (print Ord = tolong(10), Line = strcat(\"- Overdue or never reviewed (ISM-2138): \", ReviewDue)),\n    (print Ord = tolong(11), Line = strcat(\"- Holding high-risk permissions (ISM-2156): \", HighRisk)),\n    (print Ord = tolong(12), Line = \"\"),\n    (print Ord = tolong(13), Line = \"## ISM control evidence status\"),\n    (print Ord = tolong(14), Line = \"\"),\n    (print Ord = tolong(15), Line = \"| Control | Status | Metric | Evidence method |\"),\n    (print Ord = tolong(16), Line = \"|---|---|---|---|\");\nlet CtlLines = YumaISMControlStatus()\n    | serialize Ord = tolong(100 + row_number())\n    | project Ord, Line = strcat(\"| \", ControlId, \" | \", Status, \" | \", esc(Metric), \" | \", EvidenceMethod, \" |\");\nunion Head, Gen, RegLines, CtlLines\n| order by Ord asc\n| summarize Lines = make_list(Line, 10000)\n| project Markdown = strcat_array(Lines, \"\\n\")\n",
+    "columns": "[variables('$fxv#0')]",
+    "functionCategory": "Yuma AI Agent Pack"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'AIAgentRegister_CL')]",
+      "properties": {
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "totalRetentionInDays": "[parameters('totalRetentionInDays')]",
+        "schema": {
+          "name": "AIAgentRegister_CL",
+          "columns": "[variables('columns')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2023-03-11",
+      "name": "[parameters('dcrName')]",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AIAgentRegister": {
+            "columns": "[variables('streamColumns')]"
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+              "name": "sentinelWorkspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Custom-AIAgentRegister"
+            ],
+            "destinations": [
+              "sentinelWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = iff(isnull(TimeGenerated), now(), TimeGenerated)",
+            "outputStream": "Custom-AIAgentRegister_CL"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'AIAgentRegister_CL')]"
+      ]
+    },
+    {
+      "type": "Microsoft.SecurityInsights/watchlists",
+      "apiVersion": "2023-02-01",
+      "scope": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+      "name": "YumaAIRegisterApproved",
+      "properties": {
+        "displayName": "Yuma AI Register - approved agents and apps",
+        "description": "Service principals approved through PB2. Suppresses D04 and D05. Maintained by PB2; remove the placeholder row after the first approval.",
+        "provider": "Yuma IT",
+        "source": "watchlist-YumaAIRegisterApproved.csv",
+        "itemsSearchKey": "ServicePrincipalId",
+        "rawContent": "[variables('$fxv#1')]",
+        "contentType": "text/csv",
+        "numberOfLinesToSkip": 0
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/watchlists",
+      "apiVersion": "2023-02-01",
+      "scope": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+      "name": "YumaISMControlMap",
+      "properties": {
+        "displayName": "Yuma ISM control map (agentic AI)",
+        "description": "ISM-2133 to 2140 and ISM-2156 to 2159 control text (ASD ISM September 2026) mapped to pack evidence.",
+        "provider": "Yuma IT",
+        "source": "watchlist-YumaISMControlMap.csv",
+        "itemsSearchKey": "ControlId",
+        "rawContent": "[variables('$fxv#2')]",
+        "contentType": "text/csv",
+        "numberOfLinesToSkip": 0
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'yuma-fn-YumaAIRegister')]",
+      "properties": {
+        "category": "[variables('functionCategory')]",
+        "displayName": "YumaAIRegister",
+        "functionAlias": "YumaAIRegister",
+        "query": "[variables('$fxv#3')]",
+        "version": 2
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'AIAgentRegister_CL')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'yuma-fn-YumaISMControlStatus')]",
+      "properties": {
+        "category": "[variables('functionCategory')]",
+        "displayName": "YumaISMControlStatus",
+        "functionAlias": "YumaISMControlStatus",
+        "query": "[variables('$fxv#4')]",
+        "version": 2
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'yuma-fn-YumaAIRegister')]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), 'Microsoft.SecurityInsights/watchlists', 'YumaISMControlMap')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'yuma-fn-YumaEvidenceRegisterCsv')]",
+      "properties": {
+        "category": "[variables('functionCategory')]",
+        "displayName": "YumaEvidenceRegisterCsv",
+        "functionAlias": "YumaEvidenceRegisterCsv",
+        "query": "[variables('$fxv#5')]",
+        "version": 2
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'yuma-fn-YumaAIRegister')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'yuma-fn-YumaEvidenceControlsCsv')]",
+      "properties": {
+        "category": "[variables('functionCategory')]",
+        "displayName": "YumaEvidenceControlsCsv",
+        "functionAlias": "YumaEvidenceControlsCsv",
+        "query": "[variables('$fxv#6')]",
+        "version": 2
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'yuma-fn-YumaISMControlStatus')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[format('{0}/{1}', parameters('workspaceName'), 'yuma-fn-YumaEvidenceMarkdown')]",
+      "properties": {
+        "category": "[variables('functionCategory')]",
+        "displayName": "YumaEvidenceMarkdown",
+        "functionAlias": "YumaEvidenceMarkdown",
+        "query": "[variables('$fxv#7')]",
+        "version": 2
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'yuma-fn-YumaISMControlStatus')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "dcrResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+    },
+    "dcrImmutableId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName')), '2023-03-11').immutableId]"
+    },
+    "logsIngestionEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName')), '2023-03-11').endpoints.logsIngestion]"
+    },
+    "streamName": {
+      "type": "string",
+      "value": "Custom-AIAgentRegister"
+    }
+  }
+}

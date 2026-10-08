@@ -1,0 +1,87 @@
+{
+  "Comment": "Yuma AIA PB1: contain an AI agent identity after named human approval (Step Functions Standard workflow). Placeholders ${...} are substituted by CloudFormation DefinitionSubstitutions.",
+  "StartAt": "Enrich",
+  "States": {
+    "Enrich": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${EnrichFunctionArn}", "Payload.$": "$"},
+      "ResultSelector": {"value.$": "$.Payload"},
+      "ResultPath": "$.enrich",
+      "Retry": [{"ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+      "Next": "IsAgentIdentity"
+    },
+    "IsAgentIdentity": {
+      "Type": "Choice",
+      "Choices": [{"Variable": "$.enrich.value.is_agent_identity", "BooleanEquals": true, "Next": "RequestApproval"}],
+      "Default": "NotAnAgentNotify"
+    },
+    "NotAnAgentNotify": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {"TopicArn": "${NotifyTopicArn}", "Subject": "Yuma AIA: alert on a non-agent identity (no containment offered)", "Message.$": "$.enrich.value.summary"},
+      "End": true
+    },
+    "RequestApproval": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {"FunctionName": "${RequestApprovalFunctionArn}", "Payload": {"taskToken.$": "$$.Task.Token", "context.$": "$.enrich.value"}},
+      "TimeoutSeconds": 14400,
+      "ResultPath": "$.decision",
+      "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": "$.timeout", "Next": "RecordTimeout"}],
+      "Next": "Approved?"
+    },
+    "Approved?": {
+      "Type": "Choice",
+      "Choices": [{"Variable": "$.decision.decision", "StringEquals": "approve", "Next": "Contain"}],
+      "Default": "RecordRejected"
+    },
+    "Contain": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${ContainFunctionArn}", "Payload": {"context.$": "$.enrich.value", "decision.$": "$.decision"}},
+      "ResultSelector": {"value.$": "$.Payload"},
+      "ResultPath": "$.containment",
+      "Next": "RecordContained"
+    },
+    "RecordContained": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:putItem",
+      "Parameters": {
+        "TableName": "${RegisterTableName}",
+        "Item": {
+          "pk": {"S.$": "States.Format('AGENT#{}', $.containment.value.agent_id)"},
+          "sk": {"S.$": "States.Format('HIST#{}#ApprovalDecision', $$.State.EnteredTime)"},
+          "agent_id": {"S.$": "$.containment.value.agent_id"},
+          "record_type": {"S": "ApprovalDecision"},
+          "status": {"S": "Contained"},
+          "decision": {"S.$": "States.Format('PB1 containment approved: {}', $.decision.reason)"},
+          "decided_by": {"S.$": "$.decision.approver"},
+          "decided_at": {"S.$": "$$.State.EnteredTime"},
+          "actions": {"S.$": "States.JsonToString($.containment.value.actions)"},
+          "updated_at": {"S.$": "$$.State.EnteredTime"}
+        }
+      },
+      "ResultPath": null,
+      "Next": "NotifyContained"
+    },
+    "NotifyContained": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {"TopicArn": "${NotifyTopicArn}", "Subject": "Yuma AIA: agent identity contained", "Message.$": "States.JsonToString($.containment.value)"},
+      "End": true
+    },
+    "RecordRejected": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {"TopicArn": "${NotifyTopicArn}", "Subject": "Yuma AIA: containment rejected", "Message.$": "States.JsonToString($.decision)"},
+      "End": true
+    },
+    "RecordTimeout": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {"TopicArn": "${NotifyTopicArn}", "Subject": "Yuma AIA: containment request timed out (no action taken)", "Message.$": "$.enrich.value.summary"},
+      "End": true
+    }
+  }
+}

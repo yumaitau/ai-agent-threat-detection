@@ -1,0 +1,9 @@
+let Reg = YumaAIRegister();
+union
+    (Reg | summarize Value = count() | extend Label = "Active agents and AI apps", Ord = 1),
+    (Reg | where GapCount > 0 | summarize Value = count() | extend Label = "Missing ISM-2135 fields", Ord = 2),
+    (Reg | where ReviewStatus in ("Overdue", "Never reviewed") | summarize Value = count() | extend Label = "Review overdue (ISM-2138)", Ord = 3),
+    (Reg | where Flag_HighRiskPermissions | summarize Value = count() | extend Label = "High-risk permissions (ISM-2156)", Ord = 4),
+    (Reg | where Flag_HasMcp | summarize Value = count() | extend Label = "Agents using MCP servers", Ord = 5)
+| order by Ord asc
+| project Label, Value

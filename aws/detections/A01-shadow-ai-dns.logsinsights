@@ -1,0 +1,13 @@
+# Yuma AIA-A01: Shadow AI - workloads resolving third-party AI model API domains
+# Source: Route 53 VPC Resolver query logs delivered to CloudWatch Logs (log group chosen at setup, e.g. /yuma/route53/resolver)
+# Fields (documented): query_timestamp, query_name, query_type, rcode, srcaddr, srcids.instance, vpc_id, account_id
+#   https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver-query-logs-format.html
+# Schedule: hourly, look back 1h. Starter domain list; maintain it as part of managed tuning.
+# Allow-listed sources (approved AI gateways, build agents) go in the regex on the last filter line.
+fields @timestamp, query_name, query_type, rcode, srcaddr, srcids.instance as instance, vpc_id, account_id
+| filter query_name like /(?i)(^|\.)(api\.openai\.com|openai\.azure\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|aiplatform\.googleapis\.com|api\.mistral\.ai|api\.cohere\.(com|ai)|api\.groq\.com|api\.together\.(xyz|ai)|api\.deepseek\.com|api\.x\.ai|openrouter\.ai|api\.perplexity\.ai|api-inference\.huggingface\.co|router\.huggingface\.co|api\.fireworks\.ai)\.?$/
+| filter rcode = "NOERROR"
+| filter srcaddr not like /^(10\.0\.99\.)/
+| stats count(*) as queries, earliest(@timestamp) as firstSeen, latest(@timestamp) as lastSeen by account_id, vpc_id, instance, srcaddr, query_name
+| sort queries desc
+| limit 500

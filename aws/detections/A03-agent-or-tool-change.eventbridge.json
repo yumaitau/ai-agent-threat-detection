@@ -1,0 +1,20 @@
+{
+  "source": [{"prefix": "aws."}],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["bedrock.amazonaws.com", "bedrock-agentcore.amazonaws.com", "agent-registry.amazonaws.com"],
+    "eventName": [
+      "CreateAgent", "UpdateAgent", "CreateAgentActionGroup", "UpdateAgentActionGroup",
+      "CreateAgentAlias", "UpdateAgentAlias", "AssociateAgentKnowledgeBase", "AssociateAgentCollaborator",
+      "CreateKnowledgeBase", "CreateDataSource", "CreateFlow",
+      "CreateAgentRuntime", "UpdateAgentRuntime", "CreateAgentRuntimeEndpoint",
+      "CreateGateway", "UpdateGateway", "CreateGatewayTarget", "UpdateGatewayTarget",
+      "CreateWorkloadIdentity", "UpdateWorkloadIdentity",
+      "CreateOauth2CredentialProvider", "UpdateOauth2CredentialProvider",
+      "CreateApiKeyCredentialProvider", "UpdateApiKeyCredentialProvider",
+      "CreateMemory", "CreateBrowser", "CreateCodeInterpreter", "CreateHarness",
+      "CreateRegistryRecord", "UpdateRegistryRecord", "UpdateRegistryRecordStatus"
+    ],
+    "errorCode": [{"exists": false}]
+  }
+}

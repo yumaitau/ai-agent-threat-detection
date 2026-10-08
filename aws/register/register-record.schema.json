@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuma.example/aia/register-record.schema.json",
+  "title": "Yuma AI agent register record (DynamoDB item and S3 JSON Lines snapshot row)",
+  "type": "object",
+  "required": ["pk", "sk", "agent_id", "platform", "record_type", "status", "updated_at"],
+  "properties": {
+    "pk": {"type": "string", "pattern": "^AGENT#.+"},
+    "sk": {"type": "string", "pattern": "^(CURRENT|HIST#\\d{4}-\\d{2}-\\d{2}T[0-9:.]+Z#(RegisterSnapshot|ChangeObserved|ApprovalDecision|ReviewCompleted|Retired))$"},
+    "agent_id": {"type": "string", "description": "ISM-2135 unique identifier. ARN of the agent, runtime, gateway, workload identity or registry record; or ext:<vendor>:<id> for SaaS agents"},
+    "agent_name": {"type": "string"},
+    "platform": {"enum": ["BedrockAgent", "AgentCoreRuntime", "AgentCoreGateway", "AgentCoreWorkloadIdentity", "AgentRegistryRecord", "IAMRole", "IAMUser", "IdentityCenterApplication", "Credential", "ExternalSaaS", "Other"]},
+    "account_id": {"type": "string"},
+    "region": {"type": "string"},
+    "owner": {"type": ["string", "null"], "description": "ISM-2135 owner (named person or role mailbox)"},
+    "business_purpose": {"type": ["string", "null"], "description": "ISM-2135 business purpose"},
+    "identities": {"type": "array", "items": {"type": "string"}, "description": "ISM-2133/2135 IAM role ARNs, workload identity ARNs, Identity Center application ARNs"},
+    "credentials": {"type": "array", "items": {"type": "string"}, "description": "ISM-2135 user accounts and credentials: access key IDs, OAuth2/API key credential provider ARNs, Secrets Manager ARNs"},
+    "tools": {"type": "array", "items": {"type": "string"}, "description": "ISM-2135 tools: action groups, gateway targets, MCP servers"},
+    "permissions": {"type": "array", "items": {"type": "string"}, "description": "ISM-2135/2156 attached and inline policy names or ARNs"},
+    "data_repositories": {"type": "array", "items": {"type": "string"}, "description": "ISM-2135 knowledge bases, S3 buckets, databases"},
+    "approved_models": {"type": "array", "items": {"type": "string"}},
+    "record_type": {"enum": ["RegisterSnapshot", "ChangeObserved", "ApprovalDecision", "ReviewCompleted", "Retired"]},
+    "status": {"enum": ["PendingReview", "Approved", "Rejected", "Contained", "Retired"]},
+    "decision": {"type": ["string", "null"]},
+    "decided_by": {"type": ["string", "null"], "description": "ISM-2113 named human approver"},
+    "decided_at": {"type": ["string", "null"], "format": "date-time"},
+    "last_review": {"type": ["string", "null"], "format": "date"},
+    "next_review_due": {"type": ["string", "null"], "format": "date", "description": "last_review + 182 days (ISM-2138 cadence applied to agents)"},
+    "source_event_id": {"type": ["string", "null"], "description": "CloudTrail eventID that created this record"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

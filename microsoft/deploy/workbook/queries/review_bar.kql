@@ -1,0 +1,2 @@
+YumaAIRegister()
+| summarize Agents = count() by ReviewStatus

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "title": "Yuma-PB4-AI-Agent-Register-Sync",
+    "author": "Yuma IT",
+    "description": "Daily: reads AgentsInfo through Microsoft Graph runHuntingQuery and writes register snapshots (or Retired records) to AIAgentRegister_CL through the Logs Ingestion API.",
+    "comments": "UNVALIDATED skeleton. Grant the managed identity Graph ThreatHunting.Read.All (application) and Monitoring Metrics Publisher on the DCR. LogsIngestionEndpoint and DcrImmutableId come from the register-infra.json outputs."
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "Yuma-PB4-AI-Agent-Register-Sync"
+    },
+    "LogsIngestionEndpoint": {
+      "type": "string",
+      "metadata": {
+        "description": "register-infra output logsIngestionEndpoint"
+      }
+    },
+    "DcrImmutableId": {
+      "type": "string",
+      "metadata": {
+        "description": "register-infra output dcrImmutableId"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "Yuma-PB4-AI-Agent-Register-Sync",
+        "hidden-SentinelTemplateVersion": "0.1"
+      },
+      "properties": {
+        "state": "Disabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "LogsIngestionEndpoint": {
+              "type": "String",
+              "defaultValue": "[parameters('LogsIngestionEndpoint')]"
+            },
+            "DcrImmutableId": {
+              "type": "String",
+              "defaultValue": "[parameters('DcrImmutableId')]"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "type": "Recurrence",
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1
+              }
+            }
+          },
+          "actions": {
+            "Run_hunting_query": {
+              "type": "Http",
+              "runAfter": {},
+              "inputs": {
+                "method": "POST",
+                "uri": "https://graph.microsoft.com/v1.0/security/runHuntingQuery",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "Query": "AgentsInfo\n| summarize arg_max(Timestamp, *) by AgentId\n| project AgentId, AgentName, Platform, AgentDescription, EntraAgentId, EntraBlueprintId, Owners, Permissions,\n          ToolsAuthenticationType, DeclaredTools, McpServers, DeclaredDataSources, SharedWith, LifecycleStatus,\n          PublishedStatus, LastUpdatedDateTime"
+                },
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://graph.microsoft.com"
+                }
+              }
+            },
+            "Select_register_rows": {
+              "type": "Select",
+              "runAfter": {
+                "Run_hunting_query": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "from": "@coalesce(body('Run_hunting_query')?['results'], json('[]'))",
+                "select": {
+                  "TimeGenerated": "@utcNow()",
+                  "RecordType": "@if(equals(item()?['LifecycleStatus'], 'Deleted'), 'Retired', 'RegisterSnapshot')",
+                  "AgentKey": "@item()?['AgentId']",
+                  "AgentName": "@item()?['AgentName']",
+                  "Source": "AgentsInfo",
+                  "Platform": "@item()?['Platform']",
+                  "EntraAgentId": "@item()?['EntraAgentId']",
+                  "EntraBlueprintId": "@item()?['EntraBlueprintId']",
+                  "Owners": "@item()?['Owners']",
+                  "BusinessPurpose": "@item()?['AgentDescription']",
+                  "Identities": "@createArray(item()?['EntraAgentId'], item()?['EntraBlueprintId'])",
+                  "Permissions": "@item()?['Permissions']",
+                  "DeclaredTools": "@item()?['DeclaredTools']",
+                  "McpServers": "@item()?['McpServers']",
+                  "DataSources": "@item()?['DeclaredDataSources']",
+                  "SharedWith": "@item()?['SharedWith']",
+                  "LifecycleStatus": "@item()?['LifecycleStatus']",
+                  "Notes": "@concat('ToolsAuthenticationType=', string(item()?['ToolsAuthenticationType']), '; PublishedStatus=', string(item()?['PublishedStatus']))"
+                }
+              }
+            },
+            "For_each_batch": {
+              "type": "Foreach",
+              "runAfter": {
+                "Select_register_rows": [
+                  "Succeeded"
+                ]
+              },
+              "foreach": "@chunk(body('Select_register_rows'), 200)",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              },
+              "actions": {
+                "Send_to_register": {
+                  "type": "Http",
+                  "runAfter": {},
+                  "inputs": {
+                    "method": "POST",
+                    "uri": "@{parameters('LogsIngestionEndpoint')}/dataCollectionRules/@{parameters('DcrImmutableId')}/streams/Custom-AIAgentRegister?api-version=2023-01-01",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": "@items('For_each_batch')",
+                    "authentication": {
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://monitor.azure.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "outputs": {}
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "playbookPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+    }
+  }
+}

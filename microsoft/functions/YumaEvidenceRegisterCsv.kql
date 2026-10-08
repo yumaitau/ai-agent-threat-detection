@@ -1,0 +1,17 @@
+// Function alias: YumaEvidenceRegisterCsv   (saved function; used by PB5 ISM evidence export)
+// Returns one row, one column (Csv): the full agent register as RFC 4180 CSV.
+let q = (s:string) { strcat('"', replace_string(s, '"', '""'), '"') };
+let Header = "AgentKey,AgentName,Source,Platform,AppId,ServicePrincipalId,EntraAgentId,Owners,BusinessPurpose,Identities,Permissions,HighRiskPermissions,DeclaredTools,McpServers,DataSources,SharedWith,Decision,DecisionBy,ConsentType,ConsentedBy,ConsentDate,LastReview,NextReviewDue,ReviewStatus,GapCount,Gap_NoOwner,Gap_NoPurpose,Gap_NoUniqueIdentity,Gap_NoPermissionsRecorded";
+YumaAIRegister()
+| order by AgentName asc
+| extend Line = strcat_array(pack_array(
+      q(AgentKey), q(AgentName), q(Source), q(Platform), q(AppId), q(ServicePrincipalId), q(EntraAgentId),
+      q(tostring(Owners)), q(BusinessPurpose), q(tostring(Identities)), q(tostring(Permissions)),
+      q(tostring(HighRiskPermissions)), q(tostring(DeclaredTools)), q(tostring(McpServers)), q(tostring(DataSources)),
+      q(tostring(SharedWith)), q(Decision), q(DecisionBy), q(ConsentType), q(ConsentedBy),
+      q(format_datetime(ConsentDate, "yyyy-MM-dd")), q(format_datetime(LastReview, "yyyy-MM-dd")),
+      q(format_datetime(NextReviewDue, "yyyy-MM-dd")), q(ReviewStatus), q(tostring(GapCount)),
+      q(tostring(Gap_NoOwner)), q(tostring(Gap_NoPurpose)), q(tostring(Gap_NoUniqueIdentity)),
+      q(tostring(Gap_NoPermissionsRecorded))), ",")
+| summarize Lines = make_list(Line, 100000)
+| project Csv = strcat(Header, "\n", strcat_array(Lines, "\n"))

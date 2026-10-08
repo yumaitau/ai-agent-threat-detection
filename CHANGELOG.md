@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rewrote the main README for non-technical readers, with everyday examples, setup responsibilities and a plain-language explanation of validation limits.
+
 ## v0.1.0 - 8 October 2026
 
 - Combined the Microsoft, AWS and Google packs under one MIT-licensed project.

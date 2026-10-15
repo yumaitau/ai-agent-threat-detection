@@ -50,11 +50,3 @@ jobs:
           echo "$RUNNER_TEMP/bicep-tools" >> "$GITHUB_PATH"
       - name: Validate all three packs
         run: bash tools/validate_all.sh
-      - name: Upload validation logs
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: offline-validation-${{ github.sha }}
-          path: artifacts/*.txt
-          if-no-files-found: warn
-          retention-days: 30

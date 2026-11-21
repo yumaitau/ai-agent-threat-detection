@@ -1,0 +1,44 @@
+id: d5023e40-2c2d-5036-b501-e479099ac19d
+name: Yuma AIA-D15 Agentic traffic invoking sensitive MCP primitives or new destinations
+description: |
+  Hunts Entra Global Secure Access NetworkAccessTraffic logs for agentic traffic invoking sensitive or destructive MCP primitives or contacting a newly observed MCP destination. Maps to ISM-2159, ISM-2156 and ISM-2113.
+requiredDataConnectors:
+- connectorId: EntraGlobalSecureAccess
+  dataTypes:
+  - NetworkAccessTraffic
+tactics:
+- Impact
+- Exfiltration
+relevantTechniques:
+- T1485
+- T1567
+query: |
+  let lookback = 1d;
+  let baseline = 14d;
+  let SensitiveVerbs = @"(?i)(delete|remove|drop|truncate|exec|execute|shell|run_command|send|transfer|payment|write|upload|share|grant)";
+  let Agentic = NetworkAccessTraffic
+      | where TimeGenerated > ago(baseline)
+      | where IsAgentic == true;
+  let KnownMcpDest = Agentic
+      | where TimeGenerated <= ago(lookback) and isnotempty(McpProtocolVersion)
+      | distinct AIAgentId, DestinationFqdn;
+  Agentic
+  | where TimeGenerated > ago(lookback)
+  | where isnotempty(McpPrimitiveName) or isnotempty(McpProtocolVersion)
+  | join kind=leftanti KnownMcpDest on AIAgentId, DestinationFqdn
+  | union (Agentic | where TimeGenerated > ago(lookback) | where McpPrimitiveName matches regex SensitiveVerbs)
+  | extend IsSensitivePrimitive = McpPrimitiveName matches regex SensitiveVerbs
+  | summarize Calls = count(), Primitives = make_set(McpPrimitiveName, 20), Destinations = make_set(DestinationFqdn, 10),
+              Actions = make_set(Action, 3), SentBytes = sum(SentBytes), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+           by AIAgentId, AIAgentName, AgentPlatform, UserPrincipalName, DeviceId, InitiatingProcessName, IsSensitivePrimitive
+  | order by IsSensitivePrimitive desc, Calls desc
+entityMappings:
+- entityType: Account
+  fieldMappings:
+  - identifier: FullName
+    columnName: UserPrincipalName
+- entityType: CloudApplication
+  fieldMappings:
+  - identifier: Name
+    columnName: AIAgentName
+version: 1.0.0

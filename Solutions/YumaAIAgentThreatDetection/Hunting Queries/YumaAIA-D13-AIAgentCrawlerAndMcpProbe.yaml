@@ -1,0 +1,37 @@
+id: 6d379dda-7e71-59c9-94df-c4e02aba7564
+name: Yuma AIA-D13 AI crawler and MCP endpoint probing
+description: |
+  Hunts Azure Application Gateway access logs for self-declared AI crawler user agents or probes against MCP, SSE, LLM API and agent-card endpoints. Maps to ISM-2116.
+requiredDataConnectors:
+- connectorId: WAF
+  dataTypes:
+  - AGWAccessLogs
+tactics:
+- Reconnaissance
+relevantTechniques:
+- T1595.002
+- T1593
+query: |
+  let lookback = 1d;
+  let AIAgentUA = dynamic(["GPTBot", "ChatGPT-User", "OAI-SearchBot", "ClaudeBot", "Claude-User", "Claude-SearchBot",
+      "PerplexityBot", "Perplexity-User", "Meta-ExternalAgent", "Bytespider", "CCBot", "Google-Extended"]);
+  let ProbePaths = dynamic(["/mcp", "/sse", "/.well-known/mcp", "/v1/chat/completions", "/v1/completions",
+      "/api/generate", "/.well-known/ai-plugin.json", "/openapi.json", "/llms.txt"]);
+  AGWAccessLogs
+  | where TimeGenerated > ago(lookback)
+  | extend ClaimsAIAgent = UserAgent has_any (AIAgentUA),
+           IsProbe = tolower(RequestUri) has_any (ProbePaths)
+  | where ClaimsAIAgent or IsProbe
+  | summarize Requests = count(), DistinctUris = dcount(RequestUri), NotFound = countif(HttpStatus == 404),
+              ProbeHits = countif(IsProbe), UserAgents = make_set(UserAgent, 10), SampleUris = make_set(RequestUri, 20),
+              Hosts = make_set(Host, 5), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+           by ClientIp, ClaimsAIAgent
+  | extend NotFoundRatio = round(todouble(NotFound) / Requests, 2)
+  | where ProbeHits > 0 or DistinctUris > 200 or NotFoundRatio > 0.5
+  | order by ProbeHits desc, DistinctUris desc
+entityMappings:
+- entityType: IP
+  fieldMappings:
+  - identifier: Address
+    columnName: ClientIp
+version: 1.0.0

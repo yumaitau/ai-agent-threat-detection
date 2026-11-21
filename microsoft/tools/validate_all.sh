@@ -58,10 +58,26 @@ for file in deploy/bicep/*.bicep; do
   "$BICEP" build "$file" --stdout > /dev/null
   echo "PASS: Bicep build $file"
 done
+# Verify unified deploy/azuredeploy.json stays in sync with deploy/bicep/main.bicep (ignoring Bicep version metadata)
+"$BICEP" build deploy/bicep/main.bicep --outfile "$TMP_CHECK/azuredeploy.built.json"
+python3 - <<'PY'
+import json, os
+from pathlib import Path
+built = json.loads((Path(os.environ['TMP_CHECK']) / 'azuredeploy.built.json').read_text())
+committed = json.loads(Path('deploy/azuredeploy.json').read_text())
+for doc in (built, committed):
+    doc.pop('metadata', None)
+assert built == committed, 'deploy/azuredeploy.json is out of sync with deploy/bicep/main.bicep; rebuild with bicep build'
+print('PASS: deploy/azuredeploy.json matches deploy/bicep/main.bicep')
+PY
+# Validate Microsoft Sentinel Content Hub V3 Solution layout, YAML schemas, ARM templates and Defender XDR rules
+python3 tools/validate_sentinel_solution.py --extract-kql-dir "$TMP_CHECK/extracted-kql"
+PRELUDE=tools/prelude.generated.kql node tools/kqlcheck.js tools/schemas.json "$TMP_CHECK"/extracted-kql/*.kql
 # Decompilation checks ARM structure, not Logic Apps workflow semantics.
-for file in deploy/analytics-rule-*.json deploy/automation-rule-*.json deploy/playbook-*.json; do
-  cp "$file" "$TMP_CHECK/"
-  "$BICEP" decompile "$TMP_CHECK/$(basename "$file")" --force
+for file in deploy/analytics-rule-*.json deploy/automation-rule-*.json deploy/playbook-*.json ../Solutions/YumaAIAgentThreatDetection/Playbooks/*/azuredeploy.json; do
+  dest="$TMP_CHECK/$(echo "$file" | tr '/.' '__').json"
+  cp "$file" "$dest"
+  "$BICEP" decompile "$dest" --force
   echo "PASS: ARM decompile $file"
 done
 echo 'ALL CHECKS PASSED'

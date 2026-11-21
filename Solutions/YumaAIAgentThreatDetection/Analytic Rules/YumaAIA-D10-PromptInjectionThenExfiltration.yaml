@@ -1,0 +1,94 @@
+id: 0ead28e0-bd21-5c08-af25-03961e1cb0e2
+name: Yuma AIA-D10 Prompt-injection or jailbreak alert followed by exfiltration activity
+description: |
+  Correlates Microsoft Defender XDR prompt-injection alerts or Copilot jailbreak events with exfiltration-like CloudAppEvents activity by the same user within two hours. Maps to ISM-2158, ISM-1924 and ISM-2113.
+severity: Medium
+status: Available
+requiredDataConnectors:
+- connectorId: MicrosoftThreatProtection
+  dataTypes:
+  - AlertInfo
+  - AlertEvidence
+  - CloudAppEvents
+- connectorId: MicrosoftCopilot
+  dataTypes:
+  - CopilotActivity
+queryFrequency: 1h
+queryPeriod: 3h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+- Exfiltration
+- Collection
+relevantTechniques:
+- T1567
+- T1530
+- T1114
+query: |
+  let lookback = 3h;
+  let window = 2h;
+  let MinExfilEvents = 10;
+  let ExfilActions = dynamic(["FileDownloaded", "FileSyncDownloadedFull", "FileCopied", "AnonymousLinkCreated",
+      "AnonymousLinkUsed", "CompanyLinkCreated", "SharingSet", "SharingInvitationCreated", "AddedToSecureLink",
+      "Send", "SendAs", "New-InboxRule", "Set-InboxRule", "UpdateInboxRules", "MailItemsAccessed"]);
+  let InjectionTitles = dynamic(["prompt injection", "jailbreak", "XPIA", "UPIA"]);
+  let DefenderTriggers = AlertInfo
+      | where Timestamp > ago(lookback)
+      | where Title has_any (InjectionTitles)
+      | join kind=inner (
+          AlertEvidence
+          | where Timestamp > ago(lookback)
+          | where EntityType =~ "User"
+          | project AlertId, AccountObjectId, AccountUpn
+        ) on AlertId
+      | project TriggerTime = Timestamp, TriggerSource = strcat("Defender: ", Title), TriggerId = AlertId,
+                AccountObjectId, AccountUpn;
+  let CopilotTriggers = CopilotActivity
+      | where TimeGenerated > ago(lookback)
+      | where RecordType == "CopilotInteraction" and tostring(LLMEventData) has "JailbreakDetected"
+      | project TriggerTime = TimeGenerated, TriggerSource = strcat("CopilotActivity jailbreak: ", AppHost),
+                TriggerId = RecordId, AccountObjectId = ActorUserId, AccountUpn = ActorName;
+  let Triggers = union isfuzzy=true DefenderTriggers, CopilotTriggers
+      | extend Keys = pack_array(tolower(AccountObjectId), tolower(AccountUpn))
+      | mv-expand Key = Keys to typeof(string)
+      | where isnotempty(Key);
+  let Activity = CloudAppEvents
+      | where Timestamp > ago(lookback)
+      | where ActionType in (ExfilActions)
+      | extend Keys = pack_array(tolower(AccountObjectId), tolower(tostring(RawEventData.UserId)))
+      | mv-expand Key = Keys to typeof(string)
+      | where isnotempty(Key)
+      | project ActivityTime = Timestamp, Key, ActionType, Application, ObjectName, IPAddress, ReportId,
+                ActivityAccountObjectId = AccountObjectId, ActivityAccountName = AccountDisplayName;
+  Triggers
+  | join kind=inner Activity on Key
+  | where ActivityTime between (TriggerTime .. (TriggerTime + window))
+  | summarize ExfilEvents = dcount(ReportId),
+              Actions = make_set(ActionType, 20),
+              Apps = make_set(Application, 10),
+              SampleObjects = make_set(ObjectName, 20),
+              IPs = make_set(IPAddress, 10),
+              FirstActivity = min(ActivityTime), LastActivity = max(ActivityTime)
+           by TriggerId, TriggerSource, TriggerTime, AccountUpn, AccountObjectId = ActivityAccountObjectId
+  | where ExfilEvents >= MinExfilEvents or Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule")
+  | extend Severity = iff(Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule"), "High", "Medium")
+  | project TriggerTime, TriggerSource, TriggerId, AccountUpn, AccountObjectId, ExfilEvents, Actions, Apps,
+            SampleObjects, IPs, FirstActivity, LastActivity, Severity
+entityMappings:
+- entityType: Account
+  fieldMappings:
+  - identifier: FullName
+    columnName: AccountUpn
+  - identifier: AadUserId
+    columnName: AccountObjectId
+customDetails:
+  TriggerSource: TriggerSource
+  TriggerId: TriggerId
+  ExfilEvents: ExfilEvents
+alertDetailsOverride:
+  alertDisplayNameFormat: 'Yuma AIA-D10: post-injection exfiltration activity for {{AccountUpn}}'
+  alertSeverityColumnName: Severity
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+version: 1.0.0
+kind: Scheduled

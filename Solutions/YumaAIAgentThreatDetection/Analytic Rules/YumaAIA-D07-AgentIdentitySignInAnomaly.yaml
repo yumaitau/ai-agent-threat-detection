@@ -1,0 +1,88 @@
+id: 8d8b5fa3-fe7e-53d4-bb03-9e79dd5ae712
+name: Yuma AIA-D07 Agent identity or AI service principal sign-in anomaly
+description: |
+  Detects an Entra agent identity or AI service principal signing in from a new ASN or IP, to a new resource, with a new credential type, or with a burst of failures compared to its 14-day baseline. Maps to ISM-2133, ISM-2136, ISM-2141, ISM-2142 and ISM-2148.
+severity: Medium
+status: Available
+requiredDataConnectors:
+- connectorId: AzureActiveDirectory
+  dataTypes:
+  - AADServicePrincipalSignInLogs
+queryFrequency: 1h
+queryPeriod: 14d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+- InitialAccess
+- DefenseEvasion
+- CredentialAccess
+relevantTechniques:
+- T1078.004
+- T1550.001
+query: |
+  let lookback = 14d;
+  let recent = 1h;
+  let FailureThreshold = 20;
+  let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+      "deepseek", "mistral", "grok", "n8n", "zapier", "langchain", "agent", "mcp"]);
+  let AgentSignIns = AADServicePrincipalSignInLogs
+      | where TimeGenerated > ago(lookback)
+      | extend AgentInfo = parse_json(Agent)
+      | extend AgentType = tostring(AgentInfo.agentType),
+               ParentAppId = tostring(AgentInfo.parentAppId)
+      | extend IsAgentic = isnotempty(AgentType) and AgentType !~ "notAgentic"
+      | where IsAgentic or ServicePrincipalName has_any (AIKeywords)
+      | extend Succeeded = ResultType == "0" or ResultType =~ "Success";
+  let Baseline = AgentSignIns
+      | where TimeGenerated <= ago(recent) and Succeeded
+      | summarize KnownIPs = make_set(IPAddress, 1000),
+                  KnownASNs = make_set(AutonomousSystemNumber, 500),
+                  KnownResources = make_set(ResourceDisplayName, 500),
+                  KnownCredTypes = make_set(ClientCredentialType, 20),
+                  BaselineSignIns = count()
+               by ServicePrincipalId;
+  AgentSignIns
+  | where TimeGenerated > ago(recent)
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+              SuccessCount = countif(Succeeded), FailureCount = countif(not(Succeeded)),
+              FailureCodes = make_set_if(ResultType, not(Succeeded), 20)
+           by ServicePrincipalId, ServicePrincipalName, AppId, AgentType, ParentAppId, IsAgentic,
+              IPAddress, AutonomousSystemNumber, ResourceDisplayName, ClientCredentialType
+  | join kind=leftouter Baseline on ServicePrincipalId
+  | extend HasBaseline = isnotnull(BaselineSignIns)
+  | extend NewIP = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownIPs, IPAddress)),
+           NewASN = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownASNs, AutonomousSystemNumber)),
+           NewResource = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownResources, ResourceDisplayName)),
+           NewCredentialType = HasBaseline and SuccessCount > 0 and not(set_has_element(KnownCredTypes, ClientCredentialType)),
+           FailureBurst = FailureCount >= FailureThreshold,
+           UsesSecret = ClientCredentialType has "secret"   // ISM-2141/2142 prefer managed or certificate credentials
+  | where NewASN or NewResource or NewCredentialType or FailureBurst or (NewIP and UsesSecret)
+  | extend Reasons = strcat_array(pack_array(
+               iff(NewIP, "new IP", ""), iff(NewASN, "new ASN", ""), iff(NewResource, "new resource", ""),
+               iff(NewCredentialType, "new credential type", ""), iff(FailureBurst, "failure burst", ""),
+               iff(UsesSecret, "static secret", "")), "; ")
+  | extend Severity = case((NewASN and NewResource) or FailureBurst, "High", IsAgentic, "Medium", "Low")
+  | project FirstSeen, LastSeen, ServicePrincipalName, ServicePrincipalId, AppId, AgentType, ParentAppId, IsAgentic,
+            IPAddress, AutonomousSystemNumber, ResourceDisplayName, ClientCredentialType, SuccessCount, FailureCount,
+            FailureCodes, Reasons, Severity
+entityMappings:
+- entityType: IP
+  fieldMappings:
+  - identifier: Address
+    columnName: IPAddress
+- entityType: CloudApplication
+  fieldMappings:
+  - identifier: Name
+    columnName: ServicePrincipalName
+customDetails:
+  ServicePrincipalId: ServicePrincipalId
+  AppId: AppId
+  AgentType: AgentType
+  Reasons: Reasons
+alertDetailsOverride:
+  alertDisplayNameFormat: 'Yuma AIA-D07: sign-in anomaly for {{ServicePrincipalName}}'
+  alertSeverityColumnName: Severity
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+version: 1.0.0
+kind: Scheduled

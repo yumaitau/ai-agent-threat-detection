@@ -1,0 +1,86 @@
+id: 63a78fb1-0cd1-5c66-b896-2d350a28beaa
+name: Yuma AIA-D08 Agent or AI app Microsoft Graph data-access burst
+description: |
+  Detects an AI agent or AI application exceeding its 14-day hourly baseline for sensitive Microsoft Graph API calls across mail, files, SharePoint sites, chats, directory, or Microsoft MCP Server for Enterprise. Maps to ISM-2157 and ISM-2159.
+severity: Medium
+status: Available
+requiredDataConnectors:
+- connectorId: AzureActiveDirectory
+  dataTypes:
+  - MicrosoftGraphActivityLogs
+  - AADServicePrincipalSignInLogs
+queryFrequency: 1h
+queryPeriod: 14d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+- Collection
+- Discovery
+relevantTechniques:
+- T1114.002
+- T1530
+- T1087.004
+query: |
+  let lookback = 14d;
+  let recent = 1h;
+  let MinRequests = 200;        // floor so tiny apps do not alert on noise
+  let SigmaThreshold = 3.0;
+  let AIKeywords = dynamic(["openai", "chatgpt", "anthropic", "claude", "copilot", "gemini", "perplexity",
+      "deepseek", "mistral", "grok", "n8n", "zapier", "langchain", "agent", "mcp"]);
+  let AgentApps = AADServicePrincipalSignInLogs
+      | where TimeGenerated > ago(lookback)
+      | extend AgentType = tostring(parse_json(Agent).agentType)
+      | where (isnotempty(AgentType) and AgentType !~ "notAgentic") or ServicePrincipalName has_any (AIKeywords)
+      | summarize AppName = take_any(ServicePrincipalName), AgentType = take_any(AgentType) by AppId;
+  let SensitiveCalls = MicrosoftGraphActivityLogs
+      | where TimeGenerated > ago(lookback)
+      | where AppId in ((AgentApps | project AppId))
+      | extend Path = tolower(tostring(split(RequestUri, "?")[0]))
+      | extend Category = case(Path has "/enterprise", "MCPEnterprise",
+                               Path has "/messages" or Path has "/mailfolders", "Mail",
+                               Path has "/drive" or Path has "/drives", "Files",
+                               Path has "/sites", "Sites",
+                               Path has "/chats" or Path has "/channels", "Chat",
+                               Path has "/users" or Path has "/groups", "Directory",
+                               "Other")
+      | where Category != "Other"
+      | extend TargetUser = extract(@"/users/([^/]+)/", 1, Path);
+  let Baseline = SensitiveCalls
+      | where TimeGenerated <= ago(recent)
+      | summarize Hourly = count() by AppId, bin(TimeGenerated, 1h)
+      | summarize AvgHourly = avg(Hourly), StdHourly = stdev(Hourly), BaselineHours = count() by AppId;
+  SensitiveCalls
+  | where TimeGenerated > ago(recent)
+  | summarize Requests = count(),
+              BytesOut = sum(ResponseSizeBytes),
+              DistinctTargetUsers = dcount(TargetUser),
+              Categories = make_set(Category, 10),
+              Methods = make_set(RequestMethod, 10),
+              IPs = make_set(IPAddress, 20),
+              SampleUris = make_set(RequestUri, 10),
+              FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+           by AppId, ServicePrincipalId
+  | join kind=inner AgentApps on AppId
+  | join kind=leftouter Baseline on AppId
+  | extend Threshold = iff(isnull(AvgHourly), real(MinRequests), max_of(real(MinRequests), AvgHourly + SigmaThreshold * coalesce(StdHourly, 0.0)))
+  | where Requests > Threshold
+  | extend Severity = iff(Categories has_any ("Mail", "Files", "MCPEnterprise") and DistinctTargetUsers > 5, "High", "Medium")
+  | project FirstSeen, LastSeen, AppName, AppId, ServicePrincipalId, AgentType, Requests, Threshold, AvgHourly, StdHourly,
+            BytesOut, DistinctTargetUsers, Categories, Methods, IPs, SampleUris, Severity
+entityMappings:
+- entityType: CloudApplication
+  fieldMappings:
+  - identifier: Name
+    columnName: AppName
+customDetails:
+  AppId: AppId
+  ServicePrincipalId: ServicePrincipalId
+  Requests: Requests
+  DistinctTargetUsers: DistinctTargetUsers
+alertDetailsOverride:
+  alertDisplayNameFormat: 'Yuma AIA-D08: Graph data-access burst by {{AppName}}'
+  alertSeverityColumnName: Severity
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+version: 1.0.0
+kind: Scheduled

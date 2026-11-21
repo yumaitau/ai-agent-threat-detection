@@ -1,0 +1,51 @@
+{
+  "@odata.type": "#microsoft.graph.security.detectionRule",
+  "id": "yuma-aia-d10-prompt-injection-then-exfiltration",
+  "displayName": "Yuma AIA-D10 Prompt injection or jailbreak followed by exfiltration activity",
+  "description": "Correlates Microsoft Defender XDR prompt-injection or jailbreak alerts with exfiltration-like CloudAppEvents activity by the same user within two hours. Maps to ISM-2158, ISM-1924 and ISM-2113.",
+  "status": "disabled",
+  "queryCondition": {
+    "queryText": "let lookback = 3h;\nlet window = 2h;\nlet MinExfilEvents = 10;\nlet ExfilActions = dynamic([\"FileDownloaded\", \"FileSyncDownloadedFull\", \"FileCopied\", \"AnonymousLinkCreated\",\n    \"AnonymousLinkUsed\", \"CompanyLinkCreated\", \"SharingSet\", \"SharingInvitationCreated\", \"AddedToSecureLink\",\n    \"Send\", \"SendAs\", \"New-InboxRule\", \"Set-InboxRule\", \"UpdateInboxRules\", \"MailItemsAccessed\"]);\nlet InjectionTitles = dynamic([\"prompt injection\", \"jailbreak\", \"XPIA\", \"UPIA\"]);\nlet Triggers = AlertInfo\n    | where Timestamp > ago(lookback)\n    | where Title has_any (InjectionTitles)\n    | join kind=inner (\n        AlertEvidence\n        | where Timestamp > ago(lookback)\n        | where EntityType =~ \"User\"\n        | project AlertId, AccountObjectId, AccountUpn\n      ) on AlertId\n    | project TriggerTime = Timestamp, TriggerSource = strcat(\"Defender: \", Title), TriggerId = AlertId,\n              AccountObjectId, AccountUpn\n    | extend Keys = pack_array(tolower(AccountObjectId), tolower(AccountUpn))\n    | mv-expand Key = Keys to typeof(string)\n    | where isnotempty(Key);\nlet Activity = CloudAppEvents\n    | where Timestamp > ago(lookback)\n    | where ActionType in (ExfilActions)\n    | extend Keys = pack_array(tolower(AccountObjectId), tolower(tostring(RawEventData.UserId)))\n    | mv-expand Key = Keys to typeof(string)\n    | where isnotempty(Key)\n    | project ActivityTime = Timestamp, Key, ActionType, Application, ObjectName, IPAddress, ReportId,\n              ActivityAccountObjectId = AccountObjectId, ActivityAccountName = AccountDisplayName;\nTriggers\n| join kind=inner Activity on Key\n| where ActivityTime between (TriggerTime .. (TriggerTime + window))\n| summarize ExfilEvents = dcount(ReportId),\n            Actions = make_set(ActionType, 20),\n            Apps = make_set(Application, 10),\n            SampleObjects = make_set(ObjectName, 20),\n            IPs = make_set(IPAddress, 10),\n            FirstActivity = min(ActivityTime),\n            arg_max(ActivityTime, ReportId)\n         by TriggerId, TriggerSource, TriggerTime, AccountUpn, AccountObjectId = ActivityAccountObjectId\n| where ExfilEvents >= MinExfilEvents or Actions has_any (\"AnonymousLinkCreated\", \"New-InboxRule\", \"Set-InboxRule\")\n| extend Timestamp = ActivityTime,\n         Severity = iff(Actions has_any (\"AnonymousLinkCreated\", \"New-InboxRule\", \"Set-InboxRule\"), \"High\", \"Medium\")\n| project Timestamp, ReportId, TriggerTime, TriggerSource, TriggerId, AccountUpn, AccountObjectId, ExfilEvents,\n          Actions, Apps, SampleObjects, IPs, FirstActivity, Severity"
+  },
+  "schedule": {
+    "frequency": "PT1H"
+  },
+  "detectionAction": {
+    "alertTemplate": {
+      "title": "Yuma AIA-D10: Exfiltration activity following prompt-injection alert",
+      "description": "User {{AccountUpn}} generated a prompt-injection or jailbreak alert ({{TriggerSource}}) followed within two hours by exfiltration-like Microsoft 365 activity ({{ExfilEvents}} events). Investigate for indirect prompt injection (XPIA) leading to data exposure (ISM-2158).",
+      "severity": "high",
+      "category": "Exfiltration",
+      "recommendedActions": "Inspect the triggering Defender alert and subsequent CloudAppEvents actions (anonymous sharing links, inbox rules or bulk downloads). Revoke active sessions or sharing links if malicious, and review the agent or prompt context involved.",
+      "tactics": [
+        {
+          "tactic": "Exfiltration",
+          "techniques": [
+            {
+              "technique": "T1567"
+            }
+          ]
+        },
+        {
+          "tactic": "Collection",
+          "techniques": [
+            {
+              "technique": "T1530"
+            },
+            {
+              "technique": "T1114"
+            }
+          ]
+        }
+      ],
+      "entityMappings": {
+        "accounts": [
+          {
+            "objectIdColumn": "AccountObjectId",
+            "upnColumn": "AccountUpn"
+          }
+        ]
+      }
+    }
+  }
+}

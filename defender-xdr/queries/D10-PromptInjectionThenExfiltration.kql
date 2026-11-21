@@ -1,0 +1,49 @@
+// YUMA-AIA-D10 (Defender XDR Custom Detection)
+// Prompt-injection or jailbreak alert followed by exfiltration-like activity by the same user within 2 hours.
+// Tables: AlertInfo, AlertEvidence, CloudAppEvents (native Microsoft Defender XDR tables).
+// Outputs Timestamp, ReportId, AccountObjectId and AccountUpn required by Defender XDR custom detections.
+let lookback = 3h;
+let window = 2h;
+let MinExfilEvents = 10;
+let ExfilActions = dynamic(["FileDownloaded", "FileSyncDownloadedFull", "FileCopied", "AnonymousLinkCreated",
+    "AnonymousLinkUsed", "CompanyLinkCreated", "SharingSet", "SharingInvitationCreated", "AddedToSecureLink",
+    "Send", "SendAs", "New-InboxRule", "Set-InboxRule", "UpdateInboxRules", "MailItemsAccessed"]);
+let InjectionTitles = dynamic(["prompt injection", "jailbreak", "XPIA", "UPIA"]);
+let Triggers = AlertInfo
+    | where Timestamp > ago(lookback)
+    | where Title has_any (InjectionTitles)
+    | join kind=inner (
+        AlertEvidence
+        | where Timestamp > ago(lookback)
+        | where EntityType =~ "User"
+        | project AlertId, AccountObjectId, AccountUpn
+      ) on AlertId
+    | project TriggerTime = Timestamp, TriggerSource = strcat("Defender: ", Title), TriggerId = AlertId,
+              AccountObjectId, AccountUpn
+    | extend Keys = pack_array(tolower(AccountObjectId), tolower(AccountUpn))
+    | mv-expand Key = Keys to typeof(string)
+    | where isnotempty(Key);
+let Activity = CloudAppEvents
+    | where Timestamp > ago(lookback)
+    | where ActionType in (ExfilActions)
+    | extend Keys = pack_array(tolower(AccountObjectId), tolower(tostring(RawEventData.UserId)))
+    | mv-expand Key = Keys to typeof(string)
+    | where isnotempty(Key)
+    | project ActivityTime = Timestamp, Key, ActionType, Application, ObjectName, IPAddress, ReportId,
+              ActivityAccountObjectId = AccountObjectId, ActivityAccountName = AccountDisplayName;
+Triggers
+| join kind=inner Activity on Key
+| where ActivityTime between (TriggerTime .. (TriggerTime + window))
+| summarize ExfilEvents = dcount(ReportId),
+            Actions = make_set(ActionType, 20),
+            Apps = make_set(Application, 10),
+            SampleObjects = make_set(ObjectName, 20),
+            IPs = make_set(IPAddress, 10),
+            FirstActivity = min(ActivityTime),
+            arg_max(ActivityTime, ReportId)
+         by TriggerId, TriggerSource, TriggerTime, AccountUpn, AccountObjectId = ActivityAccountObjectId
+| where ExfilEvents >= MinExfilEvents or Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule")
+| extend Timestamp = ActivityTime,
+         Severity = iff(Actions has_any ("AnonymousLinkCreated", "New-InboxRule", "Set-InboxRule"), "High", "Medium")
+| project Timestamp, ReportId, TriggerTime, TriggerSource, TriggerId, AccountUpn, AccountObjectId, ExfilEvents,
+          Actions, Apps, SampleObjects, IPs, FirstActivity, Severity

@@ -1,0 +1,59 @@
+{
+  "@odata.type": "#microsoft.graph.security.detectionRule",
+  "id": "yuma-aia-d01-shadow-ai-non-browser-api",
+  "displayName": "Yuma AIA-D01 Shadow AI non-browser process calling AI model APIs",
+  "description": "Detects non-browser processes on managed endpoints communicating with third-party AI model APIs (local agents, CLIs and scripts). Tune ApprovedProcesses before enabling. Maps to ISM-2074, ISM-2095 and ISM-2134.",
+  "status": "disabled",
+  "queryCondition": {
+    "queryText": "let lookback = 3h;\nlet AIApiDomains = dynamic([\"api.openai.com\", \"chatgpt.com\", \"api.anthropic.com\", \"claude.ai\",\n    \"generativelanguage.googleapis.com\", \"aiplatform.googleapis.com\", \"api.mistral.ai\", \"api.deepseek.com\",\n    \"api.x.ai\", \"api.perplexity.ai\", \"api.groq.com\", \"api.together.xyz\", \"openrouter.ai\", \"api.cohere.com\",\n    \"huggingface.co\", \"api-inference.huggingface.co\", \"api.moonshot.cn\", \"dashscope.aliyuncs.com\"]);\nlet Browsers = dynamic([\"msedge.exe\", \"chrome.exe\", \"firefox.exe\", \"brave.exe\", \"opera.exe\", \"safari\", \"iexplore.exe\",\n    \"msedgewebview2.exe\"]);\nlet ApprovedProcesses = dynamic([]);\nDeviceNetworkEvents\n| where Timestamp > ago(lookback)\n| where ActionType in (\"ConnectionSuccess\", \"HttpConnectionInspected\", \"SslConnectionInspected\")\n| where isnotempty(RemoteUrl) and RemoteUrl has_any (AIApiDomains)\n| where InitiatingProcessFileName !in~ (Browsers) and InitiatingProcessFileName !in~ (ApprovedProcesses)\n| summarize Connections = count(),\n            FirstSeen = min(Timestamp),\n            arg_max(Timestamp, ReportId, RemoteUrl, RemoteIP, InitiatingProcessCommandLine,\n                    InitiatingProcessParentFileName, InitiatingProcessAccountObjectId, InitiatingProcessSHA256),\n            Destinations = make_set(RemoteUrl, 20),\n            SampleCommandLines = make_set(InitiatingProcessCommandLine, 5),\n            Parents = make_set(InitiatingProcessParentFileName, 5)\n         by DeviceName, DeviceId, InitiatingProcessFileName, InitiatingProcessAccountUpn\n| project Timestamp, ReportId, DeviceId, DeviceName, InitiatingProcessAccountUpn, InitiatingProcessAccountObjectId,\n          InitiatingProcessFileName, InitiatingProcessSHA256, InitiatingProcessCommandLine,\n          InitiatingProcessParentFileName, RemoteUrl, RemoteIP, Connections, FirstSeen, Destinations,\n          SampleCommandLines, Parents"
+  },
+  "schedule": {
+    "frequency": "PT3H"
+  },
+  "detectionAction": {
+    "alertTemplate": {
+      "title": "Yuma AIA-D01: Non-browser process contacting AI model API",
+      "description": "A non-browser process on {{DeviceName}} contacted an external AI model API ({{RemoteUrl}}). Review whether the tool is approved under organisational AI policy (ISM-2074) and recorded in the AI agent register (ISM-2134).",
+      "severity": "medium",
+      "category": "Exfiltration",
+      "recommendedActions": "Confirm whether the initiating process and user are authorised to use the external AI service. If authorised, add the binary to ApprovedProcesses and record the tool in the AI agent register. If unauthorised, check for sensitive data exposure and enforce application control.",
+      "tactics": [
+        {
+          "tactic": "Exfiltration",
+          "techniques": [
+            {
+              "technique": "T1567"
+            }
+          ]
+        },
+        {
+          "tactic": "CommandAndControl",
+          "techniques": []
+        }
+      ],
+      "entityMappings": {
+        "devices": [
+          {
+            "deviceIdColumn": "DeviceId"
+          }
+        ],
+        "accounts": [
+          {
+            "objectIdColumn": "InitiatingProcessAccountObjectId",
+            "upnColumn": "InitiatingProcessAccountUpn"
+          }
+        ],
+        "files": [
+          {
+            "sha256Column": "InitiatingProcessSHA256"
+          }
+        ],
+        "ips": [
+          {
+            "addressColumn": "RemoteIP"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -7,7 +7,9 @@ Each platform keeps its original relative paths so its generators, templates and
 | `microsoft/detections` | KQL rules and hunts |
 | `microsoft/functions` | Register, ISM status and evidence functions, plus the inventory sync query |
 | `microsoft/playbooks` | Five Logic App playbook guides |
-| `microsoft/deploy` | ARM, Bicep, register schemas, watchlists and workbook |
+| `microsoft/deploy` | ARM (including unified `azuredeploy.json`), Bicep, register schemas, watchlists and workbook |
+| `Solutions/YumaAIAgentThreatDetection` | Microsoft Sentinel Content Hub V3 solution layout (Analytic Rules YAML, Hunting Queries, Parsers, Workbooks, Playbooks, Package templates) |
+| `defender-xdr` | Defender XDR custom detection rule definitions, KQL queries and import guide |
 | `aws/detections` | SQL, Logs Insights, EventBridge patterns and synthetic fixtures |
 | `aws/playbooks` | Five guides, Step Functions ASL and Lambda functions under `lambda/` |
 | `aws/register` | DynamoDB schema, Athena views, control map and dashboard |

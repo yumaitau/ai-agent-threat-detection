@@ -1,0 +1,478 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": false,
+      "basics": {
+        "description": "The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.\n\n**Analytic Rules:** 6, **Hunting Queries:** 5, **Parsers:** 5, **Workbooks:** 1, **Playbooks:** 3\n\n[Repository and documentation](https://github.com/yumaitau/ai-agent-threat-detection)",
+        "subscription": {
+          "resourceProviders": [
+            "Microsoft.OperationsManagement/solutions",
+            "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "Microsoft.Insights/workbooks",
+            "Microsoft.Logic/workflows"
+          ]
+        },
+        "location": {
+          "metadata": {
+            "hidden": "Location is derived from the selected Log Analytics workspace."
+          },
+          "visible": false
+        },
+        "resourceGroup": {
+          "allowExisting": true
+        }
+      }
+    },
+    "basics": [
+      {
+        "name": "getLAWorkspace",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "toolTip": "Lists Log Analytics workspaces in the selected subscription.",
+        "condition": "[greater(length(resourceGroup().name),0)]",
+        "request": {
+          "method": "GET",
+          "path": "[concat(subscription().id,'/providers/Microsoft.OperationalInsights/workspaces?api-version=2020-08-01')]"
+        }
+      },
+      {
+        "name": "workspace",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Workspace",
+        "placeholder": "Select a workspace",
+        "toolTip": "Select an existing Log Analytics workspace in the chosen resource group.",
+        "constraints": {
+          "allowedValues": "[map(filter(basics('getLAWorkspace').value, (filter) => contains(toLower(filter.id), toLower(resourceGroup().name))), (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+          "required": true
+        },
+        "visible": true
+      }
+    ],
+    "steps": [
+      {
+        "name": "contentSelection",
+        "label": "Content selection",
+        "elements": [
+          {
+            "name": "DeployAnalyticsRule",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy analytics rules",
+            "defaultValue": true,
+            "toolTip": "Install the six scheduled Microsoft Sentinel analytics rule templates (disabled by default)."
+          },
+          {
+            "name": "DeployHuntingQuery",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy hunting queries",
+            "defaultValue": true,
+            "toolTip": "Install the five Microsoft Sentinel hunting queries."
+          },
+          {
+            "name": "DeployParser",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy parsers (saved functions)",
+            "defaultValue": true,
+            "toolTip": "Install the five Yuma register and ISM evidence workspace functions."
+          },
+          {
+            "name": "DeployWorkbook",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy workbook",
+            "defaultValue": true,
+            "toolTip": "Install the Yuma AI Agent Register and ISM Evidence workbook."
+          },
+          {
+            "name": "DeployPlaybook",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy playbook templates",
+            "defaultValue": true,
+            "toolTip": "Register the PB1, PB4 and PB5 Logic App playbook templates."
+          }
+        ]
+      },
+      {
+        "name": "workbooks",
+        "label": "Workbooks",
+        "subLabel": {
+          "preValidation": "Configure the workbooks",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Workbooks",
+        "elements": [
+          {
+            "name": "workbooks-text",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "This solution installs the Yuma AI Agent Register and ISM Evidence workbook."
+            }
+          },
+          {
+            "name": "workbook1",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AI Agent Register and ISM Evidence",
+            "elements": [
+              {
+                "name": "workbook1-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Six-tab Sentinel workbook displaying the AI agent register, ISM-2133 to ISM-2140 and ISM-2156 to ISM-2159 evidence coverage, Entra consent history, six-monthly review status, and Yuma AI detection alerts."
+                }
+              },
+              {
+                "name": "workbook1-name",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Display Name",
+                "defaultValue": "Yuma AI Agent Register and ISM Evidence",
+                "toolTip": "Display name for the workbook.",
+                "constraints": {
+                  "required": true,
+                  "regex": "[a-z0-9A-Z]{1,256}$",
+                  "validationMessage": "Please enter a workbook display name."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "analytics",
+        "label": "Analytics",
+        "subLabel": {
+          "preValidation": "Configure the analytics",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Analytics",
+        "elements": [
+          {
+            "name": "analytics-text",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "This solution installs the following analytics rule templates. Rules start disabled so you can tune thresholds before enabling them."
+            }
+          },
+          {
+            "name": "analytic1",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D04 High-risk Graph permission granted to AI agent or AI app",
+            "elements": [
+              {
+                "name": "analytic1-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Detects when a high-risk Microsoft Graph application or delegated permission is granted to an Entra agent identity, an AI-named service principal, or self-granted by an application. Suppresses service principals listed in the YumaAIRegisterApproved watchlist. Maps to ISM-2156, ISM-2137, ISM-2138 and ISM-2139."
+                }
+              }
+            ]
+          },
+          {
+            "name": "analytic2",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D05 New AI app consent (user or admin), first seen",
+            "elements": [
+              {
+                "name": "analytic2-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Detects first-seen admin or user OAuth consent to an Entra agent identity or AI-named application. Approved service principals in the YumaAIRegisterApproved watchlist are suppressed unless consent is granted by a non-admin user. Maps to ISM-2134, ISM-2135, ISM-2137, ISM-2138 and ISM-2139."
+                }
+              }
+            ]
+          },
+          {
+            "name": "analytic3",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D07 Agent identity or AI service principal sign-in anomaly",
+            "elements": [
+              {
+                "name": "analytic3-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Detects an Entra agent identity or AI service principal signing in from a new ASN or IP, to a new resource, with a new credential type, or with a burst of failures compared to its 14-day baseline. Maps to ISM-2133, ISM-2136, ISM-2141, ISM-2142 and ISM-2148."
+                }
+              }
+            ]
+          },
+          {
+            "name": "analytic4",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D08 Agent or AI app Microsoft Graph data-access burst",
+            "elements": [
+              {
+                "name": "analytic4-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Detects an AI agent or AI application exceeding its 14-day hourly baseline for sensitive Microsoft Graph API calls across mail, files, SharePoint sites, chats, directory, or Microsoft MCP Server for Enterprise. Maps to ISM-2157 and ISM-2159."
+                }
+              }
+            ]
+          },
+          {
+            "name": "analytic5",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D10 Prompt-injection or jailbreak alert followed by exfiltration activity",
+            "elements": [
+              {
+                "name": "analytic5-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Correlates Microsoft Defender XDR prompt-injection alerts or Copilot jailbreak events with exfiltration-like CloudAppEvents activity by the same user within two hours. Maps to ISM-2158, ISM-1924 and ISM-2113."
+                }
+              }
+            ]
+          },
+          {
+            "name": "analytic6",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D14 AI-speed exploitation burst against App Gateway WAF",
+            "elements": [
+              {
+                "name": "analytic6-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Detects a single client IP tripping many distinct Application Gateway WAF rules across many URIs within 10 minutes, characteristic of automated or LLM-driven exploit tooling. Enriches with access logs and Sentinel threat intelligence indicators. Maps to ISM-2116 and Essential Eight patch applications."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "huntingqueries",
+        "label": "Hunting Queries",
+        "bladeTitle": "Hunting Queries",
+        "elements": [
+          {
+            "name": "huntingqueries-text",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "This solution installs the following hunting queries."
+            }
+          },
+          {
+            "name": "huntingquery1",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D01 Shadow AI: non-browser process calling AI model APIs",
+            "elements": [
+              {
+                "name": "huntingquery1-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Hunts DeviceNetworkEvents for non-browser endpoint processes connecting to third-party AI model APIs (local agents, CLIs and scripts). Tune ApprovedProcesses to match organisational AI policy. Maps to ISM-2074, ISM-2095 and ISM-2134."
+                }
+              }
+            ]
+          },
+          {
+            "name": "huntingquery2",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D06 Agent identities on static client secrets",
+            "elements": [
+              {
+                "name": "huntingquery2-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Hunts AADServicePrincipalSignInLogs for Entra agent identities and AI service principals authenticating with static client secrets instead of managed identities, federated credentials or certificates. Maps to ISM-2141, ISM-2142 and ISM-2146."
+                }
+              }
+            ]
+          },
+          {
+            "name": "huntingquery3",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D09 AI agent register review with ISM gap flags",
+            "elements": [
+              {
+                "name": "huntingquery3-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Reviews Defender XDR AgentsInfo inventory entries with ISM-2133 and ISM-2135 completeness gap flags (missing owner, purpose, unique Entra identity or instructions, wide sharing, and MCP usage). Maps to ISM-2133, ISM-2134, ISM-2135 and ISM-2156."
+                }
+              }
+            ]
+          },
+          {
+            "name": "huntingquery4",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D13 AI crawler and MCP endpoint probing",
+            "elements": [
+              {
+                "name": "huntingquery4-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Hunts Azure Application Gateway access logs for self-declared AI crawler user agents or probes against MCP, SSE, LLM API and agent-card endpoints. Maps to ISM-2116."
+                }
+              }
+            ]
+          },
+          {
+            "name": "huntingquery5",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma AIA-D15 Agentic traffic invoking sensitive MCP primitives or new destinations",
+            "elements": [
+              {
+                "name": "huntingquery5-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Hunts Entra Global Secure Access NetworkAccessTraffic logs for agentic traffic invoking sensitive or destructive MCP primitives or contacting a newly observed MCP destination. Maps to ISM-2159, ISM-2156 and ISM-2113."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parsers",
+        "label": "Parsers",
+        "bladeTitle": "Parsers",
+        "elements": [
+          {
+            "name": "parsers-text",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "This solution installs the following workspace functions (parsers) for the AI agent register and ISM evidence exports."
+            }
+          },
+          {
+            "name": "parser1",
+            "type": "Microsoft.Common.Section",
+            "label": "YumaAIRegister",
+            "elements": [
+              {
+                "name": "parser1-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Returns one row per active AI agent from AIAgentRegister_CL with ISM-2133/2135 gap flags and ISM-2138 review status."
+                }
+              }
+            ]
+          },
+          {
+            "name": "parser2",
+            "type": "Microsoft.Common.Section",
+            "label": "YumaISMControlStatus",
+            "elements": [
+              {
+                "name": "parser2-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Computes evidence status per ISM control (ISM-2133 to ISM-2140 and ISM-2156 to ISM-2159) from Sentinel logs and the AI agent register."
+                }
+              }
+            ]
+          },
+          {
+            "name": "parser3",
+            "type": "Microsoft.Common.Section",
+            "label": "YumaEvidenceRegisterCsv",
+            "elements": [
+              {
+                "name": "parser3-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Formats YumaAIRegister() as an RFC 4180 CSV single-cell payload for automated assessor exports (PB5)."
+                }
+              }
+            ]
+          },
+          {
+            "name": "parser4",
+            "type": "Microsoft.Common.Section",
+            "label": "YumaEvidenceControlsCsv",
+            "elements": [
+              {
+                "name": "parser4-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Formats YumaISMControlStatus() as an RFC 4180 CSV single-cell payload for automated assessor exports (PB5)."
+                }
+              }
+            ]
+          },
+          {
+            "name": "parser5",
+            "type": "Microsoft.Common.Section",
+            "label": "YumaEvidenceMarkdown",
+            "elements": [
+              {
+                "name": "parser5-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Formats a dated Markdown summary of register counts and ISM control statuses for automated assessor exports (PB5)."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "playbooks",
+        "label": "Playbooks",
+        "bladeTitle": "Playbooks",
+        "elements": [
+          {
+            "name": "playbooks-text",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "This solution packages the following Logic App playbooks. Playbooks deploy disabled and require managed identity role assignments after deployment."
+            }
+          },
+          {
+            "name": "playbook1",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma PB1 - Agent Permission Containment",
+            "elements": [
+              {
+                "name": "playbook1-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Sentinel incident-triggered Logic App that enriches a service principal from Microsoft Graph, posts an approval Adaptive Card to Teams, and disables the service principal only after human approval."
+                }
+              }
+            ]
+          },
+          {
+            "name": "playbook2",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma PB4 - AI Agent Register Sync",
+            "elements": [
+              {
+                "name": "playbook2-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Daily recurrence Logic App that queries Defender XDR AgentsInfo via Microsoft Graph runHuntingQuery and posts snapshots or Retired records to AIAgentRegister_CL through the Logs Ingestion API."
+                }
+              }
+            ]
+          },
+          {
+            "name": "playbook3",
+            "type": "Microsoft.Common.Section",
+            "label": "Yuma PB5 - ISM Evidence Export",
+            "elements": [
+              {
+                "name": "playbook3-text",
+                "type": "Microsoft.Common.TextBlock",
+                "options": {
+                  "text": "Monthly or on-demand Logic App that executes the Yuma evidence functions and writes dated CSV, Markdown and manifest files to an Azure Blob Storage container."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "workspace-location": "[first(map(filter(basics('getLAWorkspace').value, (filter) => and(contains(toLower(filter.id), toLower(resourceGroup().name)),equals(filter.name,basics('workspace')))), (item) => item.location))]",
+      "location": "[location()]",
+      "workspace": "[basics('workspace')]",
+      "workbook1-name": "[steps('workbooks').workbook1.workbook1-name]",
+      "DeployAnalyticsRule": "[steps('contentSelection').DeployAnalyticsRule]",
+      "DeployHuntingQuery": "[steps('contentSelection').DeployHuntingQuery]",
+      "DeployParser": "[steps('contentSelection').DeployParser]",
+      "DeployWorkbook": "[steps('contentSelection').DeployWorkbook]",
+      "DeployPlaybook": "[steps('contentSelection').DeployPlaybook]"
+    }
+  }
+}

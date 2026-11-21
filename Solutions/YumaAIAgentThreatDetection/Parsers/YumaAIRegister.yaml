@@ -1,0 +1,63 @@
+id: 21c880b2-a601-5e48-be78-a3b471263970
+Function:
+  Title: Yuma AI Agent Register view
+  Version: 1.0.0
+  LastUpdated: '2026-11-21'
+Category: Yuma AI Agent Pack
+FunctionName: YumaAIRegister
+FunctionAlias: YumaAIRegister
+FunctionQuery: |
+  let HighRisk = dynamic([
+      "Application.ReadWrite.All", "AppRoleAssignment.ReadWrite.All", "Directory.ReadWrite.All",
+      "AgentIdentity.ReadWrite.All", "DelegatedPermissionGrant.ReadWrite.All",
+      "RoleManagement.ReadWrite.Directory", "User.ReadWrite.All", "Group.ReadWrite.All",
+      "Policy.ReadWrite.ConditionalAccess", "Mail.Read", "Mail.ReadWrite", "Mail.Send",
+      "MailboxSettings.ReadWrite", "full_access_as_app", "EWS.AccessAsUser.All",
+      "Files.Read.All", "Files.ReadWrite.All", "Sites.Read.All", "Sites.ReadWrite.All",
+      "Sites.FullControl.All", "Chat.Read.All", "Chat.ReadWrite.All", "ChannelMessage.Read.All"]);
+  let ReviewCycle = 182d;   // ISM-2138: at least every six months
+  let Records = AIAgentRegister_CL;
+  let Snapshot = Records
+      | where RecordType == "RegisterSnapshot"
+      | summarize arg_max(TimeGenerated, AgentName, Source, Platform, AppId, ServicePrincipalId, EntraAgentId,
+                          EntraBlueprintId, Owners, BusinessPurpose, Identities, Permissions, DeclaredTools, McpServers,
+                          DataSources, SharedWith, LifecycleStatus, RiskRating)
+               by AgentKey
+      | project-rename LastSnapshotAt = TimeGenerated;
+  let Decisions = Records
+      | where RecordType == "ConsentDecision"
+      | summarize arg_max(TimeGenerated, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,
+                          ConsentDate, IncidentArmId)
+               by AgentKey
+      | project-rename LastDecisionAt = TimeGenerated;
+  let Lifecycle = Records
+      | extend ReviewTime = iff(RecordType in ("ReviewCompleted", "ConsentDecision"), coalesce(LastReviewDate, TimeGenerated), datetime(null))
+      | summarize FirstRecorded = min(TimeGenerated),
+                  LastReview = max(ReviewTime),
+                  RetiredAt = maxif(TimeGenerated, RecordType == "Retired"),
+                  ConsentEvents = countif(RecordType == "ConsentDecision")
+               by AgentKey;
+  Snapshot
+  | join kind=leftouter Decisions on AgentKey
+  | join kind=leftouter Lifecycle on AgentKey
+  | project-away AgentKey1, AgentKey2
+  | where isnull(RetiredAt) or RetiredAt < LastSnapshotAt
+  | extend NextReviewDue = LastReview + ReviewCycle
+  | extend ReviewStatus = case(isnull(LastReview), "Never reviewed",
+                               NextReviewDue < now(), "Overdue",
+                               NextReviewDue < now() + 30d, "Due within 30 days",
+                               "Current")
+  | extend HighRiskPermissions = set_intersect(extract_all(@"([A-Za-z_]+(?:\.[A-Za-z]+)+|full_access_as_app)", tostring(Permissions)), HighRisk)
+  | extend Gap_NoOwner = coalesce(array_length(Owners), 0) == 0,
+           Gap_NoPurpose = isempty(BusinessPurpose),
+           Gap_NoUniqueIdentity = isempty(EntraAgentId) and isempty(ServicePrincipalId),
+           Gap_NoPermissionsRecorded = isempty(tostring(Permissions)) or tostring(Permissions) in ("[]", "{}"),
+           Flag_HighRiskPermissions = array_length(HighRiskPermissions) > 0,
+           Flag_HasMcp = coalesce(array_length(McpServers), 0) > 0
+  | extend GapCount = toint(Gap_NoOwner) + toint(Gap_NoPurpose) + toint(Gap_NoUniqueIdentity) + toint(Gap_NoPermissionsRecorded)
+  | project AgentKey, AgentName, Source, Platform, AppId, ServicePrincipalId, EntraAgentId, EntraBlueprintId, Owners,
+            BusinessPurpose, Identities, Permissions, HighRiskPermissions, DeclaredTools, McpServers, DataSources, SharedWith,
+            LifecycleStatus, RiskRating, Decision, DecisionBy, DecisionReason, ConsentType, IsAdminConsent, ConsentedBy,
+            ConsentDate, IncidentArmId, ConsentEvents, FirstRecorded, LastSnapshotAt, LastDecisionAt, LastReview,
+            NextReviewDue, ReviewStatus, Gap_NoOwner, Gap_NoPurpose, Gap_NoUniqueIdentity, Gap_NoPermissionsRecorded,
+            Flag_HighRiskPermissions, Flag_HasMcp, GapCount

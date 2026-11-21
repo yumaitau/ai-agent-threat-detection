@@ -1,0 +1,40 @@
+{
+  "Name": "Yuma AI Agent Threat Detection",
+  "Author": "Yuma IT",
+  "Logo": "",
+  "Description": "The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.",
+  "Analytic Rules": [
+    "Analytic Rules/YumaAIA-D04-HighRiskGraphPermission.yaml",
+    "Analytic Rules/YumaAIA-D05-NewAIAppConsent.yaml",
+    "Analytic Rules/YumaAIA-D07-AgentIdentitySignInAnomaly.yaml",
+    "Analytic Rules/YumaAIA-D08-AgentGraphDataAccessBurst.yaml",
+    "Analytic Rules/YumaAIA-D10-PromptInjectionThenExfiltration.yaml",
+    "Analytic Rules/YumaAIA-D14-AISpeedExploitationBurst.yaml"
+  ],
+  "Hunting Queries": [
+    "Hunting Queries/YumaAIA-D01-ShadowAINonBrowserProcessToAIAPI.yaml",
+    "Hunting Queries/YumaAIA-D06-AgentIdentityStaticSecret.yaml",
+    "Hunting Queries/YumaAIA-D09-AgentRegisterExportISM2135.yaml",
+    "Hunting Queries/YumaAIA-D13-AIAgentCrawlerAndMcpProbe.yaml",
+    "Hunting Queries/YumaAIA-D15-AgenticMcpSensitivePrimitive.yaml"
+  ],
+  "Parsers": [
+    "Parsers/YumaAIRegister.yaml",
+    "Parsers/YumaISMControlStatus.yaml",
+    "Parsers/YumaEvidenceRegisterCsv.yaml",
+    "Parsers/YumaEvidenceControlsCsv.yaml",
+    "Parsers/YumaEvidenceMarkdown.yaml"
+  ],
+  "Workbooks": [
+    "Workbooks/YumaAIAgentRegisterAndISMEvidence.json"
+  ],
+  "Playbooks": [
+    "Playbooks/Yuma-PB1-Agent-Permission-Containment/azuredeploy.json",
+    "Playbooks/Yuma-PB4-AI-Agent-Register-Sync/azuredeploy.json",
+    "Playbooks/Yuma-PB5-ISM-Evidence-Export/azuredeploy.json"
+  ],
+  "BasePath": "Solutions/YumaAIAgentThreatDetection",
+  "Version": "1.0.0",
+  "Metadata": "SolutionMetadata.json",
+  "TemplateSpec": true
+}

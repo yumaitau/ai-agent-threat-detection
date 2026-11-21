@@ -70,9 +70,14 @@ Download or clone this repository, then follow the [offline validation setup](do
 
 ### Microsoft
 
+Deploy the Microsoft Sentinel pack (AI agent register table, DCR, watchlists, workspace functions, workbook, six scheduled analytics rules and five hunting queries) into an existing Log Analytics workspace in one click. All analytics rules deploy **disabled** so you can tune thresholds before alerting.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fyumaitau%2Fai-agent-threat-detection%2Fmain%2Fmicrosoft%2Fdeploy%2Fazuredeploy.json)
+
 1. Follow the [Microsoft guide](microsoft/README.md) to enable the required Sentinel and Defender data sources.
-2. From `microsoft/`, install the register using `deploy/register-infra.json`, then the workbook dashboard and selected analytics rule templates.
-3. Configure the playbook identities and connections. Rules and Logic Apps start disabled. Test with representative events, adjust thresholds and check approval and recovery before enabling them.
+2. Use the **Deploy to Azure** button above (backed by [microsoft/deploy/azuredeploy.json](microsoft/deploy/azuredeploy.json), compiled from [microsoft/deploy/bicep/main.bicep](microsoft/deploy/bicep/main.bicep)), supply your existing workspace name and Azure region, or install via the Microsoft Sentinel Content Hub V3 solution package under [Solutions/YumaAIAgentThreatDetection/](Solutions/YumaAIAgentThreatDetection/Data/Solution_YumaAIAgentThreatDetection.json).
+3. For detections that run on Defender XDR tables (`DeviceNetworkEvents`, `AlertInfo`, `AlertEvidence`, `CloudAppEvents`), see the custom detection rule definitions and import guide under [defender-xdr/](defender-xdr/README.md).
+4. Configure the playbook identities and connections. Rules and Logic Apps start disabled. Test with representative events, adjust thresholds and check approval and recovery before enabling them.
 
 ### AWS
 

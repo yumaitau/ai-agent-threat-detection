@@ -64,9 +64,38 @@ The register is an evidence source to support an assessment. It isn't a complian
 
 ## Deploy (lab only until validated)
 
-Deploy in this order. The register comes first because D04 and D05 read the approved watchlist.
+### One-click deployment (existing Log Analytics workspace)
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fyumaitau%2Fai-agent-threat-detection%2Fmain%2Fmicrosoft%2Fdeploy%2Fazuredeploy.json)
+
+The unified template [deploy/azuredeploy.json](deploy/azuredeploy.json) (compiled from [deploy/bicep/main.bicep](deploy/bicep/main.bicep)) deploys into an existing Log Analytics workspace (`workspaceName` and `location` parameters):
+- AI agent register infrastructure (`AIAgentRegister_CL`, DCR, watchlists `YumaAIRegisterApproved` and `YumaISMControlMap`, and all five saved workspace functions)
+- Workbook "Yuma AI Agent Register and ISM Evidence"
+- Six scheduled analytics rules (D04, D05, D07, D08, D10, D14), all deployed **disabled** by default
+- Five hunting queries (D01, D06, D09, D13, D15)
+
+### Microsoft Sentinel Content Hub V3 solution layout
+
+A Microsoft Sentinel Content Hub V3 solution package following `Azure/Azure-Sentinel` conventions is available under [Solutions/YumaAIAgentThreatDetection/](../Solutions/YumaAIAgentThreatDetection/Data/Solution_YumaAIAgentThreatDetection.json), including:
+- `Data/Solution_YumaAIAgentThreatDetection.json` and `SolutionMetadata.json`
+- `Analytic Rules/*.yaml` (6 scheduled rules: D04, D05, D07, D08, D10, D14)
+- `Hunting Queries/*.yaml` (5 hunting queries: D01, D06, D09, D13, D15)
+- `Parsers/*.yaml` (5 workspace functions)
+- `Workbooks/YumaAIAgentRegisterAndISMEvidence.json`
+- `Playbooks/` (PB1, PB4 and PB5 ARM templates and guides)
+- `Package/mainTemplate.json` and `Package/createUiDefinition.json` (Content Hub V3 `contentPackages` and `contentTemplates`)
+
+### Defender XDR custom detections
+
+Detections that run natively on Microsoft Defender XDR tables (`DeviceNetworkEvents`, `AlertInfo`, `AlertEvidence`, `CloudAppEvents`) are also packaged as Defender XDR custom detection rule definitions with an import guide under [defender-xdr/](../defender-xdr/README.md).
+
+### Manual step-by-step CLI deployment
+
+Deploy in this order if installing individual templates. The register comes first because D04 and D05 read the approved watchlist.
 
 ```bash
+az deployment group create -g <rg> -f deploy/azuredeploy.json -p workspaceName=<ws> location=<region>
+# Or deploy individual components:
 az deployment group create -g <rg> -f deploy/register-infra.json -p workspaceName=<ws>      # table, DCR, watchlists, functions
 az deployment group create -g <rg> -f deploy/workbook.json -p workspaceName=<ws>
 az deployment group create -g <rg> -f deploy/analytics-rule-D04.json -p workspace=<ws> ruleId=<fixed-guid>
@@ -83,12 +112,12 @@ After deploying:
 
 Rules deploy **disabled**, and the Logic Apps deploy in the **Disabled** state.
 
-`register-infra.json` and `workbook.json` are compiled from `deploy/bicep/*.bicep`, which load the KQL, CSV and workbook files with `loadTextContent`.
+`azuredeploy.json`, `register-infra.json` and `workbook.json` are compiled from `deploy/bicep/*.bicep`, which load the KQL, CSV and workbook files with `loadTextContent`.
 
-To regenerate, run:
+To regenerate all templates and the Content Hub V3 solution package, run:
 
 ```bash
-python3 tools/build_workbook.py && python3 tools/build_arm.py && bicep build deploy/bicep/register-infra.bicep --outfile deploy/register-infra.json && bicep build deploy/bicep/workbook.bicep --outfile deploy/workbook.json
+python3 tools/build_workbook.py && python3 tools/build_arm.py && python3 tools/build_sentinel_solution.py && bicep build deploy/bicep/main.bicep --outfile deploy/azuredeploy.json && bicep build deploy/bicep/register-infra.bicep --outfile deploy/register-infra.json && bicep build deploy/bicep/workbook.bicep --outfile deploy/workbook.json
 ```
 
 

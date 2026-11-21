@@ -1,0 +1,21 @@
+{
+  "publisherId": "yumaitau",
+  "offerId": "yumaitau-ai-agent-threat-detection",
+  "firstPublishDate": "2026-11-21",
+  "providers": [
+    "Yuma IT"
+  ],
+  "categories": {
+    "domains": [
+      "Security - Threat Protection",
+      "Identity",
+      "Compliance"
+    ]
+  },
+  "support": {
+    "name": "Yuma IT",
+    "tier": "Community",
+    "link": "https://github.com/yumaitau/ai-agent-threat-detection/issues"
+  },
+  "version": "1.0.0"
+}

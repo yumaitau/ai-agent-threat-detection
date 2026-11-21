@@ -9,7 +9,7 @@
 @description('Name of the existing Log Analytics workspace with Microsoft Sentinel enabled.')
 param workspaceName string
 
-@description('Azure region matching the Log Analytics workspace.')
+@description('Azure region matching the existing Log Analytics workspace (must match the workspace region for the DCR).')
 param location string = resourceGroup().location
 
 @description('Deploy the AI agent register table, DCR, watchlists and saved workspace functions.')
@@ -27,18 +27,18 @@ param deployHuntingQueries bool = true
 @description('Enable analytics rules immediately on deployment. Keep false to tune thresholds before alerting.')
 param enableAnalyticsRules bool = false
 
-@description('Interactive retention for AIAgentRegister_CL in days.')
-@minValue(30)
+@description('Interactive retention for AIAgentRegister_CL in days (minimum 183 days to retain six-monthly ISM-2138 review records).')
+@minValue(183)
 @maxValue(730)
 param retentionInDays int = 365
 
 @description('Total retention (interactive plus long-term) for AIAgentRegister_CL in days.')
-@minValue(30)
+@minValue(183)
 @maxValue(4383)
 param totalRetentionInDays int = 2555
 
-@description('Name for the direct-ingestion Data Collection Rule writing to AIAgentRegister_CL.')
-param dcrName string = 'dcr-yuma-ai-agent-register'
+@description('Name for the direct-ingestion Data Collection Rule writing to AIAgentRegister_CL. Leave blank for a workspace-scoped default name.')
+param dcrName string = ''
 
 @description('Display name for the Microsoft Sentinel workbook.')
 param workbookDisplayName string = 'Yuma AI Agent Register and ISM Evidence'
@@ -53,6 +53,8 @@ var functionCategory = 'Yuma AI Agent Pack'
 resource ws 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
   name: workspaceName
 }
+
+var effectiveDcrName = empty(dcrName) ? 'dcr-yuma-ai-agent-register-${uniqueString(ws.id)}' : dcrName
 
 // ---------------- Register infrastructure ----------------
 
@@ -70,7 +72,7 @@ resource registerTable 'Microsoft.OperationalInsights/workspaces/tables@2022-10-
 }
 
 resource dcr 'Microsoft.Insights/dataCollectionRules@2023-03-11' = if (deployRegisterInfrastructure) {
-  name: dcrName
+  name: effectiveDcrName
   location: location
   kind: 'Direct'
   properties: {

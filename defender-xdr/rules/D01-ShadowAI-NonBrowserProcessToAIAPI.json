@@ -32,14 +32,14 @@
         }
       ],
       "entityMappings": {
-        "devices": [
+        "hosts": [
           {
             "deviceIdColumn": "DeviceId"
           }
         ],
         "accounts": [
           {
-            "objectIdColumn": "InitiatingProcessAccountObjectId",
+            "aadUserIdColumn": "InitiatingProcessAccountObjectId",
             "upnColumn": "InitiatingProcessAccountUpn"
           }
         ],

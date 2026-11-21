@@ -228,7 +228,7 @@
         "description": "YumaAIA-D04-HighRiskGraphPermission Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -366,7 +366,7 @@
         "description": "YumaAIA-D05-NewAIAppConsent Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -501,7 +501,7 @@
         "description": "YumaAIA-D07-AgentIdentitySignInAnomaly Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -633,7 +633,7 @@
         "description": "YumaAIA-D08-AgentGraphDataAccessBurst Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -757,7 +757,7 @@
         "description": "YumaAIA-D10-PromptInjectionThenExfiltration Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -887,7 +887,7 @@
         "description": "YumaAIA-D14-AISpeedExploitationBurst Analytics Rule with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1014,7 +1014,7 @@
         "description": "YumaAIA-D01-ShadowAINonBrowserProcessToAIAPI Hunting Query with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1098,7 +1098,7 @@
         "description": "YumaAIA-D06-AgentIdentityStaticSecret Hunting Query with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1182,7 +1182,7 @@
         "description": "YumaAIA-D09-AgentRegisterExportISM2135 Hunting Query with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1262,7 +1262,7 @@
         "description": "YumaAIA-D13-AIAgentCrawlerAndMcpProbe Hunting Query with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1346,7 +1346,7 @@
         "description": "YumaAIA-D15-AgenticMcpSensitivePrimitive Hunting Query with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1430,7 +1430,7 @@
         "description": "YumaAIRegister Parser with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1511,7 +1511,7 @@
         "description": "YumaISMControlStatus Parser with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1592,7 +1592,7 @@
         "description": "YumaEvidenceRegisterCsv Parser with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1673,7 +1673,7 @@
         "description": "YumaEvidenceControlsCsv Parser with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1754,7 +1754,7 @@
         "description": "YumaEvidenceMarkdown Parser with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1835,7 +1835,7 @@
         "description": "YumaAIAgentRegisterAndISMEvidence Workbook with template version 1.0.0",
         "mainTemplate": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0",
+          "contentVersion": "1.0.0.0",
           "parameters": {},
           "variables": {},
           "resources": [
@@ -1935,43 +1935,43 @@
             }
           },
           "variables": {
-            "SentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
-            "TeamsConnectionName": "[concat('teams-', parameters('PlaybookName'))]"
+            "SentinelConnectionName": "[[concat('azuresentinel-', parameters('PlaybookName'))]",
+            "TeamsConnectionName": "[[concat('teams-', parameters('PlaybookName'))]"
           },
           "resources": [
             {
               "type": "Microsoft.Web/connections",
               "apiVersion": "2016-06-01",
-              "name": "[variables('SentinelConnectionName')]",
-              "location": "[resourceGroup().location]",
+              "name": "[[variables('SentinelConnectionName')]",
+              "location": "[[resourceGroup().location]",
               "kind": "V1",
               "properties": {
-                "displayName": "[variables('SentinelConnectionName')]",
+                "displayName": "[[variables('SentinelConnectionName')]",
                 "customParameterValues": {},
                 "parameterValueType": "Alternative",
                 "api": {
-                  "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
+                  "id": "[[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
                 }
               }
             },
             {
               "type": "Microsoft.Web/connections",
               "apiVersion": "2016-06-01",
-              "name": "[variables('TeamsConnectionName')]",
-              "location": "[resourceGroup().location]",
+              "name": "[[variables('TeamsConnectionName')]",
+              "location": "[[resourceGroup().location]",
               "properties": {
-                "displayName": "[variables('TeamsConnectionName')]",
+                "displayName": "[[variables('TeamsConnectionName')]",
                 "customParameterValues": {},
                 "api": {
-                  "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+                  "id": "[[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
                 }
               }
             },
             {
               "type": "Microsoft.Logic/workflows",
               "apiVersion": "2017-07-01",
-              "name": "[parameters('PlaybookName')]",
-              "location": "[resourceGroup().location]",
+              "name": "[[parameters('PlaybookName')]",
+              "location": "[[resourceGroup().location]",
               "identity": {
                 "type": "SystemAssigned"
               },
@@ -1980,8 +1980,8 @@
                 "hidden-SentinelTemplateVersion": "0.1"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
-                "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
+                "[[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
+                "[[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
               ],
               "properties": {
                 "state": "Disabled",
@@ -1995,11 +1995,11 @@
                     },
                     "TeamsGroupId": {
                       "type": "String",
-                      "defaultValue": "[parameters('TeamsGroupId')]"
+                      "defaultValue": "[[parameters('TeamsGroupId')]"
                     },
                     "TeamsChannelId": {
                       "type": "String",
-                      "defaultValue": "[parameters('TeamsChannelId')]"
+                      "defaultValue": "[[parameters('TeamsChannelId')]"
                     }
                   },
                   "triggers": {
@@ -2245,9 +2245,9 @@
                   "$connections": {
                     "value": {
                       "azuresentinel": {
-                        "connectionId": "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
-                        "connectionName": "[variables('SentinelConnectionName')]",
-                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]",
+                        "connectionId": "[[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
+                        "connectionName": "[[variables('SentinelConnectionName')]",
+                        "id": "[[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]",
                         "connectionProperties": {
                           "authentication": {
                             "type": "ManagedServiceIdentity"
@@ -2255,9 +2255,9 @@
                         }
                       },
                       "teams": {
-                        "connectionId": "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
-                        "connectionName": "[variables('TeamsConnectionName')]",
-                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+                        "connectionId": "[[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
+                        "connectionName": "[[variables('TeamsConnectionName')]",
+                        "id": "[[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
                       }
                     }
                   }
@@ -2268,7 +2268,7 @@
           "outputs": {
             "playbookPrincipalId": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+              "value": "[[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
             }
           }
         },
@@ -2327,8 +2327,8 @@
             {
               "type": "Microsoft.Logic/workflows",
               "apiVersion": "2017-07-01",
-              "name": "[parameters('PlaybookName')]",
-              "location": "[resourceGroup().location]",
+              "name": "[[parameters('PlaybookName')]",
+              "location": "[[resourceGroup().location]",
               "identity": {
                 "type": "SystemAssigned"
               },
@@ -2344,11 +2344,11 @@
                   "parameters": {
                     "LogsIngestionEndpoint": {
                       "type": "String",
-                      "defaultValue": "[parameters('LogsIngestionEndpoint')]"
+                      "defaultValue": "[[parameters('LogsIngestionEndpoint')]"
                     },
                     "DcrImmutableId": {
                       "type": "String",
-                      "defaultValue": "[parameters('DcrImmutableId')]"
+                      "defaultValue": "[[parameters('DcrImmutableId')]"
                     }
                   },
                   "triggers": {
@@ -2451,7 +2451,7 @@
           "outputs": {
             "playbookPrincipalId": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+              "value": "[[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
             }
           }
         },
@@ -2511,8 +2511,8 @@
             {
               "type": "Microsoft.Logic/workflows",
               "apiVersion": "2017-07-01",
-              "name": "[parameters('PlaybookName')]",
-              "location": "[resourceGroup().location]",
+              "name": "[[parameters('PlaybookName')]",
+              "location": "[[resourceGroup().location]",
               "identity": {
                 "type": "SystemAssigned"
               },
@@ -2528,15 +2528,15 @@
                   "parameters": {
                     "WorkspaceId": {
                       "type": "String",
-                      "defaultValue": "[parameters('WorkspaceId')]"
+                      "defaultValue": "[[parameters('WorkspaceId')]"
                     },
                     "StorageAccountName": {
                       "type": "String",
-                      "defaultValue": "[parameters('StorageAccountName')]"
+                      "defaultValue": "[[parameters('StorageAccountName')]"
                     },
                     "ContainerName": {
                       "type": "String",
-                      "defaultValue": "[parameters('ContainerName')]"
+                      "defaultValue": "[[parameters('ContainerName')]"
                     }
                   },
                   "triggers": {
@@ -2759,7 +2759,7 @@
           "outputs": {
             "playbookPrincipalId": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+              "value": "[[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
             }
           }
         },
@@ -2787,7 +2787,7 @@
         "contentSchemaVersion": "3.0.0",
         "displayName": "Yuma AI Agent Threat Detection",
         "publisherDisplayName": "Yuma IT",
-        "descriptionHtml": "<p>The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.</p>\n<p><strong>Analytic Rules:</strong> 6, <strong>Hunting Queries:</strong> 5, <strong>Parsers:</strong> 5, <strong>Workbooks:</strong> 1, <strong>Playbooks:</strong> 3</p>\n<p><a href=\"https://github.com/yumaitau/ai-agent-threat-detection\">Yuma AI Agent Threat Detection repository</a></p>",
+        "descriptionHtml": "<p>The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.</p>\n<p><strong>Prerequisite:</strong> Prerequisite: deploy microsoft/deploy/register-infra.json (or the unified microsoft/deploy/azuredeploy.json) into the target workspace first to create AIAgentRegister_CL, the direct-ingestion DCR and the YumaAIRegisterApproved and YumaISMControlMap watchlists.</p>\n<p><strong>Analytic Rules:</strong> 6, <strong>Hunting Queries:</strong> 5, <strong>Parsers:</strong> 5, <strong>Workbooks:</strong> 1, <strong>Playbooks:</strong> 3</p>\n<p><a href=\"https://github.com/yumaitau/ai-agent-threat-detection\">Yuma AI Agent Threat Detection repository</a></p>",
         "contentKind": "Solution",
         "contentProductId": "[variables('_solutioncontentProductId')]",
         "id": "[variables('_solutioncontentProductId')]",

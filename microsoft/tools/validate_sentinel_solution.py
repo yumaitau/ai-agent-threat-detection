@@ -232,10 +232,12 @@ def validate_solution(errors: list[str], extract_dir: pathlib.Path | None) -> in
         freq = duration_minutes(doc.get("queryFrequency"), label, "queryFrequency", errors)
         period = duration_minutes(doc.get("queryPeriod"), label, "queryPeriod", errors)
         if freq is not None and period is not None:
+            if freq < 5 or freq > 14 * 1440:
+                errors.append(f"{label}: queryFrequency ({doc.get('queryFrequency')}) must be between 5m and 14d")
+            if period < 5 or period > 14 * 1440:
+                errors.append(f"{label}: queryPeriod ({doc.get('queryPeriod')}) must be between 5m and 14d")
             if period < freq:
                 errors.append(f"{label}: queryPeriod ({doc.get('queryPeriod')}) must be >= queryFrequency ({doc.get('queryFrequency')})")
-            if period > 14 * 1440:
-                errors.append(f"{label}: queryPeriod ({doc.get('queryPeriod')}) exceeds Sentinel 14d maximum")
         if doc.get("triggerOperator") not in VALID_OPERATORS:
             errors.append(f"{label}: invalid triggerOperator '{doc.get('triggerOperator')}'")
         if not isinstance(doc.get("triggerThreshold"), int) or doc["triggerThreshold"] < 0:
@@ -355,6 +357,26 @@ def validate_solution(errors: list[str], extract_dir: pathlib.Path | None) -> in
                 errors.append(f"{main_tpl_path.relative_to(REPO_ROOT)}: HuntingQuery IDs in mainTemplate do not match YAML queries")
             if packaged_pr != parser_ids:
                 errors.append(f"{main_tpl_path.relative_to(REPO_ROOT)}: Parser IDs in mainTemplate do not match YAML parsers")
+            for idx, tpl in enumerate(templates):
+                props = tpl.get("properties", {})
+                inner = props.get("mainTemplate")
+                if not isinstance(inner, dict):
+                    errors.append(f"{main_tpl_path.relative_to(REPO_ROOT)}: contentTemplates[{idx}] missing mainTemplate object")
+                    continue
+                if not str(inner.get("$schema", "")).startswith(ARM_SCHEMA_PREFIX):
+                    errors.append(f"{main_tpl_path.relative_to(REPO_ROOT)}: contentTemplates[{idx}] invalid embedded $schema")
+                if not re.fullmatch(r"\d+\.\d+\.\d+\.\d+", str(inner.get("contentVersion", ""))):
+                    errors.append(
+                        f"{main_tpl_path.relative_to(REPO_ROOT)}: contentTemplates[{idx}] embedded contentVersion must be four-part numeric"
+                    )
+                if not isinstance(inner.get("resources"), list) or not inner["resources"]:
+                    errors.append(f"{main_tpl_path.relative_to(REPO_ROOT)}: contentTemplates[{idx}] embedded mainTemplate has empty resources")
+                if props.get("contentKind") == "Playbook":
+                    inner_json = json.dumps(inner)
+                    if re.search(r'"\[(?!\[)(?:parameters|variables|resourceGroup|subscription|resourceId|reference|concat)\(', inner_json):
+                        errors.append(
+                            f"{main_tpl_path.relative_to(REPO_ROOT)}: contentTemplates[{idx}] playbook mainTemplate contains unescaped ARM expression"
+                        )
 
     # Package/createUiDefinition.json
     ui_path = SOL_ROOT / "Package" / "createUiDefinition.json"

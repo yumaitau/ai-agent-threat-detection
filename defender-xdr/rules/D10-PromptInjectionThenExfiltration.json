@@ -41,7 +41,7 @@
       "entityMappings": {
         "accounts": [
           {
-            "objectIdColumn": "AccountObjectId",
+            "aadUserIdColumn": "AccountObjectId",
             "upnColumn": "AccountUpn"
           }
         ]

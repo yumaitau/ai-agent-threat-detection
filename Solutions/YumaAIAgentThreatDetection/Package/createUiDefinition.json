@@ -6,7 +6,7 @@
     "config": {
       "isWizard": false,
       "basics": {
-        "description": "The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.\n\n**Analytic Rules:** 6, **Hunting Queries:** 5, **Parsers:** 5, **Workbooks:** 1, **Playbooks:** 3\n\n[Repository and documentation](https://github.com/yumaitau/ai-agent-threat-detection)",
+        "description": "The Yuma AI Agent Threat Detection solution for Microsoft Sentinel packages analytics rules, hunting queries, an AI agent register and ISM evidence workbook, saved workspace functions (parsers), and Logic App playbooks to detect and investigate risky AI and agent activity across Microsoft Entra ID, Microsoft Graph, Defender XDR, Global Secure Access and Azure Application Gateway WAF. All analytics rules and playbooks deploy disabled so security teams can tune thresholds in a test workspace before enabling them.\n\n**Prerequisite:** Deploy `microsoft/deploy/register-infra.json` (or `microsoft/deploy/azuredeploy.json`) into the target workspace first to create `AIAgentRegister_CL`, the ingestion DCR and the `YumaAIRegisterApproved` and `YumaISMControlMap` watchlists.\n\n**Analytic Rules:** 6, **Hunting Queries:** 5, **Parsers:** 5, **Workbooks:** 1, **Playbooks:** 3\n\n[Repository and documentation](https://github.com/yumaitau/ai-agent-threat-detection)",
         "subscription": {
           "resourceProviders": [
             "Microsoft.OperationsManagement/solutions",
@@ -44,7 +44,7 @@
         "placeholder": "Select a workspace",
         "toolTip": "Select an existing Log Analytics workspace in the chosen resource group.",
         "constraints": {
-          "allowedValues": "[map(filter(basics('getLAWorkspace').value, (filter) => contains(toLower(filter.id), toLower(resourceGroup().name))), (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+          "allowedValues": "[map(filter(basics('getLAWorkspace').value, (filter) => contains(toLower(filter.id), toLower(concat('/resourcegroups/', resourceGroup().name, '/')))), (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
           "required": true
         },
         "visible": true
@@ -464,7 +464,7 @@
       }
     ],
     "outputs": {
-      "workspace-location": "[first(map(filter(basics('getLAWorkspace').value, (filter) => and(contains(toLower(filter.id), toLower(resourceGroup().name)),equals(filter.name,basics('workspace')))), (item) => item.location))]",
+      "workspace-location": "[first(map(filter(basics('getLAWorkspace').value, (filter) => and(contains(toLower(filter.id), toLower(concat('/resourcegroups/', resourceGroup().name, '/'))),equals(filter.name,basics('workspace')))), (item) => item.location))]",
       "location": "[location()]",
       "workspace": "[basics('workspace')]",
       "workbook1-name": "[steps('workbooks').workbook1.workbook1-name]",

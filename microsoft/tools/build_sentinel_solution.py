@@ -107,6 +107,21 @@ def dump_yaml(data: dict[str, Any]) -> str:
     return yaml.dump(data, Dumper=SentinelDumper, sort_keys=False, allow_unicode=False, width=120)
 
 
+def escape_arm_expressions(obj: Any) -> Any:
+    """Escape ARM template expressions ([...]) as [[...] inside embedded playbook templates
+    so the outer Content Hub mainTemplate.json does not attempt to evaluate playbook-local
+    parameters or variables at solution registration time."""
+    if isinstance(obj, str):
+        if obj.startswith("[") and not obj.startswith("[["):
+            return "[" + obj
+        return obj
+    if isinstance(obj, list):
+        return [escape_arm_expressions(item) for item in obj]
+    if isinstance(obj, dict):
+        return {k: escape_arm_expressions(v) for k, v in obj.items()}
+    return obj
+
+
 ANALYTIC_RULES: list[dict[str, Any]] = [
     {
         "slug": "YumaAIA-D04-HighRiskGraphPermission",
@@ -777,7 +792,7 @@ def build_main_template(
                 "description": f"{rec['slug']} Analytics Rule with template version {SOL_VERSION}",
                 "mainTemplate": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": SOL_VERSION,
+                    "contentVersion": "1.0.0.0",
                     "parameters": {},
                     "variables": {},
                     "resources": [
@@ -866,7 +881,7 @@ def build_main_template(
                 "description": f"{rec['slug']} Hunting Query with template version {SOL_VERSION}",
                 "mainTemplate": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": SOL_VERSION,
+                    "contentVersion": "1.0.0.0",
                     "parameters": {},
                     "variables": {},
                     "resources": [
@@ -954,7 +969,7 @@ def build_main_template(
                 "description": f"{alias} Parser with template version {SOL_VERSION}",
                 "mainTemplate": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": SOL_VERSION,
+                    "contentVersion": "1.0.0.0",
                     "parameters": {},
                     "variables": {},
                     "resources": [
@@ -1036,7 +1051,7 @@ def build_main_template(
             "description": f"YumaAIAgentRegisterAndISMEvidence Workbook with template version {SOL_VERSION}",
             "mainTemplate": {
                 "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                "contentVersion": SOL_VERSION,
+                "contentVersion": "1.0.0.0",
                 "parameters": {},
                 "variables": {},
                 "resources": [
@@ -1113,7 +1128,7 @@ def build_main_template(
             "dependsOn": [package_dep],
             "properties": {
                 "description": f"{rec['folder']} Playbook with template version {SOL_VERSION}",
-                "mainTemplate": rec["arm"],
+                "mainTemplate": escape_arm_expressions(rec["arm"]),
                 "packageKind": "Solution",
                 "packageVersion": "[variables('_solutionVersion')]",
                 "packageName": "[variables('_solutionName')]",
@@ -1129,8 +1144,14 @@ def build_main_template(
         })
 
     # Solution contentPackage resource
+    prereq_note = (
+        "Prerequisite: deploy microsoft/deploy/register-infra.json (or the unified microsoft/deploy/azuredeploy.json) "
+        "into the target workspace first to create AIAgentRegister_CL, the direct-ingestion DCR and the "
+        "YumaAIRegisterApproved and YumaISMControlMap watchlists."
+    )
     description_html = (
         f"<p>{solution_desc}</p>\n"
+        f"<p><strong>Prerequisite:</strong> {prereq_note}</p>\n"
         f"<p><strong>Analytic Rules:</strong> {len(analytic_records)}, "
         f"<strong>Hunting Queries:</strong> {len(hunting_records)}, "
         f"<strong>Parsers:</strong> {len(parser_records)}, "
@@ -1322,6 +1343,9 @@ def build_create_ui_definition(
 
     basics_description = (
         f"{solution_desc}\n\n"
+        "**Prerequisite:** Deploy `microsoft/deploy/register-infra.json` (or `microsoft/deploy/azuredeploy.json`) "
+        "into the target workspace first to create `AIAgentRegister_CL`, the ingestion DCR and the "
+        "`YumaAIRegisterApproved` and `YumaISMControlMap` watchlists.\n\n"
         f"**Analytic Rules:** {len(analytic_records)}, **Hunting Queries:** {len(hunting_records)}, "
         f"**Parsers:** {len(parser_records)}, **Workbooks:** 1, **Playbooks:** {len(playbook_records)}\n\n"
         f"[Repository and documentation]({REPO_URL})"
@@ -1375,7 +1399,7 @@ def build_create_ui_definition(
                     "constraints": {
                         "allowedValues": (
                             "[map(filter(basics('getLAWorkspace').value, (filter) => contains(toLower(filter.id), "
-                            "toLower(resourceGroup().name))), (item) => parse(concat('{\"label\":\"', item.name, "
+                            "toLower(concat('/resourcegroups/', resourceGroup().name, '/')))), (item) => parse(concat('{\"label\":\"', item.name, "
                             "'\",\"value\":\"', item.name, '\"}')))]"
                         ),
                         "required": True,
@@ -1532,7 +1556,7 @@ def build_create_ui_definition(
             "outputs": {
                 "workspace-location": (
                     "[first(map(filter(basics('getLAWorkspace').value, (filter) => and(contains(toLower(filter.id), "
-                    "toLower(resourceGroup().name)),equals(filter.name,basics('workspace')))), (item) => item.location))]"
+                    "toLower(concat('/resourcegroups/', resourceGroup().name, '/'))),equals(filter.name,basics('workspace')))), (item) => item.location))]"
                 ),
                 "location": "[location()]",
                 "workspace": "[basics('workspace')]",
